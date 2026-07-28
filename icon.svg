@@ -1,0 +1,39 @@
++  1 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
++  2   <defs>
++  3     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
++  4       <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
++  5       <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
++  6     </linearGradient>
++  7   </defs>
++  8   
++  9   <!-- 背景圓 -->
++ 10   <circle cx="256" cy="256" r="240" fill="url(#grad)"/>
++ 11   
++ 12   <!-- 房子主體 -->
++ 13   <rect x="140" y="220" width="232" height="180" fill="#fff" opacity="0.9" rx="8"/>
++ 14   
++ 15   <!-- 屋頂 -->
++ 16   <path d="M 120 220 L 256 140 L 392 220 Z" fill="#fff" opacity="0.95"/>
++ 17   
++ 18   <!-- 門 -->
++ 19   <rect x="226" y="300" width="60" height="100" fill="#667eea" rx="4"/>
++ 20   <circle cx="270" cy="350" r="4" fill="#fff"/>
++ 21   
++ 22   <!-- 窗戶左 -->
++ 23   <rect x="160" y="260" width="50" height="50" fill="#88ccff" opacity="0.7" rx="4"/>
++ 24   <line x1="185" y1="260" x2="185" y2="310" stroke="#fff" stroke-width="2"/>
++ 25   <line x1="160" y1="285" x2="210" y2="285" stroke="#fff" stroke-width="2"/>
++ 26   
++ 27   <!-- 窗戶右 -->
++ 28   <rect x="302" y="260" width="50" height="50" fill="#88ccff" opacity="0.7" rx="4"/>
++ 29   <line x1="327" y1="260" x2="327" y2="310" stroke="#fff" stroke-width="2"/>
++ 30   <line x1="302" y1="285" x2="352" y2="285" stroke="#fff" stroke-width="2"/>
++ 31   
++ 32   <!-- 透明人暗示（發光點） -->
++ 33   <circle cx="200" cy="340" r="8" fill="#88ccff" opacity="0.6">
++ 34     <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
++ 35   </circle>
++ 36   
++ 37   <!-- 心形裝飾 -->
++ 38   <path d="M 256 180 C 256 180 246 170 236 170 C 226 170 220 176 220 186 C 220 196 230 206 256 226 C 282 206 292 196 292 186 C 292 176 286 170 276 170 C 266 170 256 180 256 180 Z" fill="#ff6b9d" opacity="0.8"/>
++ 39 </svg>
