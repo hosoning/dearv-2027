@@ -1,0 +1,411 @@
++   1 <!DOCTYPE html>
++   2 <html lang="zh-CN">
++   3 <head>
++   4     <meta charset="UTF-8">
++   5     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
++   6     <meta name="theme-color" content="#000000">
++   7     <meta name="apple-mobile-web-app-capable" content="yes">
++   8     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
++   9     <title>3D回憶小屋</title>
++  10     <link rel="manifest" href="manifest.json">
++  11     <link rel="icon" type="image/png" href="icon.png">
++  12     <style>
++  13         * {
++  14             margin: 0;
++  15             padding: 0;
++  16             box-sizing: border-box;
++  17             -webkit-tap-highlight-color: transparent;
++  18         }
++  19 
++  20         body {
++  21             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
++  22             overflow: hidden;
++  23             background: #000;
++  24             touch-action: none;
++  25         }
++  26 
++  27         #canvas-container {
++  28             width: 100vw;
++  29             height: 100vh;
++  30             position: fixed;
++  31             top: 0;
++  32             left: 0;
++  33         }
++  34 
++  35         /* 加載畫面 */
++  36         #loading {
++  37             position: fixed;
++  38             top: 0;
++  39             left: 0;
++  40             width: 100%;
++  41             height: 100%;
++  42             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++  43             display: flex;
++  44             flex-direction: column;
++  45             align-items: center;
++  46             justify-content: center;
++  47             z-index: 1000;
++  48             transition: opacity 0.5s;
++  49         }
++  50 
++  51         #loading.hidden {
++  52             opacity: 0;
++  53             pointer-events: none;
++  54         }
++  55 
++  56         .loading-text {
++  57             color: white;
++  58             font-size: 24px;
++  59             margin-bottom: 20px;
++  60         }
++  61 
++  62         .loading-bar {
++  63             width: 200px;
++  64             height: 4px;
++  65             background: rgba(255, 255, 255, 0.3);
++  66             border-radius: 2px;
++  67             overflow: hidden;
++  68         }
++  69 
++  70         .loading-progress {
++  71             width: 0%;
++  72             height: 100%;
++  73             background: white;
++  74             transition: width 0.3s;
++  75         }
++  76 
++  77         /* 搖桿控制 */
++  78         .joystick {
++  79             position: fixed;
++  80             bottom: 40px;
++  81             width: 120px;
++  82             height: 120px;
++  83             z-index: 100;
++  84             touch-action: none;
++  85         }
++  86 
++  87         #joystick-left {
++  88             left: 40px;
++  89         }
++  90 
++  91         #joystick-right {
++  92             right: 40px;
++  93         }
++  94 
++  95         .joystick-base {
++  96             width: 100%;
++  97             height: 100%;
++  98             background: rgba(255, 255, 255, 0.1);
++  99             border: 2px solid rgba(255, 255, 255, 0.3);
++ 100             border-radius: 50%;
++ 101             backdrop-filter: blur(10px);
++ 102         }
++ 103 
++ 104         .joystick-stick {
++ 105             position: absolute;
++ 106             width: 50px;
++ 107             height: 50px;
++ 108             background: rgba(255, 255, 255, 0.6);
++ 109             border-radius: 50%;
++ 110             top: 50%;
++ 111             left: 50%;
++ 112             transform: translate(-50%, -50%);
++ 113             transition: all 0.1s;
++ 114         }
++ 115 
++ 116         /* 互動提示 */
++ 117         #interaction-hint {
++ 118             position: fixed;
++ 119             top: 50%;
++ 120             left: 50%;
++ 121             transform: translate(-50%, -50%);
++ 122             background: rgba(0, 0, 0, 0.8);
++ 123             color: white;
++ 124             padding: 15px 30px;
++ 125             border-radius: 25px;
++ 126             font-size: 16px;
++ 127             opacity: 0;
++ 128             pointer-events: none;
++ 129             transition: opacity 0.3s;
++ 130             z-index: 50;
++ 131             backdrop-filter: blur(10px);
++ 132         }
++ 133 
++ 134         #interaction-hint.show {
++ 135             opacity: 1;
++ 136         }
++ 137 
++ 138         /* 對話框 */
++ 139         #dialog-box {
++ 140             position: fixed;
++ 141             bottom: 0;
++ 142             left: 0;
++ 143             width: 100%;
++ 144             background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.8));
++ 145             backdrop-filter: blur(20px);
++ 146             padding: 20px;
++ 147             transform: translateY(100%);
++ 148             transition: transform 0.3s ease-out;
++ 149             z-index: 200;
++ 150             max-height: 40vh;
++ 151             overflow-y: auto;
++ 152         }
++ 153 
++ 154         #dialog-box.show {
++ 155             transform: translateY(0);
++ 156         }
++ 157 
++ 158         .dialog-header {
++ 159             display: flex;
++ 160             align-items: center;
++ 161             margin-bottom: 15px;
++ 162         }
++ 163 
++ 164         .dialog-avatar {
++ 165             width: 50px;
++ 166             height: 50px;
++ 167             border-radius: 50%;
++ 168             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++ 169             margin-right: 15px;
++ 170             display: flex;
++ 171             align-items: center;
++ 172             justify-content: center;
++ 173             color: white;
++ 174             font-size: 20px;
++ 175         }
++ 176 
++ 177         .dialog-name {
++ 178             color: white;
++ 179             font-size: 18px;
++ 180             font-weight: 600;
++ 181         }
++ 182 
++ 183         .dialog-content {
++ 184             color: rgba(255, 255, 255, 0.9);
++ 185             font-size: 16px;
++ 186             line-height: 1.6;
++ 187             margin-bottom: 15px;
++ 188         }
++ 189 
++ 190         .dialog-options {
++ 191             display: flex;
++ 192             gap: 10px;
++ 193             flex-wrap: wrap;
++ 194         }
++ 195 
++ 196         .dialog-option {
++ 197             background: rgba(255, 255, 255, 0.1);
++ 198             border: 1px solid rgba(255, 255, 255, 0.3);
++ 199             color: white;
++ 200             padding: 10px 20px;
++ 201             border-radius: 20px;
++ 202             cursor: pointer;
++ 203             transition: all 0.3s;
++ 204         }
++ 205 
++ 206         .dialog-option:hover {
++ 207             background: rgba(255, 255, 255, 0.2);
++ 208             transform: translateY(-2px);
++ 209         }
++ 210 
++ 211         /* 物品查看器 */
++ 212         #item-viewer {
++ 213             position: fixed;
++ 214             top: 0;
++ 215             left: 0;
++ 216             width: 100%;
++ 217             height: 100%;
++ 218             background: rgba(0, 0, 0, 0.95);
++ 219             z-index: 300;
++ 220             display: none;
++ 221             flex-direction: column;
++ 222             align-items: center;
++ 223             justify-content: center;
++ 224             padding: 20px;
++ 225         }
++ 226 
++ 227         #item-viewer.show {
++ 228             display: flex;
++ 229         }
++ 230 
++ 231         .item-viewer-content {
++ 232             max-width: 600px;
++ 233             width: 100%;
++ 234             max-height: 80vh;
++ 235             background: rgba(255, 255, 255, 0.05);
++ 236             border-radius: 20px;
++ 237             padding: 30px;
++ 238             backdrop-filter: blur(20px);
++ 239             border: 1px solid rgba(255, 255, 255, 0.1);
++ 240             overflow-y: auto;
++ 241         }
++ 242 
++ 243         .item-viewer-title {
++ 244             color: white;
++ 245             font-size: 24px;
++ 246             margin-bottom: 20px;
++ 247             text-align: center;
++ 248         }
++ 249 
++ 250         .item-viewer-image {
++ 251             width: 100%;
++ 252             max-height: 300px;
++ 253             object-fit: contain;
++ 254             border-radius: 10px;
++ 255             margin-bottom: 20px;
++ 256         }
++ 257 
++ 258         .item-viewer-text {
++ 259             color: rgba(255, 255, 255, 0.9);
++ 260             font-size: 16px;
++ 261             line-height: 1.8;
++ 262             white-space: pre-wrap;
++ 263         }
++ 264 
++ 265         .item-viewer-close {
++ 266             position: absolute;
++ 267             top: 30px;
++ 268             right: 30px;
++ 269             width: 40px;
++ 270             height: 40px;
++ 271             background: rgba(255, 255, 255, 0.1);
++ 272             border-radius: 50%;
++ 273             display: flex;
++ 274             align-items: center;
++ 275             justify-content: center;
++ 276             cursor: pointer;
++ 277             color: white;
++ 278             font-size: 24px;
++ 279         }
++ 280 
++ 281         .item-viewer-nav {
++ 282             display: flex;
++ 283             justify-content: space-between;
++ 284             margin-top: 20px;
++ 285         }
++ 286 
++ 287         .item-viewer-nav button {
++ 288             background: rgba(255, 255, 255, 0.1);
++ 289             border: 1px solid rgba(255, 255, 255, 0.3);
++ 290             color: white;
++ 291             padding: 10px 30px;
++ 292             border-radius: 20px;
++ 293             cursor: pointer;
++ 294             transition: all 0.3s;
++ 295         }
++ 296 
++ 297         .item-viewer-nav button:disabled {
++ 298             opacity: 0.3;
++ 299             cursor: not-allowed;
++ 300         }
++ 301 
++ 302         /* 響應式設計 */
++ 303         @media (max-width: 768px) {
++ 304             .joystick {
++ 305                 width: 100px;
++ 306                 height: 100px;
++ 307                 bottom: 30px;
++ 308             }
++ 309 
++ 310             #joystick-left {
++ 311                 left: 30px;
++ 312             }
++ 313 
++ 314             #joystick-right {
++ 315                 right: 30px;
++ 316             }
++ 317 
++ 318             .joystick-stick {
++ 319                 width: 40px;
++ 320                 height: 40px;
++ 321             }
++ 322         }
++ 323 
++ 324         /* PC 提示 */
++ 325         #pc-hint {
++ 326             position: fixed;
++ 327             bottom: 20px;
++ 328             left: 50%;
++ 329             transform: translateX(-50%);
++ 330             background: rgba(0, 0, 0, 0.7);
++ 331             color: white;
++ 332             padding: 10px 20px;
++ 333             border-radius: 15px;
++ 334             font-size: 14px;
++ 335             z-index: 50;
++ 336             backdrop-filter: blur(10px);
++ 337         }
++ 338 
++ 339         @media (max-width: 768px) {
++ 340             #pc-hint {
++ 341                 display: none;
++ 342             }
++ 343         }
++ 344     </style>
++ 345 </head>
++ 346 <body>
++ 347     <!-- 加載畫面 -->
++ 348     <div id="loading">
++ 349         <div class="loading-text">正在載入回憶小屋...</div>
++ 350         <div class="loading-bar">
++ 351             <div class="loading-progress" id="loading-progress"></div>
++ 352         </div>
++ 353     </div>
++ 354 
++ 355     <!-- 3D 畫布 -->
++ 356     <div id="canvas-container"></div>
++ 357 
++ 358     <!-- 左搖桿（視角控制） -->
++ 359     <div class="joystick" id="joystick-left">
++ 360         <div class="joystick-base"></div>
++ 361         <div class="joystick-stick" id="stick-left"></div>
++ 362     </div>
++ 363 
++ 364     <!-- 右搖桿（移動控制） -->
++ 365     <div class="joystick" id="joystick-right">
++ 366         <div class="joystick-base"></div>
++ 367         <div class="joystick-stick" id="stick-right"></div>
++ 368     </div>
++ 369 
++ 370     <!-- 互動提示 -->
++ 371     <div id="interaction-hint">點擊查看</div>
++ 372 
++ 373     <!-- 對話框 -->
++ 374     <div id="dialog-box">
++ 375         <div class="dialog-header">
++ 376             <div class="dialog-avatar">✨</div>
++ 377             <div class="dialog-name" id="dialog-name">他</div>
++ 378         </div>
++ 379         <div class="dialog-content" id="dialog-content">
++ 380             你好，歡迎回家。
++ 381         </div>
++ 382         <div class="dialog-options" id="dialog-options">
++ 383             <div class="dialog-option">你好</div>
++ 384             <div class="dialog-option">今天過得怎麼樣？</div>
++ 385             <div class="dialog-option">關閉</div>
++ 386         </div>
++ 387     </div>
++ 388 
++ 389     <!-- 物品查看器 -->
++ 390     <div id="item-viewer">
++ 391         <div class="item-viewer-close" onclick="closeItemViewer()">×</div>
++ 392         <div class="item-viewer-content">
++ 393             <div class="item-viewer-title" id="item-title">回憶</div>
++ 394             <img class="item-viewer-image" id="item-image" src="" alt="" style="display: none;">
++ 395             <div class="item-viewer-text" id="item-text">這是一段珍貴的回憶...</div>
++ 396             <div class="item-viewer-nav">
++ 397                 <button id="prev-item" onclick="navigateItem(-1)">上一個</button>
++ 398                 <button id="next-item" onclick="navigateItem(1)">下一個</button>
++ 399             </div>
++ 400         </div>
++ 401     </div>
++ 402 
++ 403     <!-- PC 提示 -->
++ 404     <div id="pc-hint">
++ 405         使用 WASD 移動 | 鼠標控制視角 | 點擊物品互動
++ 406     </div>
++ 407 
++ 408     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
++ 409     <script src="app.js"></script>
++ 410 </body>
++ 411 </html>
