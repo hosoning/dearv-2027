@@ -1,0 +1,358 @@
++   1 <!DOCTYPE html>
++   2 <html lang="zh-CN">
++   3 <head>
++   4     <meta charset="UTF-8">
++   5     <meta name="viewport" content="width=device-width, initial-scale=1.0">
++   6     <title>3D回憶小屋 - 安裝指南</title>
++   7     <style>
++   8         * {
++   9             margin: 0;
++  10             padding: 0;
++  11             box-sizing: border-box;
++  12         }
++  13 
++  14         body {
++  15             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
++  16             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++  17             min-height: 100vh;
++  18             padding: 20px;
++  19         }
++  20 
++  21         .container {
++  22             max-width: 800px;
++  23             margin: 0 auto;
++  24             background: white;
++  25             border-radius: 20px;
++  26             padding: 40px;
++  27             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
++  28         }
++  29 
++  30         h1 {
++  31             color: #667eea;
++  32             margin-bottom: 30px;
++  33             font-size: 32px;
++  34         }
++  35 
++  36         h2 {
++  37             color: #333;
++  38             margin-top: 30px;
++  39             margin-bottom: 15px;
++  40             font-size: 24px;
++  41         }
++  42 
++  43         p {
++  44             line-height: 1.8;
++  45             color: #666;
++  46             margin-bottom: 15px;
++  47         }
++  48 
++  49         .step {
++  50             background: #f7fafc;
++  51             padding: 20px;
++  52             border-radius: 10px;
++  53             margin: 20px 0;
++  54             border-left: 4px solid #667eea;
++  55         }
++  56 
++  57         .step h3 {
++  58             color: #667eea;
++  59             margin-bottom: 10px;
++  60         }
++  61 
++  62         code {
++  63             background: #e2e8f0;
++  64             padding: 2px 8px;
++  65             border-radius: 4px;
++  66             font-family: 'Courier New', monospace;
++  67             color: #e53e3e;
++  68         }
++  69 
++  70         .code-block {
++  71             background: #2d3748;
++  72             color: #e2e8f0;
++  73             padding: 20px;
++  74             border-radius: 10px;
++  75             margin: 15px 0;
++  76             overflow-x: auto;
++  77             font-family: 'Courier New', monospace;
++  78         }
++  79 
++  80         .button {
++  81             display: inline-block;
++  82             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
++  83             color: white;
++  84             padding: 15px 30px;
++  85             border-radius: 25px;
++  86             text-decoration: none;
++  87             margin: 20px 10px 20px 0;
++  88             transition: transform 0.3s;
++  89         }
++  90 
++  91         .button:hover {
++  92             transform: translateY(-2px);
++  93         }
++  94 
++  95         .warning {
++  96             background: #fff5f5;
++  97             border-left: 4px solid #fc8181;
++  98             padding: 15px;
++  99             border-radius: 5px;
++ 100             margin: 20px 0;
++ 101         }
++ 102 
++ 103         .warning p {
++ 104             color: #c53030;
++ 105             margin: 0;
++ 106         }
++ 107 
++ 108         .feature {
++ 109             display: flex;
++ 110             align-items: center;
++ 111             margin: 15px 0;
++ 112         }
++ 113 
++ 114         .feature-icon {
++ 115             font-size: 24px;
++ 116             margin-right: 15px;
++ 117         }
++ 118 
++ 119         ul {
++ 120             margin: 15px 0 15px 30px;
++ 121         }
++ 122 
++ 123         li {
++ 124             line-height: 1.8;
++ 125             color: #666;
++ 126             margin: 8px 0;
++ 127         }
++ 128     </style>
++ 129 </head>
++ 130 <body>
++ 131     <div class="container">
++ 132         <h1>🏠 3D回憶小屋 - 安裝和使用指南</h1>
++ 133 
++ 134         <p>歡迎來到 3D 回憶小屋！這是一個用於珍藏和回顧珍貴回憶的互動 3D 空間應用。</p>
++ 135 
++ 136         <h2>✨ 功能特點</h2>
++ 137         
++ 138         <div class="feature">
++ 139             <div class="feature-icon">🚶</div>
++ 140             <div>第一人稱視角自由探索 3D 空間</div>
++ 141         </div>
++ 142         
++ 143         <div class="feature">
++ 144             <div class="feature-icon">🪑</div>
++ 145             <div>點擊家具查看分類回憶（信件、照片、禮物等）</div>
++ 146         </div>
++ 147         
++ 148         <div class="feature">
++ 149             <div class="feature-icon">👤</div>
++ 150             <div>透明人陪伴，邊緣發光的玻璃折射效果</div>
++ 151         </div>
++ 152         
++ 153         <div class="feature">
++ 154             <div class="feature-icon">💬</div>
++ 155             <div>對話系統（支持字卡模式和 AI 模式）</div>
++ 156         </div>
++ 157         
++ 158         <div class="feature">
++ 159             <div class="feature-icon">📱</div>
++ 160             <div>PWA 支持，可安裝到手機和電腦</div>
++ 161         </div>
++ 162         
++ 163         <div class="feature">
++ 164             <div class="feature-icon">☁️</div>
++ 165             <div>雲端同步功能</div>
++ 166         </div>
++ 167 
++ 168         <h2>🚀 快速開始</h2>
++ 169 
++ 170         <div class="step">
++ 171             <h3>步驟 1：啟動本地服務器</h3>
++ 172             <p>由於瀏覽器安全限制，需要通過 HTTP 服務器運行。選擇以下任一方式：</p>
++ 173             
++ 174             <p><strong>使用 Python（推薦）：</strong></p>
++ 175             <div class="code-block">
++ 176 # Python 3.x
++ 177 python -m http.server 8000
++ 178 
++ 179 # 或 Python 2.x
++ 180 python -m SimpleHTTPServer 8000
++ 181             </div>
++ 182 
++ 183             <p><strong>使用 Node.js：</strong></p>
++ 184             <div class="code-block">
++ 185 # 安裝 http-server（僅需一次）
++ 186 npm install -g http-server
++ 187 
++ 188 # 運行
++ 189 http-server -p 8000
++ 190             </div>
++ 191 
++ 192             <p><strong>使用 VS Code：</strong></p>
++ 193             <p>安裝 "Live Server" 擴展，右鍵點擊 index.html 選擇 "Open with Live Server"</p>
++ 194         </div>
++ 195 
++ 196         <div class="step">
++ 197             <h3>步驟 2：在瀏覽器中打開</h3>
++ 198             <p>在瀏覽器中訪問：</p>
++ 199             <div class="code-block">
++ 200 http://localhost:8000
++ 201             </div>
++ 202             <p>推薦使用 Chrome、Edge 或 Safari 瀏覽器以獲得最佳體驗。</p>
++ 203         </div>
++ 204 
++ 205         <div class="step">
++ 206             <h3>步驟 3：安裝為 PWA（可選）</h3>
++ 207             <p>在手機或電腦上，瀏覽器會提示"添加到主屏幕"或"安裝應用"，點擊即可安裝。</p>
++ 208             
++ 209             <p><strong>iOS Safari：</strong></p>
++ 210             <ul>
++ 211                 <li>點擊分享按鈕（向上箭頭）</li>
++ 212                 <li>選擇"添加到主屏幕"</li>
++ 213                 <li>確認後即可在主屏幕找到應用圖標</li>
++ 214             </ul>
++ 215 
++ 216             <p><strong>Android Chrome：</strong></p>
++ 217             <ul>
++ 218                 <li>點擊瀏覽器菜單（三個點）</li>
++ 219                 <li>選擇"安裝應用"或"添加到主屏幕"</li>
++ 220                 <li>確認後即可在應用列表找到</li>
++ 221             </ul>
++ 222 
++ 223             <p><strong>桌面 Chrome/Edge：</strong></p>
++ 224             <ul>
++ 225                 <li>地址欄右側會出現安裝圖標</li>
++ 226                 <li>點擊並確認安裝</li>
++ 227                 <li>應用會添加到系統應用列表</li>
++ 228             </ul>
++ 229         </div>
++ 230 
++ 231         <h2>🎮 操作指南</h2>
++ 232 
++ 233         <div class="step">
++ 234             <h3>移動端控制</h3>
++ 235             <ul>
++ 236                 <li><strong>左下角搖桿</strong>：控制視角（上下左右旋轉）</li>
++ 237                 <li><strong>右下角搖桿</strong>：控制移動（前後左右走動）</li>
++ 238                 <li><strong>點擊物品</strong>：查看回憶內容</li>
++ 239                 <li><strong>點擊透明人</strong>：開始對話</li>
++ 240                 <li><strong>點擊空白</strong>：關閉對話框或物品查看器</li>
++ 241             </ul>
++ 242         </div>
++ 243 
++ 244         <div class="step">
++ 245             <h3>PC端控制</h3>
++ 246             <ul>
++ 247                 <li><strong>WASD 鍵</strong>：移動（W前 S後 A左 D右）</li>
++ 248                 <li><strong>鼠標移動</strong>：控制視角</li>
++ 249                 <li><strong>左鍵點擊</strong>：與物品或角色互動</li>
++ 250                 <li><strong>ESC 鍵</strong>：退出鼠標鎖定</li>
++ 251             </ul>
++ 252         </div>
++ 253 
++ 254         <h2>🔧 自定義配置</h2>
++ 255 
++ 256         <div class="step">
++ 257             <h3>添加自己的回憶</h3>
++ 258             <p>在 <code>app.js</code> 中找到 <code>itemDatabase</code> 對象，添加你的內容：</p>
++ 259             <div class="code-block">
++ 260 const itemDatabase = {
++ 261     bookshelf: [
++ 262         {
++ 263             title: "你的標題",
++ 264             type: "letter",
++ 265             content: "你的內容..."
++ 266         }
++ 267     ]
++ 268 };
++ 269             </div>
++ 270         </div>
++ 271 
++ 272         <div class="step">
++ 273             <h3>接入 AI 對話</h3>
++ 274             <p>在 <code>app.js</code> 的 <code>handleDialogOption()</code> 函數中添加 API 調用：</p>
++ 275             <div class="code-block">
++ 276 async function handleDialogOption(option) {
++ 277     const response = await fetch('YOUR_AI_API', {
++ 278         method: 'POST',
++ 279         body: JSON.stringify({ message: option })
++ 280     });
++ 281     const data = await response.json();
++ 282     // 顯示 AI 回覆
++ 283 }
++ 284             </div>
++ 285         </div>
++ 286 
++ 287         <div class="step">
++ 288             <h3>配置雲端同步</h3>
++ 289             <p>在 <code>cloud-sync.js</code> 中設置你的 API 端點：</p>
++ 290             <div class="code-block">
++ 291 this.apiEndpoint = 'https://your-api.com';
++ 292             </div>
++ 293             <p>詳細的後端 API 要求請查看 README.md</p>
++ 294         </div>
++ 295 
++ 296         <div class="warning">
++ 297             <p><strong>⚠️ 注意：</strong>雲端同步功能需要配置後端 API 才能使用。在配置之前，數據僅保存在本地瀏覽器。</p>
++ 298         </div>
++ 299 
++ 300         <h2>📦 部署到生產環境</h2>
++ 301 
++ 302         <p>將項目部署到以下任一平台即可公開訪問：</p>
++ 303 
++ 304         <ul>
++ 305             <li><strong>Vercel</strong>：零配置部署，自動 HTTPS</li>
++ 306             <li><strong>Netlify</strong>：拖放部署，支持自定義域名</li>
++ 307             <li><strong>GitHub Pages</strong>：免費靜態托管</li>
++ 308             <li><strong>Cloudflare Pages</strong>：全球 CDN 加速</li>
++ 309         </ul>
++ 310 
++ 311         <p>只需上傳所有文件到這些平台，即可獲得一個公開的 URL。</p>
++ 312 
++ 313         <h2>🐛 常見問題</h2>
++ 314 
++ 315         <div class="step">
++ 316             <h3>Q: 為什麼看不到 3D 場景？</h3>
++ 317             <p>A: 請確保：</p>
++ 318             <ul>
++ 319                 <li>通過 HTTP 服務器運行（不是直接打開 HTML 文件）</li>
++ 320                 <li>瀏覽器支持 WebGL（Chrome 90+、Safari 14+）</li>
++ 321                 <li>沒有瀏覽器擴展阻止了 JavaScript</li>
++ 322             </ul>
++ 323         </div>
++ 324 
++ 325         <div class="step">
++ 326             <h3>Q: 移動端性能不佳怎麼辦？</h3>
++ 327             <p>A: 可以調整以下設置以提升性能：</p>
++ 328             <ul>
++ 329                 <li>降低渲染分辨率（修改 <code>setPixelRatio</code>）</li>
++ 330                 <li>減少陰影質量（<code>shadowMap.size</code>）</li>
++ 331                 <li>簡化家具模型</li>
++ 332             </ul>
++ 333         </div>
++ 334 
++ 335         <div class="step">
++ 336             <h3>Q: 如何備份我的數據？</h3>
++ 337             <p>A: 數據保存在瀏覽器的 localStorage 中。你可以：</p>
++ 338             <ul>
++ 339                 <li>在開發者工具中導出 localStorage 數據</li>
++ 340                 <li>配置雲端同步自動備份</li>
++ 341                 <li>定期手動複製數據</li>
++ 342             </ul>
++ 343         </div>
++ 344 
++ 345         <h2>📞 獲取幫助</h2>
++ 346 
++ 347         <p>如果遇到問題或有建議，可以：</p>
++ 348         <ul>
++ 349             <li>查看 <code>README.md</code> 了解詳細文檔</li>
++ 350             <li>檢查瀏覽器控制台的錯誤信息</li>
++ 351             <li>在 GitHub 提交 Issue</li>
++ 352         </ul>
++ 353 
++ 354         <a href="index.html" class="button">🚀 開始體驗</a>
++ 355         <a href="README.md" class="button" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">📖 查看文檔</a>
++ 356     </div>
++ 357 </body>
++ 358 </html>
