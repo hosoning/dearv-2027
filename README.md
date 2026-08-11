@@ -1,214 +1,102 @@
-# dearv-2027
-Happy Birthday My Dear V
+# 3D 回憶小屋
 
-+   1 # 3D 回憶小屋
-+   2 
-+   3 一個基於 Three.js 的第一人稱 3D 互動空間應用，用於珍藏和回顧珍貴的回憶。
-+   4 
-+   5 ## 功能特點
-+   6 
-+   7 ### 核心功能
-+   8 - ✨ **第一人稱 3D 探索**：自由在 3D 空間中走動
-+   9 - 🏠 **多房間布局**：根據平面圖生成的現代簡約大平層
-+  10 - 🪑 **家具互動**：點擊書架、櫃子等查看分類回憶
-+  11 - 👤 **透明人陪伴**：邊緣發光的玻璃折射效果，會自行走動
-+  12 - 💬 **對話系統**：可選字卡模式或 AI 模式
-+  13 - 📱 **PWA 支持**：可安裝到手機和電腦
-+  14 - ☁️ **雲端同步**：數據自動同步到雲端
-+  15 
-+  16 ### 控制方式
-+  17 
-+  18 #### 移動端
-+  19 - **左下搖桿**：控制視角（上下左右）
-+  20 - **右下搖桿**：控制移動（前後左右）
-+  21 - **點擊物品**：查看回憶內容
-+  22 - **點擊透明人**：開始對話
-+  23 
-+  24 #### PC端
-+  25 - **WASD**：移動
-+  26 - **鼠標**：控制視角
-+  27 - **左鍵點擊**：互動
-+  28 
-+  29 ## 技術棧
-+  30 
-+  31 - **Three.js** - 3D 渲染引擎
-+  32 - **原生 JavaScript** - 無框架依賴
-+  33 - **PWA** - 漸進式網頁應用
-+  34 - **Service Worker** - 離線支持
-+  35 
-+  36 ## 快速開始
-+  37 
-+  38 ### 本地運行
-+  39 
-+  40 1. 使用任何 HTTP 服務器運行項目：
-+  41 
-+  42 ```bash
-+  43 # 使用 Python
-+  44 python -m http.server 8000
-+  45 
-+  46 # 或使用 Node.js http-server
-+  47 npx http-server
-+  48 ```
-+  49 
-+  50 2. 在瀏覽器中打開 `http://localhost:8000`
-+  51 
-+  52 ### 部署
-+  53 
-+  54 將以下文件部署到任何靜態網站托管服務：
-+  55 - `index.html`
-+  56 - `app.js`
-+  57 - `cloud-sync.js`
-+  58 - `manifest.json`
-+  59 - `sw.js`
-+  60 - 圖標文件（需要自行創建）
-+  61 
-+  62 推薦服務：
-+  63 - Vercel
-+  64 - Netlify
-+  65 - GitHub Pages
-+  66 - Cloudflare Pages
-+  67 
-+  68 ## 雲端同步設置
-+  69 
-+  70 ### 後端 API 要求
-+  71 
-+  72 需要實現以下 API 端點：
-+  73 
-+  74 ```
-+  75 GET  /api/user/{userId}/data       - 獲取用戶數據
-+  76 POST /api/user/{userId}/data       - 保存用戶數據
-+  77 PUT  /api/user/{userId}/items      - 更新物品
-+  78 ```
-+  79 
-+  80 ### 數據格式
-+  81 
-+  82 ```json
-+  83 {
-+  84   "items": {
-+  85     "bookshelf": [
-+  86       {
-+  87         "id": "1",
-+  88         "title": "第一封信",
-+  89         "type": "letter",
-+  90         "content": "...",
-+  91         "createdAt": "2024-01-01T00:00:00Z"
-+  92       }
-+  93     ]
-+  94   },
-+  95   "decorations": [],
-+  96   "settings": {},
-+  97   "updatedAt": "2024-01-01T00:00:00Z"
-+  98 }
-+  99 ```
-+ 100 
-+ 101 ### 配置
-+ 102 
-+ 103 在 `cloud-sync.js` 中修改：
-+ 104 
-+ 105 ```javascript
-+ 106 this.apiEndpoint = 'YOUR_API_ENDPOINT'; // 替換為你的 API 端點
-+ 107 ```
-+ 108 
-+ 109 並實現認證邏輯：
-+ 110 
-+ 111 ```javascript
-+ 112 getAuthToken() {
-+ 113     return localStorage.getItem('authToken') || '';
-+ 114 }
-+ 115 ```
-+ 116 
-+ 117 ## 自定義
-+ 118 
-+ 119 ### 添加新家具
-+ 120 
-+ 121 在 `app.js` 的 `createFurniture()` 函數中添加：
-+ 122 
-+ 123 ```javascript
-+ 124 const furniture = new THREE.Mesh(geometry, material);
-+ 125 furniture.userData = {
-+ 126     type: 'furniture',
-+ 127     name: '家具名稱',
-+ 128     itemType: 'category_name',
-+ 129     interactive: true
-+ 130 };
-+ 131 scene.add(furniture);
-+ 132 interactiveObjects.push(furniture);
-+ 133 ```
-+ 134 
-+ 135 ### 添加新物品類別
-+ 136 
-+ 137 在 `app.js` 的 `itemDatabase` 中添加：
-+ 138 
-+ 139 ```javascript
-+ 140 const itemDatabase = {
-+ 141     your_category: [
-+ 142         {
-+ 143             title: "標題",
-+ 144             type: "類型",
-+ 145             content: "內容"
-+ 146         }
-+ 147     ]
-+ 148 };
-+ 149 ```
-+ 150 
-+ 151 ### 修改房間布局
-+ 152 
-+ 153 在 `app.js` 的 `createRoom()` 函數中修改牆壁位置和尺寸。
-+ 154 
-+ 155 ### 接入 AI 對話
-+ 156 
-+ 157 在 `app.js` 的 `handleDialogOption()` 函數中添加 API 調用：
-+ 158 
-+ 159 ```javascript
-+ 160 async function handleDialogOption(option) {
-+ 161     try {
-+ 162         const response = await fetch('YOUR_AI_API', {
-+ 163             method: 'POST',
-+ 164             headers: { 'Content-Type': 'application/json' },
-+ 165             body: JSON.stringify({ message: option })
-+ 166         });
-+ 167         const data = await response.json();
-+ 168         document.getElementById('dialog-content').textContent = data.reply;
-+ 169     } catch (error) {
-+ 170         console.error('AI API 調用失敗:', error);
-+ 171     }
-+ 172 }
-+ 173 ```
-+ 174 
-+ 175 ## 性能優化建議
-+ 176 
-+ 177 1. **模型優化**：使用簡化的 3D 模型，減少面數
-+ 178 2. **紋理壓縮**：使用壓縮格式的紋理（如 KTX2）
-+ 179 3. **按需加載**：使用 Three.js 的 GLTFLoader 實現資源懶加載
-+ 180 4. **陰影優化**：限制投影物體數量，使用較低的陰影貼圖分辨率
-+ 181 5. **移動端優化**：降低渲染分辨率，使用 `setPixelRatio(Math.min(2, window.devicePixelRatio))`
-+ 182 
-+ 183 ## 未來功能計劃
-+ 184 
-+ 185 - [ ] 更多家具和裝飾品
-+ 186 - [ ] 自定義房間布局編輯器
-+ 187 - [ ] 照片上傳和展示
-+ 188 - [ ] 背景音樂和環境音效
-+ 189 - [ ] 多語言支持
-+ 190 - [ ] VR 支持
-+ 191 - [ ] 社交分享功能
-+ 192 - [ ] 更豐富的 AI 對話模式
-+ 193 
-+ 194 ## 瀏覽器支持
-+ 195 
-+ 196 - Chrome/Edge 90+
-+ 197 - Safari 14+
-+ 198 - Firefox 88+
-+ 199 - 移動端瀏覽器（iOS Safari 14+, Chrome Mobile）
-+ 200 
-+ 201 ## 授權
-+ 202 
-+ 203 MIT License
-+ 204 
-+ 205 ## 貢獻
-+ 206 
-+ 207 歡迎提交 Issue 和 Pull Request！
-+ 208 
-+ 209 ## 聯繫方式
-+ 210 
-+ 211 如有問題或建議，請通過 Issue 聯繫。
+一個私人的 3D 互動回憶空間：漫遊房間、擺放家具與記憶物件、寫信/翻閱信件。手機與網頁共用同一份雲端資料。
+
+## 技術架構
+
+```
+Next.js 14 (App Router) + TypeScript
++ React Three Fiber + drei          ← 3D 渲染層
++ Supabase (Postgres + Storage + Auth) ← 資料同步、圖片上傳、登入
++ PWA (manifest + service worker)   ← 手機「加入主屏幕」
+```
+
+這是舊版單檔案 Three.js (r128) 原型的重構版本。舊版 repo 內容已損毀（每個檔案都被寫入了帶有
+`+  123` 這種 diff 行號前綴的錯誤內容，無法直接使用），因此依照交接文件的架構全部重新搭建，
+UI/互動邏輯則參考文件描述重新實作。
+
+## 專案結構
+
+```
+app/                    Next.js App Router 入口 (layout.tsx, page.tsx)
+components/
+  Scene.tsx             R3F <Canvas> 容器：燈光、房間、家具、玩家控制
+  Room.tsx               房間幾何（地板/牆/天花/窗景）
+  Character.tsx           透明玻璃質感的陪伴角色（手動關節 Group，非 skeleton）
+  PlayerControls.tsx      WASD + 拖曳視角（桌面）
+  MobileJoysticks.tsx     雙搖桿（行動裝置）
+  CatalogPanel.tsx        目錄 UI：放置家具/記憶物件
+  LetterPanel.tsx         信件 UI：寫信、翻閱信件列表
+  MemoryObjectEditor.tsx  記憶物件（星星瓶/照片框/禮物盒）標題、筆記、照片編輯
+  AuthGate.tsx            Supabase Magic Link 登入（未設定 Supabase 時直接跳過，走本機模式）
+  HouseApp.tsx            上層狀態容器：載入資料、串接所有 UI 與 3D 場景
+  furniture/*.tsx          已建模家具（沙發、餐桌、廚房中島、書架、床、書桌）
+lib/
+  textures.ts             程序化材質產生器（人字拼花地板、灰泥牆、大理石、维港夜景）
+  supabase.ts             Supabase client（未設定環境變數時為 null）
+  storage.ts               資料存取層：有 Supabase session 時讀寫雲端，否則 fallback 至 localStorage
+  types.ts / catalog.ts    型別與目錄資料
+supabase/schema.sql      rooms / placed_items / letters / memory_objects 資料表 + RLS + Storage bucket
+public/                  manifest.json、sw.js、icon.svg（PWA）
+```
+
+## 本機開發
+
+```bash
+npm install
+npm run dev
+```
+
+開發模式下若未設定 Supabase 環境變數，App 會自動進入「本機模式」：跳過登入、資料存在
+`localStorage`（並有記憶體變數 fallback，避免 sandboxed 瀏覽器完全無法寫入 storage 時整個壞掉）。
+畫面右上角會有一顆橘色提示「未連接雲端」。
+
+## 設定 Supabase（跨裝置同步）
+
+1. 建立 Supabase 專案（或用 `supabase start` 起本機實例）。
+2. 在 SQL Editor 執行 `supabase/schema.sql`，會建立四張表、RLS 政策，以及 `memory-house` Storage bucket。
+3. 於 Supabase Dashboard → Authentication，確認 Email OTP（Magic Link）已啟用。
+4. 複製 `.env.example` 為 `.env.local`，填入：
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=...
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+   ```
+5. 重新啟動 `npm run dev`。此時首次載入會要求輸入 Email 取得登入連結；登入後資料即寫入雲端，
+   手機與電腦用同一個帳號登入即可共用同一個房間。
+
+## 測試各階段功能
+
+- **房間渲染 / 移動**：`npm run dev` 後打開 `http://localhost:3000`。桌面用 WASD 移動、拖曳畫面看方向；
+  手機（或縮小視窗＋切換裝置模擬）會出現雙搖桿，左搖桿移動、右搖桿看方向。
+- **目錄放置物品**：點右上角「📦 目錄」，選任一家具或記憶物件，會隨機出現在房間內；記憶物件放置後
+  會直接跳出編輯視窗填標題/筆記/照片。
+- **信件**：點「✉️ 信件」→「寫信」分頁撰寫、選心情標籤、可附加圖片 → 「封存這封信」；回到「信件」
+  分頁可看到列表並點開翻閱。
+- **陪伴角色互動**：點擊房間裡的透明人形，會跳出對話框（你好 / 今天過得怎麼樣？/ 關閉）。
+- **跨裝置同步**：設定好 Supabase 並登入後，用另一台裝置（或無痕視窗）以同一 Email 登入，應該會看到
+  同樣的房間、放置物品與信件。
+- **PWA 安裝**：用手機瀏覽器打開網址 → 加入主屏幕；`public/sw.js` 會快取靜態資源，讓已載入過的頁面在
+  斷線時仍可開啟殼層。
+
+## 已完成 vs. 待辦（對照原交接文件的分階段計畫）
+
+| 階段 | 狀態 | 說明 |
+|---|---|---|
+| Phase 1：Next.js + Supabase + 登入 | ✅ 已完成 | Magic Link 登入、rooms 表 get-or-create |
+| Phase 2：房間/材質/家具搬進 R3F | ✅ 已完成 | 房間幾何、四種程序化材質、六件家具、陪伴角色 |
+| Phase 3：Catalog / 信件改用 Supabase 讀寫 | ✅ 已完成 | 含記憶物件（星星瓶/照片框/禮物盒），目前用簡單幾何體占位 |
+| Phase 5（提前）：PWA | ✅ 已完成 | manifest + service worker（stale-while-revalidate 靜態資源，其餘 network-first） |
+| Phase 4：家具深度互動（開抽屜、翻書）、多房間 | ⬜ 待辦 | `rooms` 表已支援多房，UI 尚未做房間切換 |
+| 天花板高度 / 4K 細節 / 畫面品質持續優化 | ⬜ 待辦 | 天花板已提高到 4.2m，其餘為長期打磨項目 |
+| 窗外景色可互動/動態 | ⬜ 待辦 | 目前仍是靜態 canvas 貼圖 |
+| 記憶物件精緻建模 | ⬜ 待辦 | 目前為簡單幾何體占位（星星瓶/照片框/禮物盒） |
+| 行走抖動細緻度 | ⬜ 待辦 | 目前僅做房間邊界限制移動，未做家具碰撞 |
+
+## 已知限制
+
+- `next/image` 對使用者上傳圖片（data URL / Supabase Storage 動態網址）警告已知並保留為 `<img>`，
+  因為這類來源不適合走 Next 的圖片最佳化管線。
+- PWA icon 目前只有一顆 SVG（`purpose: any maskable`）。多數 Android/桌面瀏覽器可直接使用；
+  若要更完整的 iOS 主屏幕圖示支援，建議之後补上 192/512 PNG。
+- 本機模式（未設定 Supabase）下記憶物件/信件的圖片是以 data URL 存進 localStorage，大量大圖可能碰到
+  瀏覽器 storage 配額上限；設定 Supabase 後圖片會改走 Storage bucket，沒有這個限制。
