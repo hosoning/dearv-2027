@@ -5,10 +5,10 @@ import type { Letter } from '@/lib/types';
 import { uploadAttachment } from '@/lib/storage';
 
 const MOODS = [
-  { tag: 'happy', icon: '😊' },
-  { tag: 'sad', icon: '😢' },
-  { tag: 'missing', icon: '💭' },
-  { tag: 'love', icon: '❤️' },
+  { tag: 'happy', icon: '·' },
+  { tag: 'sad', icon: '○' },
+  { tag: 'missing', icon: '◇' },
+  { tag: 'love', icon: '♥' },
 ];
 
 export default function LetterPanel({
@@ -16,11 +16,13 @@ export default function LetterPanel({
   onClose,
   letters,
   onCreate,
+  t = (key: string) => key,
 }: {
   open: boolean;
   onClose: () => void;
   letters: Letter[];
   onCreate: (input: { title: string; content: string; mood_tag: string | null; attachment_url: string | null }) => Promise<void>;
+  t?: (key: string) => string;
 }) {
   const [tab, setTab] = useState<'list' | 'compose'>('list');
   const [selected, setSelected] = useState<Letter | null>(null);
@@ -33,8 +35,8 @@ export default function LetterPanel({
 
   if (!open) return null;
 
-  async function handleFile(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
     if (!file) return;
     setUploading(true);
     try {
@@ -48,7 +50,7 @@ export default function LetterPanel({
     if (!content.trim()) return;
     setSaving(true);
     try {
-      await onCreate({ title: title.trim() || '無題', content, mood_tag: mood, attachment_url: attachmentUrl });
+      await onCreate({ title: title.trim() || 'Untitled', content, mood_tag: mood, attachment_url: attachmentUrl });
       setTitle('');
       setContent('');
       setMood(null);
@@ -60,47 +62,28 @@ export default function LetterPanel({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={onClose}>
-      <div
-        className="flex max-h-[75vh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <div className="flex gap-4">
-            <button
-              onClick={() => {
-                setTab('list');
-                setSelected(null);
-              }}
-              className={`text-sm font-medium ${tab === 'list' ? 'text-slate-900' : 'text-slate-400'}`}
-            >
-              信件
-            </button>
-            <button onClick={() => setTab('compose')} className={`text-sm font-medium ${tab === 'compose' ? 'text-slate-900' : 'text-slate-400'}`}>
-              寫信
-            </button>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 p-3 backdrop-blur-sm sm:items-center" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="flex max-h-[82vh] w-full max-w-xl flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#171513]/95 text-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div className="flex gap-2">
+            <button type="button" onClick={() => { setTab('list'); setSelected(null); }} className={`rounded-full px-3 py-1.5 text-xs ${tab === 'list' ? 'bg-white text-stone-900' : 'text-white/45'}`}>{t('letters')}</button>
+            <button type="button" onClick={() => setTab('compose')} className={`rounded-full px-3 py-1.5 text-xs ${tab === 'compose' ? 'bg-white text-stone-900' : 'text-white/45'}`}>＋ {t('letter')}</button>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700">
-            ✕
-          </button>
+          <button type="button" onClick={onClose} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/55">{t('close')}</button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
           {tab === 'list' && !selected && (
             <div className="flex flex-col gap-2">
-              {letters.length === 0 && <p className="text-sm text-slate-400">還沒有信件，寫下第一封吧。</p>}
+              {letters.length === 0 && <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm leading-7 text-white/30">{t('emptyArchive')}</p>}
               {letters.map((letter) => (
-                <button
-                  key={letter.id}
-                  onClick={() => setSelected(letter)}
-                  className="rounded-xl border border-slate-100 p-3 text-left hover:border-slate-300"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-slate-800">{letter.title}</span>
-                    {letter.mood_tag && <span>{MOODS.find((m) => m.tag === letter.mood_tag)?.icon}</span>}
+                <button key={letter.id} type="button" onClick={() => setSelected(letter)} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-left hover:bg-white/[0.06]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="truncate text-sm font-medium text-white/80">{letter.title}</span>
+                    {letter.mood_tag && <span className="text-amber-100/55">{MOODS.find((item) => item.tag === letter.mood_tag)?.icon}</span>}
                   </div>
-                  <p className="mt-1 truncate text-xs text-slate-400">{letter.content}</p>
-                  <p className="mt-1 text-[11px] text-slate-300">{new Date(letter.created_at).toLocaleString('zh-TW')}</p>
+                  <p className="mt-2 truncate text-xs text-white/35">{letter.content}</p>
+                  <p className="mt-2 text-[10px] text-white/20">{new Date(letter.created_at).toLocaleString()}</p>
                 </button>
               ))}
             </div>
@@ -108,53 +91,28 @@ export default function LetterPanel({
 
           {tab === 'list' && selected && (
             <div>
-              <button onClick={() => setSelected(null)} className="mb-3 text-xs text-slate-400 hover:text-slate-600">
-                ← 返回列表
-              </button>
-              <h3 className="mb-1 text-base font-semibold text-slate-800">{selected.title}</h3>
-              <p className="mb-3 text-[11px] text-slate-400">{new Date(selected.created_at).toLocaleString('zh-TW')}</p>
-              {selected.attachment_url && (
-                <img src={selected.attachment_url} alt="" className="mb-3 max-h-52 w-full rounded-lg object-cover" />
-              )}
-              <p className="whitespace-pre-wrap text-sm text-slate-700">{selected.content}</p>
+              <button type="button" onClick={() => setSelected(null)} className="mb-4 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/45">← {t('archive')}</button>
+              <h3 className="mb-1 text-lg font-medium text-white/85">{selected.title}</h3>
+              <p className="mb-5 text-[10px] text-white/25">{new Date(selected.created_at).toLocaleString()}</p>
+              {selected.attachment_url && <img src={selected.attachment_url} alt="" className="mb-5 max-h-72 w-full rounded-2xl object-contain" />}
+              <div className="rounded-3xl bg-[#f0e6d5] p-6 text-stone-700 shadow-inner">
+                <p className="whitespace-pre-wrap font-serif text-[15px] leading-8">{selected.content}</p>
+              </div>
             </div>
           )}
 
           {tab === 'compose' && (
-            <div>
-              <input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="標題"
-                className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
-              />
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="寫下你想說的話…"
-                rows={6}
-                className="mb-3 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
-              />
-              <div className="mb-3 flex gap-2">
-                {MOODS.map((m) => (
-                  <button
-                    key={m.tag}
-                    onClick={() => setMood(mood === m.tag ? null : m.tag)}
-                    className={`rounded-lg border px-3 py-1.5 text-lg ${mood === m.tag ? 'border-slate-500 bg-slate-100' : 'border-slate-200'}`}
-                  >
-                    {m.icon}
-                  </button>
+            <div className="space-y-3">
+              <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t('title')} className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none" />
+              <textarea value={content} onChange={(event) => setContent(event.target.value)} placeholder={t('description')} rows={7} className="w-full resize-none rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 text-sm text-white outline-none" />
+              <div className="flex gap-2">
+                {MOODS.map((item) => (
+                  <button key={item.tag} type="button" onClick={() => setMood(mood === item.tag ? null : item.tag)} className={`h-9 w-9 rounded-full border text-sm ${mood === item.tag ? 'border-amber-100/60 bg-amber-100/10 text-amber-100' : 'border-white/10 text-white/45'}`}>{item.icon}</button>
                 ))}
               </div>
-              <input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="mb-3 text-sm" />
-              {attachmentUrl && <img src={attachmentUrl} alt="" className="mb-3 max-h-32 rounded-lg object-cover" />}
-              <button
-                onClick={handleSubmit}
-                disabled={saving || uploading || !content.trim()}
-                className="w-full rounded-lg bg-slate-800 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
-              >
-                {saving ? '寄出中…' : '封存這封信'}
-              </button>
+              <input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="block w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-white/65 file:mr-3 file:rounded-full file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-xs file:text-white" />
+              {attachmentUrl && <img src={attachmentUrl} alt="" className="max-h-40 rounded-2xl object-contain" />}
+              <button type="button" onClick={handleSubmit} disabled={saving || uploading || !content.trim()} className="w-full rounded-2xl bg-amber-100 py-3 text-sm font-medium text-stone-900 disabled:opacity-40">{saving ? '…' : t('save')}</button>
             </div>
           )}
         </div>

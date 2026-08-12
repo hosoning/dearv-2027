@@ -2,7 +2,9 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - claude/memory-house-3d-handoff-a0d0e1
   workflow_dispatch:
 
 permissions:
@@ -29,6 +31,8 @@ jobs:
           GITHUB_PAGES: 'true'
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_DOOR_CODE: ${{ secrets.NEXT_PUBLIC_DOOR_CODE }}
+          NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

@@ -7,11 +7,34 @@ import { controlsState } from '@/lib/controlsState';
 import { ROOM_WIDTH, ROOM_DEPTH } from './Room';
 
 const EYE_HEIGHT = 1.6;
-const MOVE_SPEED = 2.6;
+const MOVE_SPEED = 2.45;
 const LOOK_SPEED = 2.2;
-const MARGIN = 0.4;
+const MARGIN = 0.48;
 const BOUND_X = ROOM_WIDTH / 2 - MARGIN;
 const BOUND_Z = ROOM_DEPTH / 2 - MARGIN;
+const PLAYER_RADIUS = 0.18;
+
+const BLOCKERS = [
+  { minX: -3.75, maxX: -1.45, minZ: -3.85, maxZ: -2.55 },
+  { minX: -3.35, maxX: -1.8, minZ: -4.35, maxZ: -3.5 },
+  { minX: 1.2, maxX: 3.1, minZ: -2.75, maxZ: -0.95 },
+  { minX: 3.05, maxX: 4.3, minZ: -0.2, maxZ: 1.55 },
+  { minX: -4.85, maxX: -4.2, minZ: -2.05, maxZ: 0.85 },
+  { minX: -3.9, maxX: -1.15, minZ: 1.7, maxZ: 4.05 },
+  { minX: 3.15, maxX: 4.8, minZ: 2.5, maxZ: 4.1 },
+  { minX: 2.35, maxX: 4.75, minZ: -4.75, maxZ: -3.75 },
+  { minX: -4.75, maxX: -2.0, minZ: 3.85, maxZ: 4.75 },
+];
+
+function blocked(x: number, z: number) {
+  return BLOCKERS.some(
+    (box) =>
+      x > box.minX - PLAYER_RADIUS &&
+      x < box.maxX + PLAYER_RADIUS &&
+      z > box.minZ - PLAYER_RADIUS &&
+      z < box.maxZ + PLAYER_RADIUS
+  );
+}
 
 export default function PlayerControls() {
   const { camera, gl } = useThree();
@@ -21,13 +44,16 @@ export default function PlayerControls() {
   const lastPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    camera.position.set(0, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.5);
+    camera.position.set(0, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.25);
     camera.rotation.order = 'YXZ';
+    yaw.current = 0;
+    pitch.current = 0;
   }, [camera]);
 
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      switch (e.key.toLowerCase()) {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement) return;
+      switch (event.key.toLowerCase()) {
         case 'w':
         case 'arrowup':
           controlsState.keys.w = true;
@@ -46,8 +72,8 @@ export default function PlayerControls() {
           break;
       }
     };
-    const onKeyUp = (e: KeyboardEvent) => {
-      switch (e.key.toLowerCase()) {
+    const onKeyUp = (event: KeyboardEvent) => {
+      switch (event.key.toLowerCase()) {
         case 'w':
         case 'arrowup':
           controlsState.keys.w = false;
@@ -75,43 +101,41 @@ export default function PlayerControls() {
   }, []);
 
   useEffect(() => {
-    const el = gl.domElement;
-    const onPointerDown = (e: PointerEvent) => {
+    const element = gl.domElement;
+    const onPointerDown = (event: PointerEvent) => {
       dragging.current = true;
-      lastPointer.current = { x: e.clientX, y: e.clientY };
+      lastPointer.current = { x: event.clientX, y: event.clientY };
     };
-    const onPointerMove = (e: PointerEvent) => {
+    const onPointerMove = (event: PointerEvent) => {
       if (!dragging.current) return;
-      const dx = e.clientX - lastPointer.current.x;
-      const dy = e.clientY - lastPointer.current.y;
-      lastPointer.current = { x: e.clientX, y: e.clientY };
+      const dx = event.clientX - lastPointer.current.x;
+      const dy = event.clientY - lastPointer.current.y;
+      lastPointer.current = { x: event.clientX, y: event.clientY };
       yaw.current -= dx * 0.0035;
-      pitch.current = THREE.MathUtils.clamp(pitch.current - dy * 0.0035, -1.2, 1.2);
+      pitch.current = THREE.MathUtils.clamp(pitch.current - dy * 0.0035, -1.15, 1.15);
     };
     const onPointerUp = () => {
       dragging.current = false;
     };
-    el.addEventListener('pointerdown', onPointerDown);
+    element.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
     return () => {
-      el.removeEventListener('pointerdown', onPointerDown);
+      element.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
     };
   }, [gl]);
 
   useFrame((_, delta) => {
-    // right joystick: continuous look while held
     const { x: lookX, y: lookY } = controlsState.joystickLook;
     if (lookX !== 0 || lookY !== 0) {
       yaw.current -= lookX * LOOK_SPEED * delta;
-      pitch.current = THREE.MathUtils.clamp(pitch.current - lookY * LOOK_SPEED * delta, -1.2, 1.2);
+      pitch.current = THREE.MathUtils.clamp(pitch.current - lookY * LOOK_SPEED * delta, -1.15, 1.15);
     }
     camera.rotation.y = yaw.current;
     camera.rotation.x = pitch.current;
 
-    // movement: left joystick takes priority, otherwise WASD
     let moveX = controlsState.joystickMove.x;
     let moveZ = controlsState.joystickMove.y;
     if (moveX === 0 && moveZ === 0) {
@@ -122,26 +146,23 @@ export default function PlayerControls() {
       if (d) moveX += 1;
     }
 
-    if (moveX !== 0 || moveZ !== 0) {
-      const len = Math.hypot(moveX, moveZ) || 1;
-      moveX /= len;
-      moveZ /= len;
+    if (moveX === 0 && moveZ === 0) return;
+    const length = Math.hypot(moveX, moveZ) || 1;
+    moveX /= length;
+    moveZ /= length;
 
-      // Matches the camera's actual look direction at rotation.y = yaw
-      // (yaw = 0 looks down -Z, Three.js's default camera forward).
-      const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
-      const right = new THREE.Vector3(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
+    const forward = new THREE.Vector3(-Math.sin(yaw.current), 0, -Math.cos(yaw.current));
+    const right = new THREE.Vector3(Math.cos(yaw.current), 0, -Math.sin(yaw.current));
+    const step = MOVE_SPEED * Math.min(delta, 0.05);
+    const deltaVector = new THREE.Vector3().addScaledVector(forward, -moveZ * step).addScaledVector(right, moveX * step);
 
-      const step = MOVE_SPEED * delta;
-      const next = camera.position.clone();
-      next.addScaledVector(forward, -moveZ * step);
-      next.addScaledVector(right, moveX * step);
+    const currentX = camera.position.x;
+    const currentZ = camera.position.z;
+    const targetX = THREE.MathUtils.clamp(currentX + deltaVector.x, -BOUND_X, BOUND_X);
+    const targetZ = THREE.MathUtils.clamp(currentZ + deltaVector.z, -BOUND_Z, BOUND_Z);
 
-      next.x = THREE.MathUtils.clamp(next.x, -BOUND_X, BOUND_X);
-      next.z = THREE.MathUtils.clamp(next.z, -BOUND_Z, BOUND_Z);
-      camera.position.x = next.x;
-      camera.position.z = next.z;
-    }
+    if (!blocked(targetX, currentZ)) camera.position.x = targetX;
+    if (!blocked(camera.position.x, targetZ)) camera.position.z = targetZ;
   });
 
   return null;

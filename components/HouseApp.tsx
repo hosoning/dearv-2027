@@ -1,46 +1,82 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import type { Room, PlacedItem, Letter, MemoryObject, ItemCategory, MemoryObjectType } from '@/lib/types';
+import type { Room, PlacedItem, Letter, MemoryObject } from '@/lib/types';
 import {
   getActiveRoom,
   listPlacedItems,
-  addPlacedItem,
   listLetters,
   addLetter,
   listMemoryObjects,
   addMemoryObject,
-  updateMemoryObject,
+  uploadAttachment,
 } from '@/lib/storage';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useLanguage, type Language } from '@/lib/i18n';
+import {
+  DEFAULT_ENVIRONMENT_SETTINGS,
+  loadEnvironmentSettings,
+  resolveEnvironment,
+  saveEnvironmentSettings,
+  type EnvironmentSettings,
+} from '@/lib/environment';
+import {
+  decodeMemoryNote,
+  encodeMemoryNote,
+  legacyTypeForMemory,
+  positionForLocation,
+} from '@/lib/memory-system';
 import PlacedItemMesh from './PlacedItemMesh';
 import MemoryObjectMesh from './MemoryObjectMesh';
-import CatalogPanel from './CatalogPanel';
 import LetterPanel from './LetterPanel';
-import MemoryObjectEditor from './MemoryObjectEditor';
 import DialogBox from './DialogBox';
 import MobileJoysticks from './MobileJoysticks';
+import EntranceGate from './EntranceGate';
+import OwnerPanel, { type OwnerMemoryInput } from './OwnerPanel';
+import MemoryDetailPanel from './MemoryDetailPanel';
 
 const Scene = dynamic(() => import('./Scene'), { ssr: false });
 
-function randomInRoom(): [number, number, number] {
-  const x = (Math.random() - 0.5) * 6;
-  const z = (Math.random() - 0.5) * 6;
-  return [x, 0, z];
+function LanguageSwitcher({ language, setLanguage }: { language: Language; setLanguage: (language: Language) => void }) {
+  return (
+    <div className="flex rounded-full border border-white/10 bg-black/25 p-1 backdrop-blur-xl">
+      {(['zh-TW', 'zh-CN', 'en'] as Language[]).map((item) => (
+        <button
+          key={item}
+          type="button"
+          onClick={() => setLanguage(item)}
+          className={`rounded-full px-2.5 py-1.5 text-[10px] transition ${language === item ? 'bg-white text-stone-900' : 'text-white/55 hover:text-white'}`}
+        >
+          {item === 'zh-TW' ? '繁中' : item === 'zh-CN' ? '简中' : 'EN'}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export default function HouseApp() {
   const isMobile = useIsMobile();
+  const { language, setLanguage, t } = useLanguage();
+  const [entered, setEntered] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [placedItems, setPlacedItems] = useState<PlacedItem[]>([]);
   const [letters, setLetters] = useState<Letter[]>([]);
   const [memoryObjects, setMemoryObjects] = useState<MemoryObject[]>([]);
-  const [catalogOpen, setCatalogOpen] = useState(false);
   const [lettersOpen, setLettersOpen] = useState(false);
+  const [collectionOpen, setCollectionOpen] = useState(false);
+  const [ownerOpen, setOwnerOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingObject, setEditingObject] = useState<MemoryObject | null>(null);
+  const [selectedObject, setSelectedObject] = useState<MemoryObject | null>(null);
+  const [environmentSettings, setEnvironmentSettings] = useState<EnvironmentSettings>(DEFAULT_ENVIRONMENT_SETTINGS);
+  const [clock, setClock] = useState(() => Date.now());
+
+  useEffect(() => {
+    setEnvironmentSettings(loadEnvironmentSettings());
+    const timer = window.setInterval(() => setClock(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -57,121 +93,176 @@ export default function HouseApp() {
     })();
   }, []);
 
-  const handlePlaceFurniture = useCallback(
-    async (catalogId: string, category: ItemCategory) => {
-      if (!room) return;
-      const [x, y, z] = randomInRoom();
-      const item = await addPlacedItem(room.id, {
-        catalog_id: catalogId,
-        category,
-        pos_x: x,
-        pos_y: y,
-        pos_z: z,
-        rotation_y: Math.random() * Math.PI * 2,
-      });
-      setPlacedItems((prev) => [...prev, item]);
-      setCatalogOpen(false);
-    },
-    [room]
-  );
+  const environment = useMemo(() => resolveEnvironment(environmentSettings, new Date(clock)), [environmentSettings, clock]);
 
-  const handlePlaceMemoryObject = useCallback(
-    async (type: MemoryObjectType) => {
-      if (!room) return;
-      const [x, y, z] = randomInRoom();
-      const object = await addMemoryObject(room.id, {
-        type,
-        title: '',
-        image_url: null,
-        note: null,
-        pos_x: x,
-        pos_y: y,
-        pos_z: z,
-      });
-      setMemoryObjects((prev) => [...prev, object]);
-      setCatalogOpen(false);
-      setEditingObject(object);
-    },
-    [room]
-  );
+  const handleEnvironmentChange = useCallback((settings: EnvironmentSettings) => {
+    setEnvironmentSettings(settings);
+    saveEnvironmentSettings(settings);
+  }, []);
 
   const handleCreateLetter = useCallback(
     async (input: { title: string; content: string; mood_tag: string | null; attachment_url: string | null }) => {
       if (!room) return;
       const letter = await addLetter(room.id, input);
-      setLetters((prev) => [letter, ...prev]);
+      setLetters((current) => [letter, ...current]);
     },
     [room]
   );
 
-  const handleSaveMemoryObject = useCallback(
-    async (updates: { title: string; note: string; image_url: string | null }) => {
-      if (!room || !editingObject) return;
-      const updated = await updateMemoryObject(room.id, editingObject.id, updates);
-      setMemoryObjects((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
-      setEditingObject(null);
+  const handleAddMemory = useCallback(
+    async (input: OwnerMemoryInput) => {
+      if (!room) return;
+      const sameLocation = memoryObjects.filter((object) => decodeMemoryNote(object.note).displayLocation === input.displayLocation).length;
+      const [x, y, z] = positionForLocation(input.displayLocation, sameLocation);
+      const imageUrl = input.image ? await uploadAttachment(input.image) : null;
+      const note = encodeMemoryNote({
+        category: input.category,
+        date: input.date || undefined,
+        direction: input.direction,
+        displayLocation: input.displayLocation,
+        interaction: input.interaction,
+        visual: input.visual,
+        description: input.description || undefined,
+        pages: input.pages.length ? input.pages : undefined,
+      });
+      const object = await addMemoryObject(room.id, {
+        type: legacyTypeForMemory(input.category),
+        title: input.title,
+        image_url: imageUrl,
+        note,
+        pos_x: x,
+        pos_y: y,
+        pos_z: z,
+      });
+      setMemoryObjects((current) => [...current, object]);
     },
-    [room, editingObject]
+    [room, memoryObjects]
   );
 
-  if (!room) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-slate-900 text-white">
-        <p className="text-sm text-white/70">載入中…</p>
-      </div>
-    );
+  if (!entered) {
+    return <EntranceGate language={language} setLanguage={setLanguage} t={t} onEnter={() => setEntered(true)} />;
   }
 
+  if (!room) {
+    return <div className="fixed inset-0 flex items-center justify-center bg-[#171513] text-sm text-white/55">{t('loading')}</div>;
+  }
+
+  const clockText = new Intl.DateTimeFormat(language === 'en' ? 'en-GB' : language === 'zh-CN' ? 'zh-CN' : 'zh-HK', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(clock));
+
+  const seasonLabel = t(environment.season);
+  const weatherLabel = t(environment.weather === 'clear' ? 'clearWeather' : environment.weather);
+  const phaseLabel = t(environment.dayPhase);
+
   return (
-    <div className="fixed inset-0 overflow-hidden">
-      <Scene onCompanionClick={() => setDialogOpen(true)}>
-        {placedItems.map((item) => (
-          <PlacedItemMesh key={item.id} item={item} />
-        ))}
+    <div className="fixed inset-0 overflow-hidden bg-stone-900 text-white">
+      <Scene
+        environment={environment}
+        onCompanionClick={() => setDialogOpen(true)}
+        onArchiveClick={() => setCollectionOpen(true)}
+        onLettersClick={() => setLettersOpen(true)}
+        onGiftsClick={() => setCollectionOpen(true)}
+      >
+        {placedItems.map((item) => <PlacedItemMesh key={item.id} item={item} />)}
         {memoryObjects.map((object) => (
-          <MemoryObjectMesh key={object.id} object={object} onClick={() => setEditingObject(object)} />
+          <MemoryObjectMesh key={object.id} object={object} onClick={() => setSelectedObject(object)} />
         ))}
       </Scene>
 
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-30 flex items-start justify-between gap-3 p-3 sm:p-4">
+        <div className="pointer-events-auto rounded-2xl border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-xl">
+          <p className="text-[9px] uppercase tracking-[0.28em] text-amber-100/50">dearv-2027</p>
+          <div className="mt-1 flex items-center gap-2 text-xs text-white/75">
+            <span>{clockText}</span>
+            <span className="text-white/25">·</span>
+            <span>{seasonLabel}</span>
+            <span className="text-white/25">·</span>
+            <span>{phaseLabel}</span>
+            <span className="text-white/25">·</span>
+            <span>{weatherLabel}</span>
+          </div>
+        </div>
+
+        <div className="pointer-events-auto flex flex-wrap justify-end gap-2">
+          <LanguageSwitcher language={language} setLanguage={setLanguage} />
+          <button type="button" onClick={() => setCollectionOpen(true)} className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs text-white/75 backdrop-blur-xl hover:bg-black/40">{t('archive')}</button>
+          <button type="button" onClick={() => setLettersOpen(true)} className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs text-white/75 backdrop-blur-xl hover:bg-black/40">{t('letters')}</button>
+          <button type="button" onClick={() => setOwnerOpen(true)} aria-label={t('owner')} className="h-9 w-9 rounded-full border border-white/10 bg-black/25 text-xs text-white/45 backdrop-blur-xl hover:text-white">⌁</button>
+        </div>
+      </div>
+
       {!isSupabaseConfigured && (
-        <div className="pointer-events-none fixed left-1/2 top-3 z-30 -translate-x-1/2 rounded-full bg-amber-500/90 px-3 py-1 text-xs text-white shadow">
-          未連接雲端 — 資料僅存於此瀏覽器
+        <div className="pointer-events-none fixed bottom-20 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[10px] text-white/35 backdrop-blur-xl">
+          {t('localOnly')}
         </div>
       )}
 
       {!isMobile && (
-        <div className="pointer-events-none fixed bottom-6 left-1/2 z-30 -translate-x-1/2 rounded-full bg-black/40 px-4 py-1.5 text-xs text-white">
-          WASD 移動 ・ 拖曳畫面看向四周 ・ 點擊物品互動
+        <div className="pointer-events-none fixed bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[11px] text-white/55 backdrop-blur-xl">
+          {t('walkHint')}
+        </div>
+      )}
+      {isMobile && (
+        <>
+          <MobileJoysticks />
+          <div className="pointer-events-none fixed bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/20 px-3 py-1 text-[10px] text-white/35">{t('mobileHint')}</div>
+        </>
+      )}
+
+      {collectionOpen && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/45 p-3 backdrop-blur-sm sm:items-center" onMouseDown={(event) => event.target === event.currentTarget && setCollectionOpen(false)}>
+          <div className="max-h-[82vh] w-full max-w-4xl overflow-y-auto rounded-[30px] border border-white/10 bg-[#171513]/95 p-5 shadow-2xl sm:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-amber-100/45">PRIVATE ARCHIVE</p>
+                <h2 className="mt-1 text-lg font-medium">{t('archive')}</h2>
+              </div>
+              <button type="button" onClick={() => setCollectionOpen(false)} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/55">{t('close')}</button>
+            </div>
+            {memoryObjects.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-white/10 p-10 text-center text-sm leading-7 text-white/35">{t('emptyArchive')}</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {memoryObjects.map((object) => {
+                  const meta = decodeMemoryNote(object.note);
+                  return (
+                    <button
+                      key={object.id}
+                      type="button"
+                      onClick={() => {
+                        setCollectionOpen(false);
+                        setSelectedObject(object);
+                      }}
+                      className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] text-left transition hover:-translate-y-0.5 hover:bg-white/[0.06]"
+                    >
+                      <div className="aspect-[4/3] bg-black/15">
+                        {object.image_url ? <img src={object.image_url} alt={object.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.18em] text-white/20">{t(meta.category)}</div>}
+                      </div>
+                      <div className="p-3">
+                        <p className="truncate text-sm text-white/80">{object.title || t(meta.category)}</p>
+                        <p className="mt-1 truncate text-[10px] text-white/35">{meta.date || t(meta.displayLocation === 'gift-cabinet' ? 'cabinet' : meta.displayLocation === 'archive' ? 'archiveShelf' : meta.displayLocation)}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {isMobile && <MobileJoysticks />}
-
-      <div className="fixed right-4 top-4 z-30 flex flex-col gap-2">
-        <button
-          onClick={() => setCatalogOpen(true)}
-          className="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-slate-800 shadow-lg hover:bg-white"
-        >
-          📦 目錄
-        </button>
-        <button
-          onClick={() => setLettersOpen(true)}
-          className="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-slate-800 shadow-lg hover:bg-white"
-        >
-          ✉️ 信件
-        </button>
-      </div>
-
-      <CatalogPanel
-        open={catalogOpen}
-        onClose={() => setCatalogOpen(false)}
-        onPlaceFurniture={handlePlaceFurniture}
-        onPlaceMemoryObject={handlePlaceMemoryObject}
-      />
       <LetterPanel open={lettersOpen} onClose={() => setLettersOpen(false)} letters={letters} onCreate={handleCreateLetter} />
-      {editingObject && (
-        <MemoryObjectEditor object={editingObject} onClose={() => setEditingObject(null)} onSave={handleSaveMemoryObject} />
-      )}
+      <MemoryDetailPanel object={selectedObject} onClose={() => setSelectedObject(null)} t={t} />
+      <OwnerPanel
+        open={ownerOpen}
+        onClose={() => setOwnerOpen(false)}
+        onAddMemory={handleAddMemory}
+        environmentSettings={environmentSettings}
+        onEnvironmentChange={handleEnvironmentChange}
+        t={t}
+      />
       <DialogBox open={dialogOpen} onClose={() => setDialogOpen(false)} />
     </div>
   );
