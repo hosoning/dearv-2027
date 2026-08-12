@@ -1,5 +1,8 @@
 const CACHE_NAME = 'memory-house-v1';
-const APP_SHELL = ['/', '/manifest.json', '/icon.svg'];
+// Derived from the worker's own script location so this also works when the
+// app is served from a subpath (e.g. GitHub Pages' /<repo>/ basePath).
+const BASE = new URL('./', self.location).pathname;
+const APP_SHELL = [BASE, `${BASE}manifest.json`, `${BASE}icon.svg`];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -22,7 +25,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.startsWith('/_next/static/')) {
+  if (url.pathname.startsWith(`${BASE}_next/static/`)) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
         const cached = await cache.match(request);
@@ -44,6 +47,6 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
         return response;
       })
-      .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+      .catch(() => caches.match(request).then((cached) => cached || caches.match(BASE)))
   );
 });

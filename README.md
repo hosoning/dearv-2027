@@ -51,6 +51,28 @@ npm run dev
 `localStorage`（並有記憶體變數 fallback，避免 sandboxed 瀏覽器完全無法寫入 storage 時整個壞掉）。
 畫面右上角會有一顆橘色提示「未連接雲端」。
 
+## 部署到 GitHub Pages
+
+這個 App 完全是前端渲染（沒有 server component / API route），所以可以直接以純靜態網站的形式跑在
+GitHub Pages 上，不需要另外申請 Vercel 之類的服務。專案已經內建：
+
+- `next.config.mjs`：`GITHUB_PAGES=true` 時會自動加上 `/dearv-2027` 這個 basePath（其他情況維持根目錄，
+  本機開發、Vercel 等其他託管都不受影響）
+- `.github/workflows/deploy-pages.yml`：build 完自動上傳並部署到 GitHub Pages
+- manifest / icon / service worker 的路徑都已改成相對路徑，不管部署在根目錄還是子路徑都能正確運作
+
+**啟用步驟（只需要做一次）：**
+
+1. 到這個 repo 的 **Settings → Pages**，「Build and deployment → Source」選擇 **GitHub Actions**。
+2. 之後只要：
+   - Push 到 `main`（例如 PR 合併後），或
+   - 到 **Actions** 分頁手動點 `Deploy to GitHub Pages` → `Run workflow`（可以選任何分支，不用等 PR 合併）
+   就會自動 build 並部署。
+3. 完成後網址是 `https://hosoning.github.io/dearv-2027/`。
+4. 若要讓部署版本也有雲端同步，到 **Settings → Secrets and variables → Actions** 補上
+   `NEXT_PUBLIC_SUPABASE_URL` 與 `NEXT_PUBLIC_SUPABASE_ANON_KEY` 兩個 Repository secrets，重新跑一次
+   workflow 即可；沒設定的話網站一樣能開，只是走本機 localStorage 模式。
+
 ## 設定 Supabase（跨裝置同步）
 
 1. 建立 Supabase 專案（或用 `supabase start` 起本機實例）。

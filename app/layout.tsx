@@ -5,10 +5,10 @@ import ServiceWorkerRegister from '@/components/ServiceWorkerRegister';
 export const metadata: Metadata = {
   title: '3D 回憶小屋',
   description: '一個珍藏回憶的 3D 互動空間',
-  manifest: '/manifest.json',
+  manifest: 'manifest.json',
   icons: {
-    icon: '/icon.svg',
-    apple: '/icon.svg',
+    icon: 'icon.svg',
+    apple: 'icon.svg',
   },
   appleWebApp: {
     capable: true,
