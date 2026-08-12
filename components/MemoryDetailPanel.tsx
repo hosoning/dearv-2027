@@ -53,6 +53,8 @@ export default function MemoryDetailPanel({ object, onClose, t }: { object: Memo
   const meta = useMemo(() => decodeMemoryNote(object?.note), [object]);
   if (!object) return null;
 
+  const interactionKey = meta.interaction === 'open-box' ? 'openBox' : meta.interaction;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 backdrop-blur-md" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-[30px] border border-white/12 bg-[#171513]/95 p-5 text-white shadow-2xl sm:p-7">
@@ -89,7 +91,7 @@ export default function MemoryDetailPanel({ object, onClose, t }: { object: Memo
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">{t('interaction')}</p>
-                  <p className="mt-1 text-white/75">{t(meta.interaction === 'flip-pages' ? 'flipPages' : meta.interaction === 'open-box' ? 'openBox' : meta.interaction)}</p>
+                  <p className="mt-1 text-white/75">{t(interactionKey)}</p>
                 </div>
                 {meta.description && (
                   <div>
