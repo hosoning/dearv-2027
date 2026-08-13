@@ -1,8 +1,8 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { ContactShadows, OrbitControls } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import type { MemoryObject } from '@/lib/types';
 import { decodeMemoryNote } from '@/lib/memory-system';
@@ -62,12 +62,23 @@ function PreviewObject({ object }: { object: MemoryObject }) {
 }
 
 export default function Memory3DPreview({ object }: { object: MemoryObject }) {
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 700px), (max-height: 520px)');
+    const update = () => setMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
   return (
     <div className="relative h-full min-h-[290px] w-full overflow-hidden bg-[radial-gradient(circle_at_50%_36%,#5d4a3a_0%,#2b241e_43%,#15120f_100%)]">
       <Canvas
         camera={{ position: [0, 1.05, 4.1], fov: 36, near: 0.05, far: 30 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        dpr={mobile ? 1 : [1, 1.35]}
+        frameloop="demand"
+        gl={{ antialias: !mobile, alpha: true, powerPreference: 'high-performance' }}
         onCreated={({ gl }) => {
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.08;
@@ -75,13 +86,16 @@ export default function Memory3DPreview({ object }: { object: MemoryObject }) {
       >
         <ambientLight intensity={0.6} color="#fff0dc" />
         <hemisphereLight args={['#f9e4c3', '#31251e', 0.75]} />
-        <directionalLight position={[3.5, 4.8, 3]} intensity={2.1} color="#ffd7a0" castShadow shadow-mapSize={[512, 512]} />
+        <directionalLight position={[3.5, 4.8, 3]} intensity={2.1} color="#ffd7a0" />
         <pointLight position={[-2.6, 1.8, 2.4]} intensity={1.1} color="#b8cced" distance={7} />
         <group position={[0, 0.25, 0]} rotation={[0, -0.18, 0]}>
           <PreviewObject object={object} />
         </group>
-        <ContactShadows position={[0, -1.05, 0]} opacity={0.42} scale={4.8} blur={2.8} far={4} resolution={256} />
-        <OrbitControls enablePan={false} minDistance={2.4} maxDistance={6} minPolarAngle={0.7} maxPolarAngle={1.85} autoRotate autoRotateSpeed={0.55} />
+        <mesh position={[0, -1.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[1.25, 48]} />
+          <meshBasicMaterial color="#080706" transparent opacity={0.28} depthWrite={false} />
+        </mesh>
+        <OrbitControls enablePan={false} minDistance={2.4} maxDistance={6} minPolarAngle={0.7} maxPolarAngle={1.85} enableDamping={false} />
       </Canvas>
     </div>
   );

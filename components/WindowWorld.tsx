@@ -94,11 +94,16 @@ function SeasonalTree({ x, z, scale, season }: { x: number; z: number; scale: nu
 
 export default function WindowWorld({ environment }: { environment: ResolvedEnvironment }) {
   const isNight = environment.dayPhase === 'night';
-  const panorama = useMemo(() => createCityPanoramaTexture({
-    season: environment.season,
-    isNight,
-    weather: environment.weather,
-  }), [environment.season, environment.weather, isNight]);
+  const panorama = useMemo(() => {
+    const mobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 900px), (max-height: 600px)').matches;
+    return createCityPanoramaTexture({
+      season: environment.season,
+      isNight,
+      weather: environment.weather,
+      width: mobile ? 768 : 1280,
+      height: mobile ? 432 : 720,
+    });
+  }, [environment.season, environment.weather, isNight]);
 
   useEffect(() => () => panorama.dispose(), [panorama]);
 

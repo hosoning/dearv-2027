@@ -75,7 +75,7 @@ export default function Scene({
 
   return (
     <Canvas
-      shadows
+      shadows="basic"
       camera={{ fov: 61, near: 0.08, far: 110 }}
       dpr={[1, 1.5]}
       performance={{ min: 0.55 }}

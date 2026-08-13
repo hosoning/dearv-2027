@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type DisplayMode = 'portrait' | 'landscape';
 type LandscapeSide = 'auto' | 'left' | 'right';
@@ -16,9 +16,9 @@ function readMode(): DisplayMode {
 export default function DisplayModeControls({ onModeChange }: { onModeChange?: (mode: DisplayMode) => void }) {
   const [mode, setMode] = useState<DisplayMode>('portrait');
   const [side, setSide] = useState<LandscapeSide>('auto');
-  const [tilt, setTilt] = useState(0);
+  const tiltRef = useRef(0);
 
-  const apply = useCallback((nextMode: DisplayMode, nextSide: LandscapeSide, nextTilt = tilt) => {
+  const apply = useCallback((nextMode: DisplayMode, nextSide: LandscapeSide, nextTilt = tiltRef.current) => {
     const root = document.documentElement;
     const body = document.body;
     const landscape = nextMode === 'landscape';
@@ -32,7 +32,7 @@ export default function DisplayModeControls({ onModeChange }: { onModeChange?: (
     root.style.setProperty('--app-rotation', `${rotate}deg`);
     body.classList.toggle('immersive-landscape', landscape);
     onModeChange?.(nextMode);
-  }, [onModeChange, tilt]);
+  }, [onModeChange]);
 
   useEffect(() => {
     const savedMode = readMode();
@@ -46,7 +46,7 @@ export default function DisplayModeControls({ onModeChange }: { onModeChange?: (
     if (mode !== 'landscape') return;
     const onOrientation = (event: DeviceOrientationEvent) => {
       if (typeof event.gamma !== 'number' || Math.abs(event.gamma) < 18) return;
-      setTilt(event.gamma);
+      tiltRef.current = event.gamma;
       if (side === 'auto') apply(mode, side, event.gamma);
     };
     const onResize = () => apply(mode, side);
