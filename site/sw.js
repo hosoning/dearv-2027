@@ -1,4 +1,4 @@
-const CACHE_NAME = 'memory-house-v1';
+const CACHE_NAME = 'memory-house-v3';
 // Derived from the worker's own script location so this also works when the
 // app is served from a subpath (e.g. GitHub Pages' /<repo>/ basePath).
 const BASE = new URL('./', self.location).pathname;
