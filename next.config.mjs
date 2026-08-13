@@ -1,9 +1,9 @@
-// GitHub Pages serves this repo at /<repo-name>/, not the domain root, so
-// the deploy workflow sets GITHUB_PAGES=true to prefix every route/asset
-// with a basePath. Other hosts (Vercel, local dev, a custom domain) leave
-// it unset and get root-path URLs as usual.
+// GitHub Pages currently publishes this repository in legacy branch mode.
+// The build workflow writes the exported Next.js app into /site, so assets
+// need to be generated with that subpath included. Other hosts stay at root.
 const isGithubPages = process.env.GITHUB_PAGES === 'true';
-const basePath = isGithubPages ? '/dearv-2027' : '';
+const pagesSubdir = process.env.GITHUB_PAGES_SUBDIR || '';
+const basePath = isGithubPages ? `/dearv-2027${pagesSubdir ? `/${pagesSubdir}` : ''}` : '';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
