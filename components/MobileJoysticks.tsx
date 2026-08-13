@@ -1,22 +1,25 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { controlsState } from '@/lib/controlsState';
 
-const RADIUS = 55;
+const RADIUS = 48;
 
 function Joystick({ side, target }: { side: 'left' | 'right'; target: { x: number; y: number } }) {
   const baseRef = useRef<HTMLDivElement>(null);
+  const visualRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef<HTMLDivElement>(null);
   const activeId = useRef<number | null>(null);
   const origin = useRef({ x: 0, y: 0 });
+  const [active, setActive] = useState(false);
 
   const setStick = (dx: number, dy: number) => {
-    if (stickRef.current) stickRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
+    if (stickRef.current) stickRef.current.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
   };
 
   const reset = () => {
     activeId.current = null;
+    setActive(false);
     target.x = 0;
     target.y = 0;
     setStick(0, 0);
@@ -25,8 +28,13 @@ function Joystick({ side, target }: { side: 'left' | 'right'; target: { x: numbe
   const onPointerDown = (e: React.PointerEvent) => {
     if (activeId.current !== null) return;
     activeId.current = e.pointerId;
+    setActive(true);
     const rect = baseRef.current!.getBoundingClientRect();
-    origin.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    if (visualRef.current) {
+      visualRef.current.style.left = `${e.clientX - rect.left}px`;
+      visualRef.current.style.top = `${e.clientY - rect.top}px`;
+    }
+    origin.current = { x: e.clientX, y: e.clientY };
     (e.target as Element).setPointerCapture(e.pointerId);
   };
 
@@ -56,13 +64,12 @@ function Joystick({ side, target }: { side: 'left' | 'right'; target: { x: numbe
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      className={`fixed bottom-10 ${side === 'left' ? 'left-8' : 'right-8'} h-[120px] w-[120px] touch-none select-none rounded-full border-2 border-white/30 bg-white/10 backdrop-blur-sm`}
+      className={`mobile-touch-zone fixed bottom-0 ${side === 'left' ? 'left-0' : 'right-0'} h-[48vh] w-[44vw] touch-none select-none`}
       style={{ zIndex: 40 }}
     >
-      <div
-        ref={stickRef}
-        className="absolute left-1/2 top-1/2 h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60"
-      />
+      <div ref={visualRef} className={`pointer-events-none absolute h-[96px] w-[96px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 bg-white/[0.035] backdrop-blur-[2px] transition-opacity duration-300 ${active ? 'opacity-100' : 'opacity-0'}`}>
+        <div ref={stickRef} className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/35 bg-white/20 shadow-[0_0_20px_rgba(255,255,255,.12)]" />
+      </div>
     </div>
   );
 }

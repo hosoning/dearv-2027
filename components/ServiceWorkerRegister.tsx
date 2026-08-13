@@ -7,7 +7,7 @@ export default function ServiceWorkerRegister() {
     if ('serviceWorker' in navigator) {
       // Relative path so this also resolves correctly when the app is
       // served from a subpath (e.g. GitHub Pages' /<repo>/ basePath).
-      navigator.serviceWorker.register('sw.js').catch((err) => console.warn('Service worker registration failed', err));
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((registration) => registration.update()).catch((err) => console.warn('Service worker registration failed', err));
     }
   }, []);
   return null;

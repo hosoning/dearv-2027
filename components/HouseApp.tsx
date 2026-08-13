@@ -36,6 +36,8 @@ import MobileJoysticks from './MobileJoysticks';
 import EntranceGate from './EntranceGate';
 import OwnerPanel, { type OwnerMemoryInput } from './OwnerPanel';
 import MemoryDetailPanel from './MemoryDetailPanel';
+import DisplayModeControls from './DisplayModeControls';
+import MemoryVisualCard from './MemoryVisualCard';
 
 const Scene = dynamic(() => import('./Scene'), { ssr: false });
 
@@ -157,7 +159,7 @@ export default function HouseApp() {
   const phaseLabel = t(environment.dayPhase);
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-stone-900 text-white">
+    <div className="app-viewport fixed inset-0 overflow-hidden bg-stone-900 text-white">
       <Scene
         environment={environment}
         onCompanionClick={() => setDialogOpen(true)}
@@ -186,6 +188,7 @@ export default function HouseApp() {
         </div>
 
         <div className="pointer-events-auto flex flex-wrap justify-end gap-2">
+          <DisplayModeControls />
           <LanguageSwitcher language={language} setLanguage={setLanguage} />
           <button type="button" onClick={() => setCollectionOpen(true)} className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs text-white/75 backdrop-blur-xl hover:bg-black/40">{t('archive')}</button>
           <button type="button" onClick={() => setLettersOpen(true)} className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs text-white/75 backdrop-blur-xl hover:bg-black/40">{t('letters')}</button>
@@ -207,7 +210,7 @@ export default function HouseApp() {
       {isMobile && (
         <>
           <MobileJoysticks />
-          <div className="pointer-events-none fixed bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/20 px-3 py-1 text-[10px] text-white/35">{t('mobileHint')}</div>
+          <div className="mobile-control-hint pointer-events-none fixed bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/20 px-3 py-1 text-[10px] text-white/35">{t('mobileHint')}</div>
         </>
       )}
 
@@ -238,7 +241,7 @@ export default function HouseApp() {
                       className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] text-left transition hover:-translate-y-0.5 hover:bg-white/[0.06]"
                     >
                       <div className="aspect-[4/3] bg-black/15">
-                        {object.image_url ? <img src={object.image_url} alt={object.title} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.18em] text-white/20">{t(meta.category)}</div>}
+                        <MemoryVisualCard object={object} compact />
                       </div>
                       <div className="p-3">
                         <p className="truncate text-sm text-white/80">{object.title || t(meta.category)}</p>

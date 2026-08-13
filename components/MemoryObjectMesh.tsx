@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { MemoryObject } from '@/lib/types';
 import { decodeMemoryNote } from '@/lib/memory-system';
+import { GoldCoin, MusicHouse, SilkPajamas, StarCertificate, TieSet } from './KeepsakeShowcase';
 
 function stop(event: ThreeEvent<MouseEvent>, onClick?: () => void) {
   event.stopPropagation();
@@ -23,6 +24,15 @@ export default function MemoryObjectMesh({ object, onClick }: { object: MemoryOb
       document.body.style.cursor = 'default';
     },
   };
+
+  const starterContent = object.id === 'starter-tie-set' ? <TieSet />
+    : object.id === 'starter-gold-520' ? <GoldCoin />
+      : object.id === 'starter-star-certificate' ? <StarCertificate />
+        : object.id === 'starter-music-house' ? <MusicHouse />
+          : object.id === 'starter-silk-pajamas' ? <SilkPajamas /> : null;
+  if (starterContent) {
+    return <group position={position} {...common}>{starterContent}</group>;
+  }
 
   if (meta.visual === 'book') {
     return (

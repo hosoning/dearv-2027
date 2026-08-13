@@ -1,4 +1,4 @@
-import type { MemoryObjectType } from './types';
+import type { MemoryObject, MemoryObjectType } from './types';
 
 export type MemoryCategory = 'letter' | 'notebook' | 'gift' | 'photo' | 'certificate' | 'moment';
 export type DisplayLocation = 'archive' | 'gift-cabinet' | 'desk' | 'wall' | 'wardrobe';
@@ -63,16 +63,67 @@ export function positionForLocation(location: DisplayLocation, existingCount = 0
   const offset = (existingCount % 4) * 0.55;
   switch (location) {
     case 'archive':
-      return [-4.25, 0.75 + (existingCount % 3) * 0.35, -0.9 + offset];
+      return [-6.85, 0.75 + (existingCount % 3) * 0.35, -1.1 + offset];
     case 'gift-cabinet':
-      return [3.75 + (existingCount % 2) * 0.5, 0.65 + (existingCount % 3) * 0.45, -3.75];
+      return [5.7 + (existingCount % 2) * 0.5, 0.65 + (existingCount % 3) * 0.45, -5.65];
     case 'desk':
-      return [3.55, 0.82, 2.85 + (existingCount % 3) * 0.35];
+      return [6.15, 0.82, 4.35 + (existingCount % 3) * 0.35];
     case 'wall':
-      return [4.82, 1.45 + (existingCount % 2) * 0.75, -0.9 + offset];
+      return [7.72, 1.45 + (existingCount % 2) * 0.75, -0.9 + offset];
     case 'wardrobe':
-      return [-3.75 + (existingCount % 2) * 0.6, 0.65, 3.65];
+      return [-5.35 + (existingCount % 2) * 0.6, 0.65, 5.65];
     default:
       return [0, 0, 0];
   }
+}
+
+function starter(
+  roomId: string,
+  id: string,
+  title: string,
+  meta: MemoryMeta,
+  position: [number, number, number]
+): MemoryObject {
+  return {
+    id: `starter-${id}`,
+    room_id: roomId,
+    type: legacyTypeForMemory(meta.category),
+    title,
+    image_url: null,
+    note: encodeMemoryNote(meta),
+    pos_x: position[0],
+    pos_y: position[1],
+    pos_z: position[2],
+    created_at: '2026-08-12T00:00:00.000Z',
+  };
+}
+
+/** The house should feel inhabited on first visit, even before Owner Mode is used. */
+export function createStarterMemories(roomId: string): MemoryObject[] {
+  return [
+    starter(roomId, 'tie-set', '领带收藏盒', {
+      category: 'gift', displayLocation: 'gift-cabinet', interaction: 'open-box', visual: 'box', direction: 'given',
+      description: '领结、长领带、领带夹与胸针被完整收进同一个礼盒。点击展示柜中的盒子，可以重新打开这份收藏。',
+    }, [5.7, 0, -6]),
+    starter(roomId, 'gold-520', '520 金色纪念饼', {
+      category: 'gift', displayLocation: 'gift-cabinet', interaction: 'rotate', visual: 'coin', direction: 'given',
+      description: '一枚写着 520 的金色纪念物。它被放在独立底座上，在暖光下保留金属细节。',
+    }, [5.7, 0, -6]),
+    starter(roomId, 'star-certificate', '星星命名证书', {
+      category: 'certificate', displayLocation: 'gift-cabinet', interaction: 'zoom', visual: 'frame', direction: 'given',
+      description: '关于一颗星星的命名证书。原件与照片之后都可以从 Owner Mode 补充进这份档案。',
+    }, [5.7, 0, -6]),
+    starter(roomId, 'music-house', '圣诞水晶音乐屋', {
+      category: 'gift', displayLocation: 'gift-cabinet', interaction: 'rotate', visual: 'miniature-house', direction: 'given',
+      description: '不是水晶球，而是一座会发光的圣诞小屋。它在收藏柜里拥有自己的柔和灯光。',
+    }, [5.7, 0, -6]),
+    starter(roomId, 'silk-pajamas', '条纹丝质睡衣', {
+      category: 'gift', displayLocation: 'wardrobe', interaction: 'zoom', visual: 'clothing', direction: 'given',
+      description: '深色条纹的长袖长裤丝质睡衣，袖口保留了专属刺绣的位置。',
+    }, [-5.25, 0, 5.72]),
+    starter(roomId, 'first-moment', '这间回忆小屋', {
+      category: 'moment', displayLocation: 'archive', interaction: 'view', visual: 'object', direction: 'shared',
+      description: '这里不是一次性完成的展示页，而是一间会随着礼物、信件和照片继续生长的家。',
+    }, [-6.85, 1.15, 0]),
+  ];
 }

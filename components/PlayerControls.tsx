@@ -7,7 +7,7 @@ import { controlsState } from '@/lib/controlsState';
 import { ROOM_WIDTH, ROOM_DEPTH } from './Room';
 
 const EYE_HEIGHT = 1.6;
-const MOVE_SPEED = 2.45;
+const MOVE_SPEED = 3.15;
 const LOOK_SPEED = 2.2;
 const MARGIN = 0.48;
 const BOUND_X = ROOM_WIDTH / 2 - MARGIN;
@@ -15,15 +15,14 @@ const BOUND_Z = ROOM_DEPTH / 2 - MARGIN;
 const PLAYER_RADIUS = 0.18;
 
 const BLOCKERS = [
-  { minX: -3.75, maxX: -1.45, minZ: -3.85, maxZ: -2.55 },
-  { minX: -3.35, maxX: -1.8, minZ: -4.35, maxZ: -3.5 },
-  { minX: 1.2, maxX: 3.1, minZ: -2.75, maxZ: -0.95 },
-  { minX: 3.05, maxX: 4.3, minZ: -0.2, maxZ: 1.55 },
-  { minX: -4.85, maxX: -4.2, minZ: -2.05, maxZ: 0.85 },
-  { minX: -3.9, maxX: -1.15, minZ: 1.7, maxZ: 4.05 },
-  { minX: 3.15, maxX: 4.8, minZ: 2.5, maxZ: 4.1 },
-  { minX: 2.35, maxX: 4.75, minZ: -4.75, maxZ: -3.75 },
-  { minX: -4.75, maxX: -2.0, minZ: 3.85, maxZ: 4.75 },
+  { minX: -6.35, maxX: -2.95, minZ: -5.45, maxZ: -3.55 },
+  { minX: 2.35, maxX: 5.05, minZ: -4.9, maxZ: -2.55 },
+  { minX: 5.85, maxX: 7.35, minZ: -0.9, maxZ: 2.0 },
+  { minX: -7.45, maxX: -6.45, minZ: -2.4, maxZ: 1.25 },
+  { minX: -5.55, maxX: -2.15, minZ: 3.15, maxZ: 6.05 },
+  { minX: 5.2, maxX: 7.4, minZ: 3.75, maxZ: 5.75 },
+  { minX: 4.25, maxX: 7.5, minZ: -6.55, maxZ: -5.15 },
+  { minX: -6.7, maxX: -3.4, minZ: 5.7, maxZ: 6.6 },
 ];
 
 function blocked(x: number, z: number) {
@@ -44,7 +43,7 @@ export default function PlayerControls() {
   const lastPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    camera.position.set(0, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.25);
+    camera.position.set(0, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.55);
     camera.rotation.order = 'YXZ';
     yaw.current = 0;
     pitch.current = 0;
@@ -133,8 +132,8 @@ export default function PlayerControls() {
       yaw.current -= lookX * LOOK_SPEED * delta;
       pitch.current = THREE.MathUtils.clamp(pitch.current - lookY * LOOK_SPEED * delta, -1.15, 1.15);
     }
-    camera.rotation.y = yaw.current;
-    camera.rotation.x = pitch.current;
+    camera.rotation.y = THREE.MathUtils.damp(camera.rotation.y, yaw.current, 18, delta);
+    camera.rotation.x = THREE.MathUtils.damp(camera.rotation.x, pitch.current, 18, delta);
 
     let moveX = controlsState.joystickMove.x;
     let moveZ = controlsState.joystickMove.y;
@@ -161,8 +160,8 @@ export default function PlayerControls() {
     const targetX = THREE.MathUtils.clamp(currentX + deltaVector.x, -BOUND_X, BOUND_X);
     const targetZ = THREE.MathUtils.clamp(currentZ + deltaVector.z, -BOUND_Z, BOUND_Z);
 
-    if (!blocked(targetX, currentZ)) camera.position.x = targetX;
-    if (!blocked(camera.position.x, targetZ)) camera.position.z = targetZ;
+    if (!blocked(targetX, currentZ)) camera.position.x = THREE.MathUtils.damp(camera.position.x, targetX, 22, delta);
+    if (!blocked(camera.position.x, targetZ)) camera.position.z = THREE.MathUtils.damp(camera.position.z, targetZ, 22, delta);
   });
 
   return null;

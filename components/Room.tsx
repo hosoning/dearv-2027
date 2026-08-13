@@ -5,36 +5,36 @@ import { createFloorTexture, createWallTexture } from '@/lib/textures';
 import type { ResolvedEnvironment } from '@/lib/environment';
 import WindowWorld from './WindowWorld';
 
-export const ROOM_WIDTH = 10;
-export const ROOM_DEPTH = 10;
-export const ROOM_HEIGHT = 4.2;
+export const ROOM_WIDTH = 16;
+export const ROOM_DEPTH = 14;
+export const ROOM_HEIGHT = 4.8;
 
-const PANEL_Z = [-3.8, -1.9, 0, 1.9, 3.8];
+const PANEL_Z = [-5.6, -2.8, 0, 2.8, 5.6];
 
 function CeilingDetails({ isNight }: { isNight: boolean }) {
   const light = isNight ? 1.5 : 0.55;
   return (
     <group>
       <mesh position={[0, ROOM_HEIGHT - 0.12, 0]}>
-        <boxGeometry args={[8.9, 0.16, 8.9]} />
+        <boxGeometry args={[14.7, 0.16, 12.7]} />
         <meshStandardMaterial color="#eee8dc" roughness={0.92} />
       </mesh>
       <mesh position={[0, ROOM_HEIGHT - 0.21, 0]}>
-        <boxGeometry args={[8.38, 0.04, 8.38]} />
+        <boxGeometry args={[14.15, 0.04, 12.15]} />
         <meshStandardMaterial color="#d4c7b3" roughness={0.7} />
       </mesh>
       {[
-        [0, -4.11, 7.9, 0.025],
-        [0, 4.11, 7.9, 0.025],
-        [-4.11, 0, 0.025, 7.9],
-        [4.11, 0, 0.025, 7.9],
+        [0, -5.95, 13.65, 0.025],
+        [0, 5.95, 13.65, 0.025],
+        [-6.95, 0, 0.025, 11.65],
+        [6.95, 0, 0.025, 11.65],
       ].map(([x, z, w, d], index) => (
         <mesh key={index} position={[x, ROOM_HEIGHT - 0.28, z]}>
           <boxGeometry args={[w, 0.022, d]} />
           <meshStandardMaterial color="#f5c990" emissive="#ffbd71" emissiveIntensity={light} toneMapped={false} />
         </mesh>
       ))}
-      {[-3.2, 0, 3.2].flatMap((x) => [-2.8, 0, 2.8].map((z) => [x, z] as const)).map(([x, z]) => (
+      {[-5.4, 0, 5.4].flatMap((x) => [-4.5, 0, 4.5].map((z) => [x, z] as const)).map(([x, z]) => (
         <group key={`${x}-${z}`} position={[x, ROOM_HEIGHT - 0.29, z]}>
           <mesh>
             <cylinderGeometry args={[0.055, 0.055, 0.028, 24]} />
@@ -62,8 +62,8 @@ function WallMoulding() {
           </mesh>
         </group>
       ))}
-      {[-3.6, -2.7, -1.8, -0.9, 0, 0.9, 1.8, 2.7, 3.6].map((z, index) => (
-        <mesh key={`slat-${z}`} position={[4.92, 1.9, z]} rotation={[0, Math.PI / 2, 0]}>
+      {[-5.8, -4.6, -3.4, -2.2, -1, 0.2, 1.4, 2.6, 3.8, 5, 6.2].map((z, index) => (
+        <mesh key={`slat-${z}`} position={[7.92, 2.15, z]} rotation={[0, Math.PI / 2, 0]}>
           <boxGeometry args={[0.075, 3.45, 0.09]} />
           <meshStandardMaterial color={index % 2 ? '#4f372b' : '#654737'} roughness={0.52} />
         </mesh>
@@ -76,7 +76,7 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
   const isNight = environment.dayPhase === 'night';
   const floorTexture = useMemo(() => {
     const texture = createFloorTexture();
-    texture.repeat.set(ROOM_WIDTH / 1.35, ROOM_DEPTH / 1.35);
+    texture.repeat.set(ROOM_WIDTH / 1.7, ROOM_DEPTH / 1.7);
     return texture;
   }, []);
 
@@ -88,9 +88,9 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
 
   const halfW = ROOM_WIDTH / 2;
   const halfD = ROOM_DEPTH / 2;
-  const windowWidth = 7.35;
-  const windowHeight = 3.18;
-  const windowBottom = 0.46;
+  const windowWidth = 12.5;
+  const windowHeight = 3.75;
+  const windowBottom = 0.48;
   const windowCenterY = windowBottom + windowHeight / 2;
   const sideWidth = (ROOM_WIDTH - windowWidth) / 2;
   const topHeight = ROOM_HEIGHT - windowBottom - windowHeight;
@@ -101,8 +101,8 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
         <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
         <meshStandardMaterial map={floorTexture} roughness={0.54} metalness={0.02} />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.008, 0.65]} receiveShadow>
-        <planeGeometry args={[4.9, 4.4]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-3.2, 0.008, -1.2]} receiveShadow>
+        <planeGeometry args={[6.8, 5.5]} />
         <meshStandardMaterial color="#d8ccbb" roughness={0.9} />
       </mesh>
 
@@ -150,22 +150,22 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
         <meshStandardMaterial color="#493b31" metalness={0.56} roughness={0.3} />
       </mesh>
 
-      {[-4.15, 4.15].map((x) => (
-        <group key={x} position={[x, 2.05, -4.77]}>
-          <mesh castShadow>
-            <boxGeometry args={[1.18, 3.52, 0.07]} />
+      {[-6.9, 6.9].map((x) => (
+        <group key={x} position={[x, 2.3, -6.77]}>
+          <mesh>
+            <boxGeometry args={[1.55, 4.02, 0.07]} />
             <meshPhysicalMaterial color="#e7ded0" transmission={0.25} transparent opacity={0.58} roughness={0.7} />
           </mesh>
           {[-0.44, -0.22, 0, 0.22, 0.44].map((offset) => (
             <mesh key={offset} position={[offset, 0, 0.045]}>
-              <boxGeometry args={[0.018, 3.42, 0.018]} />
+              <boxGeometry args={[0.018, 3.9, 0.018]} />
               <meshStandardMaterial color="#d2c4b2" roughness={0.9} />
             </mesh>
           ))}
         </group>
       ))}
-      <mesh position={[0, 3.88, -4.74]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.025, 0.025, 8.5, 16]} />
+      <mesh position={[0, 4.38, -6.74]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.025, 0.025, 14.2, 16]} />
         <meshStandardMaterial color="#b99b6f" metalness={0.7} roughness={0.24} />
       </mesh>
 
@@ -195,12 +195,12 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
         <meshStandardMaterial color="#8b7158" roughness={0.58} />
       </mesh>
 
-      <mesh position={[0, 1.6, 4.84]}>
-        <boxGeometry args={[3.4, 2.75, 0.16]} />
+      <mesh position={[0, 1.8, 6.84]}>
+        <boxGeometry args={[4.6, 3.15, 0.16]} />
         <meshStandardMaterial color="#5a4032" roughness={0.55} />
       </mesh>
-      {[-1.35, -0.9, -0.45, 0, 0.45, 0.9, 1.35].map((x) => (
-        <mesh key={x} position={[x, 1.6, 4.73]}>
+      {[-1.9, -1.28, -0.64, 0, 0.64, 1.28, 1.9].map((x) => (
+        <mesh key={x} position={[x, 1.8, 6.73]}>
           <boxGeometry args={[0.08, 2.42, 0.06]} />
           <meshStandardMaterial color="#b79b73" roughness={0.44} />
         </mesh>

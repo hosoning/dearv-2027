@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Room, PlacedItem, Letter, MemoryObject, MemoryObjectType, ItemCategory } from './types';
+import { createStarterMemories } from './memory-system';
 
 // Data-access layer: reads/writes go to Supabase when a signed-in session
 // exists, otherwise fall back to localStorage (with an in-memory shim for
@@ -174,9 +175,11 @@ export async function listMemoryObjects(roomId: string): Promise<MemoryObject[]>
       .eq('room_id', roomId)
       .order('created_at', { ascending: true });
     if (error) throw error;
-    return (data as MemoryObject[]) ?? [];
+    const objects = (data as MemoryObject[]) ?? [];
+    return [...createStarterMemories(roomId), ...objects.filter((item) => !item.id.startsWith('starter-'))];
   }
-  return readLocal<MemoryObject[]>(`memory:${roomId}`, []);
+  const objects = readLocal<MemoryObject[]>(`memory:${roomId}`, []);
+  return [...createStarterMemories(roomId), ...objects.filter((item) => !item.id.startsWith('starter-'))];
 }
 
 export async function addMemoryObject(

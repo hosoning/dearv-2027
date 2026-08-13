@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { MemoryObject } from '@/lib/types';
 import { decodeMemoryNote } from '@/lib/memory-system';
+import MemoryVisualCard from './MemoryVisualCard';
 
 function NotebookViewer({ pages, t }: { pages: string[]; t: (key: string) => string }) {
   const safePages = pages.length ? pages : [''];
@@ -75,13 +76,7 @@ export default function MemoryDetailPanel({ object, onClose, t }: { object: Memo
         ) : (
           <div className="mt-6 grid gap-5 sm:grid-cols-[minmax(0,1.1fr)_minmax(220px,.9fr)]">
             <div className="min-h-64 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035]">
-              {object.image_url ? (
-                <img src={object.image_url} alt={object.title || t(meta.category)} className="h-full min-h-64 w-full object-contain" />
-              ) : (
-                <div className="flex min-h-64 items-center justify-center p-8 text-center text-sm text-white/25">
-                  {t(meta.visual === 'miniature-house' ? 'miniatureHouse' : meta.visual)}
-                </div>
-              )}
+              <MemoryVisualCard object={object} />
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
               <div className="space-y-4 text-sm">

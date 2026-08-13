@@ -75,9 +75,9 @@ export default function Scene({
   return (
     <Canvas
       shadows
-      camera={{ fov: 57, near: 0.05, far: 90 }}
-      dpr={[1, 1.75]}
-      gl={{ antialias: true, alpha: false }}
+      camera={{ fov: 62, near: 0.08, far: 110 }}
+      dpr={[1, 1.5]}
+      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = isNight ? 0.94 : 1.08;
@@ -86,38 +86,37 @@ export default function Scene({
     >
       <Suspense fallback={null}>
         <color attach="background" args={[isNight ? '#11131a' : '#d8d1c7']} />
-        <fog attach="fog" args={[isNight ? '#191820' : '#d8d0c5', 14, 38]} />
+        <fog attach="fog" args={[isNight ? '#191820' : '#d8d0c5', 20, 52]} />
         <hemisphereLight args={[isNight ? '#7183a3' : '#fff2df', '#5b4738', isNight ? 0.35 : 0.7]} />
         <ambientLight intensity={isNight ? 0.19 : 0.36} color={isNight ? '#a9b7d2' : '#fff0dc'} />
-        <directionalLight position={isNight ? [-4, 5.5, -2] : [4.8, 6.8, -4.6]} intensity={isNight ? 0.46 : 1.62} color={isNight ? '#b9c7e8' : '#ffd9a0'} castShadow shadow-mapSize={[2048, 2048]} shadow-camera-left={-8} shadow-camera-right={8} shadow-camera-top={8} shadow-camera-bottom={-8} shadow-camera-far={24} shadow-bias={-0.0003} />
-        <pointLight position={[-1.35, 3.35, -2.4]} intensity={isNight ? 0.9 : 0.24} color="#ffcb8a" distance={7.5} />
-        <pointLight position={[3.55, 3.05, 2.7]} intensity={isNight ? 0.58 : 0.16} color="#ffe0b3" distance={6} />
-        <pointLight position={[-3.7, 2.8, 3.2]} intensity={isNight ? 0.48 : 0.12} color="#ffd7a1" distance={5} />
+        <directionalLight position={isNight ? [-6, 7, -3] : [7.8, 9, -6.8]} intensity={isNight ? 0.46 : 1.62} color={isNight ? '#b9c7e8' : '#ffd9a0'} castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-10} shadow-camera-right={10} shadow-camera-top={10} shadow-camera-bottom={-10} shadow-camera-far={30} shadow-bias={-0.0003} />
+        <pointLight position={[-3.3, 3.65, -3.9]} intensity={isNight ? 0.9 : 0.2} color="#ffcb8a" distance={8.5} />
+        <pointLight position={[5.5, 3.25, 3.7]} intensity={isNight ? 0.58 : 0.14} color="#ffe0b3" distance={7} />
 
         <Room environment={environment} />
 
-        <Rug position={[-2.55, 0.012, -3.25]} size={[3.25, 2.5]} color="#c6b49f" />
-        <Sofa position={[-2.55, 0, -3.05]} rotationY={Math.PI} />
-        <CoffeeTable position={[-2.55, 0, -3.82]} />
-        <FloorLamp position={[-1.18, 0, -3.45]} />
-        <TVConsole position={[-4.58, 0, -3.15]} rotationY={Math.PI / 2} />
-        <DiningTable position={[2.15, 0, -1.85]} />
-        <KitchenIsland position={[3.65, 0, 0.65]} rotationY={Math.PI / 2} />
-        <group onClick={interactive(onArchiveClick)}><Bookshelf position={[-4.55, 0, -0.65]} rotationY={Math.PI / 2} /></group>
-        <Bed position={[-2.55, 0, 2.55]} />
+        <Rug position={[-4.65, 0.012, -4.45]} size={[5.3, 3.8]} color="#b9aa98" />
+        <group position={[-4.3, 0, -3.75]} scale={1.28}><Sofa rotationY={Math.PI} /></group>
+        <group position={[-4.1, 0, -4.85]} scale={1.18}><CoffeeTable /></group>
+        <FloorLamp position={[-2.5, 0, -4.85]} />
+        <TVConsole position={[-7.28, 0, -4.45]} rotationY={Math.PI / 2} />
+        <group position={[3.25, 0, -3.35]} scale={1.12}><DiningTable /></group>
+        <group position={[5.55, 0, 0.55]} scale={1.16}><KitchenIsland rotationY={Math.PI / 2} /></group>
+        <group onClick={interactive(onArchiveClick)}><Bookshelf position={[-7.28, 0, -0.75]} rotationY={Math.PI / 2} /></group>
+        <group position={[-3.7, 0, 4.15]} scale={1.25}><Bed /></group>
         <group onClick={interactive(onLettersClick)}>
-          <Desk position={[3.9, 0, 3.15]} rotationY={-Math.PI / 2} />
+          <group position={[5.55, 0, 4.1]} scale={1.12}><Desk rotationY={-Math.PI / 2} /></group>
           <DeskKeepsakes />
         </group>
         <KeepsakeCabinet onClick={onGiftsClick} />
         <PajamaWardrobe onClick={onGiftsClick} />
-        <Planter position={[4.42, 0, -2.65]} scale={0.88} />
-        <Planter position={[-4.25, 0, 3.35]} scale={0.78} />
-        <WallArt position={[4.93, 1.82, -1.05]} rotationY={-Math.PI / 2} size={[0.72, 0.92]} color="#6e8276" />
-        <WallArt position={[4.93, 1.62, 1.62]} rotationY={-Math.PI / 2} size={[0.58, 0.62]} color="#b98964" />
+        <Planter position={[7.28, 0, -3.5]} scale={1.05} />
+        <Planter position={[-6.85, 0, 4.35]} scale={0.92} />
+        <WallArt position={[7.93, 2.1, -1.45]} rotationY={-Math.PI / 2} size={[0.9, 1.18]} color="#6e8276" />
+        <WallArt position={[7.93, 1.85, 2.05]} rotationY={-Math.PI / 2} size={[0.72, 0.82]} color="#b98964" />
         <Character position={[0.25, 0, -0.25]} onClick={onCompanionClick} />
         {children}
-        <ContactShadows position={[0, 0.015, 0]} opacity={isNight ? 0.34 : 0.24} scale={18} blur={2.7} far={5.5} resolution={512} />
+        <ContactShadows position={[0, 0.015, 0]} opacity={isNight ? 0.32 : 0.22} scale={25} blur={3.1} far={6} resolution={256} frames={1} />
         <PlayerControls />
       </Suspense>
     </Canvas>
