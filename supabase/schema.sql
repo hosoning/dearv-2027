@@ -75,6 +75,11 @@ alter table placed_items enable row level security;
 alter table letters enable row level security;
 alter table memory_objects enable row level security;
 
+-- Data API grants are explicit because automatic exposure of new tables is
+-- disabled for the private project. RLS still scopes every request by owner.
+revoke all on table rooms, placed_items, letters, memory_objects from anon;
+grant select, insert, update, delete on table rooms, placed_items, letters, memory_objects to authenticated;
+
 create policy "rooms are owned by their user" on rooms
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
@@ -105,18 +110,39 @@ create policy "memory_objects follow room ownership" on memory_objects
 -- ─────────────────────────────────────────────────────────
 -- Storage bucket for letter/memory-object attachments (images)
 -- ─────────────────────────────────────────────────────────
-insert into storage.buckets (id, name, public)
-values ('memory-house', 'memory-house', true)
-on conflict (id) do nothing;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'dearv-private-assets',
+  'dearv-private-assets',
+  false,
+  52428800,
+  array[
+    'image/png', 'image/jpeg', 'image/webp',
+    'model/gltf-binary', 'model/gltf+json',
+    'audio/mpeg', 'audio/ogg', 'audio/wav',
+    'application/pdf', 'application/octet-stream'
+  ]
+)
+on conflict (id) do update set public = false;
 
-create policy "authenticated users can upload to their own folder"
-  on storage.objects for insert
-  with check (bucket_id = 'memory-house' and auth.uid()::text = (storage.foldername(name))[1]);
+drop policy if exists "owner reads dearv web assets" on storage.objects;
+drop policy if exists "owner creates dearv web assets" on storage.objects;
+drop policy if exists "owner updates dearv web assets" on storage.objects;
+drop policy if exists "owner deletes dearv web assets" on storage.objects;
 
-create policy "anyone can read memory-house attachments"
-  on storage.objects for select
-  using (bucket_id = 'memory-house');
+create policy "owner reads dearv web assets"
+  on storage.objects for select to authenticated
+  using (bucket_id = 'dearv-private-assets' and auth.uid()::text = (storage.foldername(name))[1]);
 
-create policy "owners can delete their own attachments"
-  on storage.objects for delete
-  using (bucket_id = 'memory-house' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "owner creates dearv web assets"
+  on storage.objects for insert to authenticated
+  with check (bucket_id = 'dearv-private-assets' and auth.uid()::text = (storage.foldername(name))[1]);
+
+create policy "owner updates dearv web assets"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'dearv-private-assets' and auth.uid()::text = (storage.foldername(name))[1])
+  with check (bucket_id = 'dearv-private-assets' and auth.uid()::text = (storage.foldername(name))[1]);
+
+create policy "owner deletes dearv web assets"
+  on storage.objects for delete to authenticated
+  using (bucket_id = 'dearv-private-assets' and auth.uid()::text = (storage.foldername(name))[1]);

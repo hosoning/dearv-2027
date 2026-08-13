@@ -28,7 +28,7 @@ components/
   CatalogPanel.tsx        目錄 UI：放置家具/記憶物件
   LetterPanel.tsx         信件 UI：寫信、翻閱信件列表
   MemoryObjectEditor.tsx  記憶物件（星星瓶/照片框/禮物盒）標題、筆記、照片編輯
-  AuthGate.tsx            Supabase Magic Link 登入（未設定 Supabase 時直接跳過，走本機模式）
+  AuthGate.tsx            進門後的 Supabase Email/密碼登入（未設定時可走本機模式）
   HouseApp.tsx            上層狀態容器：載入資料、串接所有 UI 與 3D 場景
   furniture/*.tsx          已建模家具（沙發、餐桌、廚房中島、書架、床、書桌）
 lib/
@@ -77,7 +77,7 @@ GitHub Pages 上，不需要另外申請 Vercel 之類的服務。專案已經�
 
 1. 建立 Supabase 專案（或用 `supabase start` 起本機實例）。
 2. 在 SQL Editor 執行 `supabase/schema.sql`，會建立四張表、RLS 政策，以及 `memory-house` Storage bucket。
-3. 於 Supabase Dashboard → Authentication，確認 Email OTP（Magic Link）已啟用。
+3. 於 Supabase Dashboard → Authentication，確認 Email 登入已啟用。
 4. 複製 `.env.example` 為 `.env.local`，填入：
    ```
    NEXT_PUBLIC_SUPABASE_URL=...

@@ -38,6 +38,7 @@ import OwnerPanel, { type OwnerMemoryInput } from './OwnerPanel';
 import MemoryDetailPanel from './MemoryDetailPanel';
 import DisplayModeControls from './DisplayModeControls';
 import MemoryVisualCard from './MemoryVisualCard';
+import AuthGate from './AuthGate';
 
 const Scene = dynamic(() => import('./Scene'), { ssr: false });
 
@@ -58,10 +59,8 @@ function LanguageSwitcher({ language, setLanguage }: { language: Language; setLa
   );
 }
 
-export default function HouseApp() {
+function CloudHouse({ language, setLanguage, t }: ReturnType<typeof useLanguage>) {
   const isMobile = useIsMobile();
-  const { language, setLanguage, t } = useLanguage();
-  const [entered, setEntered] = useState(false);
   const [room, setRoom] = useState<Room | null>(null);
   const [placedItems, setPlacedItems] = useState<PlacedItem[]>([]);
   const [letters, setLetters] = useState<Letter[]>([]);
@@ -105,8 +104,8 @@ export default function HouseApp() {
   const handleCreateLetter = useCallback(
     async (input: { title: string; content: string; mood_tag: string | null; attachment_url: string | null }) => {
       if (!room) return;
-      const letter = await addLetter(room.id, input);
-      setLetters((current) => [letter, ...current]);
+      await addLetter(room.id, input);
+      setLetters(await listLetters(room.id));
     },
     [room]
   );
@@ -127,7 +126,7 @@ export default function HouseApp() {
         description: input.description || undefined,
         pages: input.pages.length ? input.pages : undefined,
       });
-      const object = await addMemoryObject(room.id, {
+      await addMemoryObject(room.id, {
         type: legacyTypeForMemory(input.category),
         title: input.title,
         image_url: imageUrl,
@@ -136,14 +135,11 @@ export default function HouseApp() {
         pos_y: y,
         pos_z: z,
       });
-      setMemoryObjects((current) => [...current, object]);
+      const refreshed = await listMemoryObjects(room.id);
+      setMemoryObjects(refreshed);
     },
     [room, memoryObjects]
   );
-
-  if (!entered) {
-    return <EntranceGate language={language} setLanguage={setLanguage} t={t} onEnter={() => setEntered(true)} />;
-  }
 
   if (!room) {
     return <div className="fixed inset-0 flex items-center justify-center bg-[#171513] text-sm text-white/55">{t('loading')}</div>;
@@ -268,5 +264,27 @@ export default function HouseApp() {
       />
       <DialogBox open={dialogOpen} onClose={() => setDialogOpen(false)} />
     </div>
+  );
+}
+
+export default function HouseApp() {
+  const languageState = useLanguage();
+  const [entered, setEntered] = useState(false);
+
+  if (!entered) {
+    return (
+      <EntranceGate
+        language={languageState.language}
+        setLanguage={languageState.setLanguage}
+        t={languageState.t}
+        onEnter={() => setEntered(true)}
+      />
+    );
+  }
+
+  return (
+    <AuthGate>
+      <CloudHouse {...languageState} />
+    </AuthGate>
   );
 }

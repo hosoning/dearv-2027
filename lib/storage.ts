@@ -43,6 +43,23 @@ async function getSupabaseUser() {
   return data.user ?? null;
 }
 
+function storagePathFromValue(value: string): string | null {
+  if (!value || value.startsWith('data:') || value.startsWith('blob:')) return null;
+  const marker = 'dearv-private-assets/';
+  const index = value.indexOf(marker);
+  if (index >= 0) return decodeURIComponent(value.slice(index + marker.length));
+  return value.startsWith('private://') ? value.slice('private://'.length) : null;
+}
+
+async function resolvePrivateAsset(value: string | null): Promise<string | null> {
+  if (!value || !supabase) return value;
+  const path = storagePathFromValue(value);
+  if (!path) return value;
+  const { data, error } = await supabase.storage.from('dearv-private-assets').createSignedUrl(path, 60 * 60);
+  if (error) return null;
+  return data.signedUrl;
+}
+
 // ─────────────────────────────────────────────────────────
 // Room
 // ─────────────────────────────────────────────────────────
@@ -140,7 +157,10 @@ export async function listLetters(roomId: string): Promise<Letter[]> {
       .eq('room_id', roomId)
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return (data as Letter[]) ?? [];
+    return Promise.all(((data as Letter[]) ?? []).map(async (letter) => ({
+      ...letter,
+      attachment_url: await resolvePrivateAsset(letter.attachment_url),
+    })));
   }
   return readLocal<Letter[]>(`letters:${roomId}`, []);
 }
@@ -175,7 +195,10 @@ export async function listMemoryObjects(roomId: string): Promise<MemoryObject[]>
       .eq('room_id', roomId)
       .order('created_at', { ascending: true });
     if (error) throw error;
-    const objects = (data as MemoryObject[]) ?? [];
+    const objects = await Promise.all(((data as MemoryObject[]) ?? []).map(async (item) => ({
+      ...item,
+      image_url: await resolvePrivateAsset(item.image_url),
+    })));
     return [...createStarterMemories(roomId), ...objects.filter((item) => !item.id.startsWith('starter-'))];
   }
   const objects = readLocal<MemoryObject[]>(`memory:${roomId}`, []);
@@ -232,10 +255,9 @@ export async function uploadAttachment(file: File): Promise<string> {
   const user = await getSupabaseUser();
   if (supabase && user) {
     const path = `${user.id}/${uuid()}-${file.name}`;
-    const { error } = await supabase.storage.from('memory-house').upload(path, file);
+    const { error } = await supabase.storage.from('dearv-private-assets').upload(path, file, { upsert: false });
     if (error) throw error;
-    const { data } = supabase.storage.from('memory-house').getPublicUrl(path);
-    return data.publicUrl;
+    return `private://${path}`;
   }
   // Local fallback: inline as a data URL so it survives in localStorage.
   return new Promise((resolve, reject) => {
