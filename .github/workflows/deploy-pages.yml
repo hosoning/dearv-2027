@@ -1,48 +1,52 @@
-name: Deploy to GitHub Pages
+name: Build Pages site
 
 on:
   push:
     branches:
-      - main
       - claude/memory-house-3d-handoff-a0d0e1
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: legacy-pages-build
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-site:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: claude/memory-house-3d-handoff-a0d0e1
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - name: Build exported app for /site
+        run: npm run build
         env:
           GITHUB_PAGES: 'true'
+          GITHUB_PAGES_SUBDIR: 'site'
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_DOOR_CODE: ${{ secrets.NEXT_PUBLIC_DOOR_CODE }}
           NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish exported files into legacy Pages source
+        run: |
+          rm -rf site
+          mkdir -p site
+          cp -R out/. site/
+          touch .nojekyll
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site .nojekyll
+          if git diff --cached --quiet; then
+            echo "No generated site changes"
+          else
+            git commit -m "Publish generated Pages site"
+            git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
+          fi
