@@ -24,7 +24,7 @@ function seededPoints(count: number, width: number, height: number, depth: numbe
 function WeatherParticles({ weather }: { weather: ResolvedEnvironment['weather'] }) {
   const ref = useRef<THREE.Points>(null);
   const count = weather === 'rain' ? 260 : weather === 'snow' ? 170 : 0;
-  const positions = useMemo(() => seededPoints(Math.max(count, 1), 9.6, 6.6, 4.5), [count]);
+  const positions = useMemo(() => seededPoints(Math.max(count, 1), 26, 7.2, 5.2), [count]);
 
   useFrame((state, delta) => {
     if (!ref.current || count === 0) return;
@@ -110,18 +110,18 @@ export default function WindowWorld({ environment }: { environment: ResolvedEnvi
   const ground = environment.season === 'winter' ? '#d8d9d7' : environment.season === 'autumn' ? '#74533b' : '#445f45';
 
   return (
-    <group position={[0, 0.12, -5.72]}>
+    <group position={[0, 0.12, -10.72]}>
       <mesh position={[0, 2.35, -5.1]}>
-        <planeGeometry args={[18, 8.5]} />
+        <planeGeometry args={[36, 9.2]} />
         <meshBasicMaterial map={panorama} toneMapped={false} />
       </mesh>
 
       <mesh position={[0, -0.3, -1.95]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[18, 7.2]} />
+        <planeGeometry args={[36, 7.2]} />
         <meshStandardMaterial color={ground} roughness={1} />
       </mesh>
       <mesh position={[0, -0.21, -1.32]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[7.5, 1.75]} />
+        <planeGeometry args={[13.5, 1.75]} />
         <meshStandardMaterial color={environment.season === 'winter' ? '#c9c9c5' : '#9c907e'} roughness={0.96} />
       </mesh>
 
@@ -129,6 +129,8 @@ export default function WindowWorld({ environment }: { environment: ResolvedEnvi
       <SeasonalTree x={2.02} z={-1.72} scale={1.0} season={environment.season} />
       <SeasonalTree x={-4.9} z={-2.15} scale={0.72} season={environment.season} />
       <SeasonalTree x={4.82} z={-2.22} scale={0.74} season={environment.season} />
+      <SeasonalTree x={-9.1} z={-2.55} scale={0.68} season={environment.season} />
+      <SeasonalTree x={9.25} z={-2.5} scale={0.7} season={environment.season} />
 
       {isNight && (
         <>

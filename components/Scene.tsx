@@ -1,17 +1,14 @@
 'use client';
 
 import { Suspense, type ReactNode } from 'react';
-import { Canvas, type ThreeEvent } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { AdaptiveDpr, ContactShadows, Preload } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ResolvedEnvironment } from '@/lib/environment';
 import Room from './Room';
 import Sofa from './furniture/Sofa';
 import DiningTable from './furniture/DiningTable';
-import KitchenIsland from './furniture/KitchenIsland';
-import Bookshelf from './furniture/Bookshelf';
 import Bed from './furniture/Bed';
-import Desk from './furniture/Desk';
 import CoffeeTable from './furniture/CoffeeTable';
 import FloorLamp from './furniture/FloorLamp';
 import TVConsole from './furniture/TVConsole';
@@ -21,13 +18,6 @@ import Character from './Character';
 import PlayerControls from './PlayerControls';
 import ArchitecturalDetails from './ArchitecturalDetails';
 import { DeskKeepsakes, KeepsakeCabinet, PajamaWardrobe } from './KeepsakeShowcase';
-
-function interactive(handler?: () => void) {
-  return (event: ThreeEvent<MouseEvent>) => {
-    event.stopPropagation();
-    handler?.();
-  };
-}
 
 function Planter({ position, scale = 1 }: { position: [number, number, number]; scale?: number }) {
   return (
@@ -76,7 +66,7 @@ export default function Scene({
   return (
     <Canvas
       shadows="basic"
-      camera={{ fov: 61, near: 0.08, far: 110 }}
+      camera={{ fov: 60, near: 0.08, far: 135 }}
       dpr={[1, 1.5]}
       performance={{ min: 0.55 }}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
@@ -88,38 +78,41 @@ export default function Scene({
     >
       <Suspense fallback={null}>
         <color attach="background" args={[isNight ? '#11131a' : '#d8d1c7']} />
-        <fog attach="fog" args={[isNight ? '#191820' : '#d8d0c5', 20, 52]} />
+        <fog attach="fog" args={[isNight ? '#191820' : '#d8d0c5', 32, 75]} />
         <hemisphereLight args={[isNight ? '#7183a3' : '#fff2df', '#5b4738', isNight ? 0.35 : 0.7]} />
         <ambientLight intensity={isNight ? 0.19 : 0.36} color={isNight ? '#a9b7d2' : '#fff0dc'} />
-        <directionalLight position={isNight ? [-6, 7, -3] : [7.8, 9, -6.8]} intensity={isNight ? 0.46 : 1.62} color={isNight ? '#b9c7e8' : '#ffd9a0'} castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-10} shadow-camera-right={10} shadow-camera-top={10} shadow-camera-bottom={-10} shadow-camera-far={30} shadow-bias={-0.0003} />
-        <pointLight position={[-3.3, 3.65, -3.9]} intensity={isNight ? 0.9 : 0.2} color="#ffcb8a" distance={8.5} />
-        <pointLight position={[5.5, 3.25, 3.7]} intensity={isNight ? 0.58 : 0.14} color="#ffe0b3" distance={7} />
+        <directionalLight position={isNight ? [-10, 11, -7] : [12, 14, -11]} intensity={isNight ? 0.46 : 1.62} color={isNight ? '#b9c7e8' : '#ffd9a0'} castShadow shadow-mapSize={[1024, 1024]} shadow-camera-left={-18} shadow-camera-right={18} shadow-camera-top={18} shadow-camera-bottom={-18} shadow-camera-far={42} shadow-bias={-0.0003} />
+        <pointLight position={[2.5, 4.15, -4.2]} intensity={isNight ? 0.86 : 0.18} color="#ffcb8a" distance={12} />
+        <pointLight position={[9.8, 3.8, 7.0]} intensity={isNight ? 0.52 : 0.11} color="#ffe0b3" distance={10} />
+        <pointLight position={[-8.5, 3.6, 0]} intensity={isNight ? 0.42 : 0.08} color="#ffd5a1" distance={9} />
 
         <Room environment={environment} />
-        <ArchitecturalDetails />
+        <ArchitecturalDetails onArchiveClick={onArchiveClick} onLettersClick={onLettersClick} />
 
-        <Rug position={[-4.65, 0.012, -4.45]} size={[5.3, 3.8]} color="#b9aa98" />
-        <group position={[-4.3, 0, -3.75]} scale={1.28}><Sofa rotationY={Math.PI} /></group>
-        <group position={[-4.1, 0, -4.85]} scale={1.18}><CoffeeTable /></group>
-        <FloorLamp position={[-2.5, 0, -4.85]} />
-        <TVConsole position={[-7.28, 0, -4.45]} rotationY={Math.PI / 2} />
-        <group position={[3.25, 0, -3.35]} scale={1.12}><DiningTable /></group>
-        <group position={[5.55, 0, 0.55]} scale={1.16}><KitchenIsland rotationY={Math.PI / 2} /></group>
-        <group onClick={interactive(onArchiveClick)}><Bookshelf position={[-7.28, 0, -0.75]} rotationY={Math.PI / 2} /></group>
-        <group position={[-3.7, 0, 4.15]} scale={1.25}><Bed /></group>
-        <group onClick={interactive(onLettersClick)}>
-          <group position={[5.55, 0, 4.1]} scale={1.12}><Desk rotationY={-Math.PI / 2} /></group>
-          <DeskKeepsakes />
-        </group>
+        <Rug position={[2.4, 0.012, -5.0]} size={[9.2, 6.7]} color="#b5a796" />
+        <group position={[2.4, 0, -2.6]} scale={1.72}><Sofa rotationY={Math.PI} /></group>
+        <group position={[2.4, 0, -5.05]} scale={1.5}><CoffeeTable /></group>
+        <FloorLamp position={[-1.35, 0, -3.55]} />
+        <TVConsole position={[2.4, 0, -8.65]} />
+
+        <Rug position={[-1.0, 0.011, 1.55]} size={[6.7, 4.45]} color="#c6b8a6" />
+        <group position={[-1.0, 0, 1.65]} scale={1.48}><DiningTable rotationY={Math.PI / 2} /></group>
+
+        <Rug position={[9.8, 0.01, 7.3]} size={[10.0, 6.65]} color="#978b7d" />
+        <Rug position={[-8.55, 0.011, -0.15]} size={[7.35, 6.6]} color="#c1b09e" />
+        <group position={[-8.45, 0, 0.55]} scale={1.56}><Bed rotationY={Math.PI} /></group>
+        <DeskKeepsakes />
+
         <KeepsakeCabinet onClick={onGiftsClick} />
         <PajamaWardrobe onClick={onGiftsClick} />
-        <Planter position={[7.28, 0, -3.5]} scale={1.05} />
-        <Planter position={[-6.85, 0, 4.35]} scale={0.92} />
-        <WallArt position={[7.93, 2.1, -1.45]} rotationY={-Math.PI / 2} size={[0.9, 1.18]} color="#6e8276" />
-        <WallArt position={[7.93, 1.85, 2.05]} rotationY={-Math.PI / 2} size={[0.72, 0.82]} color="#b98964" />
-        <Character position={[0.25, 0, -0.25]} onClick={onCompanionClick} />
+        <Planter position={[13.7, 0, -9.9]} scale={1.35} />
+        <Planter position={[-3.85, 0, -10.2]} scale={1.18} />
+        <Planter position={[4.8, 0, 4.8]} scale={0.92} />
+        <WallArt position={[14.88, 2.35, 1.45]} rotationY={-Math.PI / 2} size={[1.3, 1.7]} color="#6e8276" />
+        <WallArt position={[-14.88, 2.25, 5.1]} rotationY={Math.PI / 2} size={[1.15, 1.42]} color="#b98964" />
+        <Character position={[2.1, 0, 0.15]} onClick={onCompanionClick} />
         {children}
-        <ContactShadows position={[0, 0.015, 0]} opacity={isNight ? 0.32 : 0.22} scale={25} blur={3.1} far={6} resolution={256} frames={1} />
+        <ContactShadows position={[0, 0.015, 0]} opacity={isNight ? 0.3 : 0.2} scale={42} blur={3.2} far={7} resolution={256} frames={1} />
         <AdaptiveDpr pixelated={false} />
         <Preload all />
         <PlayerControls />

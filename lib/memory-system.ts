@@ -63,15 +63,15 @@ export function positionForLocation(location: DisplayLocation, existingCount = 0
   const offset = (existingCount % 4) * 0.55;
   switch (location) {
     case 'archive':
-      return [-6.85, 0.75 + (existingCount % 3) * 0.35, -1.1 + offset];
+      return [5.35 + offset, 1.2 + (existingCount % 3) * 0.58, 11.0];
     case 'gift-cabinet':
-      return [5.7 + (existingCount % 2) * 0.5, 0.65 + (existingCount % 3) * 0.45, -5.65];
+      return [13.55, 0.7 + (existingCount % 3) * 0.58, -2.8 + offset];
     case 'desk':
-      return [6.15, 0.82, 4.35 + (existingCount % 3) * 0.35];
+      return [9.1 + (existingCount % 3) * 0.48, 0.93, 7.2];
     case 'wall':
-      return [7.72, 1.45 + (existingCount % 2) * 0.75, -0.9 + offset];
+      return [14.65, 1.5 + (existingCount % 2) * 0.82, -0.2 + offset];
     case 'wardrobe':
-      return [-5.35 + (existingCount % 2) * 0.6, 0.65, 5.65];
+      return [-13.5, 0.78 + (existingCount % 2) * 0.52, 0.5 + offset];
     default:
       return [0, 0, 0];
   }
@@ -104,26 +104,26 @@ export function createStarterMemories(roomId: string): MemoryObject[] {
     starter(roomId, 'tie-set', '领带收藏盒', {
       category: 'gift', displayLocation: 'gift-cabinet', interaction: 'open-box', visual: 'box', direction: 'given',
       description: '领结、长领带、领带夹与胸针被完整收进同一个礼盒。点击展示柜中的盒子，可以重新打开这份收藏。',
-    }, [5.7, 0, -6]),
+    }, [13.55, 0, -2.4]),
     starter(roomId, 'gold-520', '520 金色纪念饼', {
       category: 'gift', displayLocation: 'gift-cabinet', interaction: 'rotate', visual: 'coin', direction: 'given',
       description: '一枚写着 520 的金色纪念物。它被放在独立底座上，在暖光下保留金属细节。',
-    }, [5.7, 0, -6]),
+    }, [13.55, 0, -2.4]),
     starter(roomId, 'star-certificate', '星星命名证书', {
       category: 'certificate', displayLocation: 'gift-cabinet', interaction: 'zoom', visual: 'frame', direction: 'given',
       description: '关于一颗星星的命名证书。原件与照片之后都可以从 Owner Mode 补充进这份档案。',
-    }, [5.7, 0, -6]),
+    }, [13.55, 0, -2.4]),
     starter(roomId, 'music-house', '圣诞水晶音乐屋', {
       category: 'gift', displayLocation: 'gift-cabinet', interaction: 'rotate', visual: 'miniature-house', direction: 'given',
       description: '不是水晶球，而是一座会发光的圣诞小屋。它在收藏柜里拥有自己的柔和灯光。',
-    }, [5.7, 0, -6]),
+    }, [13.55, 0, -2.4]),
     starter(roomId, 'silk-pajamas', '条纹丝质睡衣', {
       category: 'gift', displayLocation: 'wardrobe', interaction: 'zoom', visual: 'clothing', direction: 'given',
       description: '深色条纹的长袖长裤丝质睡衣，袖口保留了专属刺绣的位置。',
-    }, [-5.25, 0, 5.72]),
+    }, [-13.55, 0, 1.3]),
     starter(roomId, 'first-moment', '这间回忆小屋', {
       category: 'moment', displayLocation: 'archive', interaction: 'view', visual: 'object', direction: 'shared',
       description: '这里不是一次性完成的展示页，而是一间会随着礼物、信件和照片继续生长的家。',
-    }, [-6.85, 1.15, 0]),
+    }, [5.35, 1.2, 11.0]),
   ];
 }

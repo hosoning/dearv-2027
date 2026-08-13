@@ -7,7 +7,7 @@ import { controlsState } from '@/lib/controlsState';
 import { ROOM_WIDTH, ROOM_DEPTH } from './Room';
 
 const EYE_HEIGHT = 1.6;
-const MOVE_SPEED = 3.25;
+const MOVE_SPEED = 3.8;
 const LOOK_SPEED = 2.05;
 const MARGIN = 0.48;
 const BOUND_X = ROOM_WIDTH / 2 - MARGIN;
@@ -15,16 +15,27 @@ const BOUND_Z = ROOM_DEPTH / 2 - MARGIN;
 const PLAYER_RADIUS = 0.18;
 
 const BLOCKERS = [
-  { minX: -6.35, maxX: -2.95, minZ: -5.45, maxZ: -3.55 },
-  { minX: 2.35, maxX: 5.05, minZ: -4.9, maxZ: -2.55 },
-  { minX: 5.85, maxX: 7.35, minZ: -0.9, maxZ: 2.0 },
-  { minX: -7.45, maxX: -6.45, minZ: -2.4, maxZ: 1.25 },
-  { minX: -5.55, maxX: -2.15, minZ: 3.15, maxZ: 6.05 },
-  { minX: 5.2, maxX: 7.4, minZ: 3.75, maxZ: 5.75 },
-  { minX: 4.25, maxX: 7.5, minZ: -6.55, maxZ: -5.15 },
-  { minX: -6.7, maxX: -3.4, minZ: 5.7, maxZ: 6.6 },
-  { minX: -1.46, maxX: -1.08, minZ: 2.18, maxZ: 4.72 },
-  { minX: -5.95, maxX: -2.62, minZ: -2.83, maxZ: -2.28 },
+  // Master-suite wall, split around its two doors.
+  { minX: -5.32, maxX: -5.02, minZ: -11.7, maxZ: -6.42 },
+  { minX: -5.32, maxX: -5.02, minZ: -5.16, maxZ: 1.0 },
+  { minX: -5.32, maxX: -5.02, minZ: 2.4, maxZ: 5.05 },
+  // Bathroom-to-bedroom wall, split around the internal door.
+  { minX: -14.85, maxX: -11.35, minZ: -4.4, maxZ: -4.1 },
+  { minX: -10.04, maxX: -5.28, minZ: -4.4, maxZ: -4.1 },
+  // Study glass partition with a wide entrance.
+  { minX: 4.15, maxX: 5.18, minZ: 3.76, maxZ: 4.05 },
+  { minX: 7.05, maxX: 14.72, minZ: 3.76, maxZ: 4.05 },
+  // Large fixed furniture.
+  { minX: -14.45, maxX: -4.95, minZ: 10.4, maxZ: 11.75 },
+  { minX: -10.8, maxX: -5.2, minZ: 6.45, maxZ: 8.2 },
+  { minX: 4.1, maxX: 14.75, minZ: 10.9, maxZ: 11.75 },
+  { minX: 7.55, maxX: 12.4, minZ: 6.4, maxZ: 8.25 },
+  { minX: -10.3, maxX: -6.55, minZ: -1.55, maxZ: 2.65 },
+  { minX: -14.7, maxX: -13.2, minZ: -3.75, maxZ: 3.35 },
+  { minX: -14.2, maxX: -10.25, minZ: -9.65, maxZ: -7.65 },
+  { minX: 0.05, maxX: 4.8, minZ: -3.75, maxZ: -1.55 },
+  { minX: 0.4, maxX: 4.35, minZ: -6.2, maxZ: -4.0 },
+  { minX: 12.95, maxX: 14.6, minZ: -3.8, maxZ: -0.45 },
 ];
 
 function blocked(x: number, z: number) {
@@ -46,7 +57,7 @@ export default function PlayerControls() {
   const lastPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    camera.position.set(0, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.55);
+    camera.position.set(8.55, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.45);
     camera.rotation.order = 'YXZ';
     yaw.current = 0;
     pitch.current = 0;

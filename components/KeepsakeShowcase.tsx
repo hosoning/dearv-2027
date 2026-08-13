@@ -253,10 +253,18 @@ export function SilkPajamas() {
   );
 }
 
-export function KeepsakeCabinet({ onClick }: { onClick?: () => void }) {
+export function KeepsakeCabinet({
+  onClick,
+  position = [13.95, 0, -2.1],
+  rotationY = -Math.PI / 2,
+}: {
+  onClick?: () => void;
+  position?: [number, number, number];
+  rotationY?: number;
+}) {
   const walnut = useMemo(() => createWalnutTexture(), []);
   return (
-    <group position={[5.65, 0, -6.18]} onClick={clickThrough(onClick)}>
+    <group position={position} rotation={[0, rotationY, 0]} onClick={clickThrough(onClick)}>
       <RoundedBox args={[3.15, 2.84, 0.65]} radius={0.04} smoothness={4} position={[0, 1.42, 0]} castShadow receiveShadow>
         <meshStandardMaterial map={walnut} color="#76533c" roughness={0.48} />
       </RoundedBox>
@@ -284,14 +292,26 @@ export function KeepsakeCabinet({ onClick }: { onClick?: () => void }) {
       ))}
       <pointLight position={[0, 2.42, 0.42]} intensity={0.72} distance={3.2} color="#ffd9a1" />
       <pointLight position={[0, 1.2, 0.42]} intensity={0.5} distance={2.7} color="#ffd9a1" />
+      <TieSet />
+      <GoldCoin />
+      <StarCertificate />
+      <MusicHouse />
     </group>
   );
 }
 
-export function PajamaWardrobe({ onClick }: { onClick?: () => void }) {
+export function PajamaWardrobe({
+  onClick,
+  position = [-13.9, 0, 1.3],
+  rotationY = Math.PI / 2,
+}: {
+  onClick?: () => void;
+  position?: [number, number, number];
+  rotationY?: number;
+}) {
   const walnut = useMemo(() => createWalnutTexture(), []);
   return (
-    <group position={[-5.25, 0, 6.18]} rotation={[0, Math.PI, 0]} onClick={clickThrough(onClick)}>
+    <group position={position} rotation={[0, rotationY, 0]} onClick={clickThrough(onClick)}>
       <RoundedBox args={[2.8, 3.1, 0.72]} radius={0.04} smoothness={4} position={[0, 1.55, 0]} castShadow receiveShadow>
         <meshStandardMaterial map={walnut} color="#76533c" roughness={0.5} />
       </RoundedBox>
@@ -303,13 +323,20 @@ export function PajamaWardrobe({ onClick }: { onClick?: () => void }) {
         <meshStandardMaterial color="#c7aa76" metalness={0.72} roughness={0.2} />
       </mesh>
       <pointLight position={[0, 2.62, 0.5]} intensity={0.35} distance={2.6} color="#ffdbac" />
+      <SilkPajamas />
     </group>
   );
 }
 
-export function DeskKeepsakes() {
+export function DeskKeepsakes({
+  position = [9.85, 0.79, 7.18],
+  rotationY = 0,
+}: {
+  position?: [number, number, number];
+  rotationY?: number;
+}) {
   return (
-    <group position={[5.98, 0.78, 4.18]} rotation={[0, -Math.PI / 2, 0]}>
+    <group position={position} rotation={[0, rotationY, 0]}>
       <RoundedBox args={[0.58, 0.055, 0.42]} radius={0.018} smoothness={3} position={[0, 0.025, 0]} rotation={[0.03, 0.1, -0.04]} castShadow>
         <meshStandardMaterial color="#745f4b" roughness={0.78} />
       </RoundedBox>
