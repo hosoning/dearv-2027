@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from 'react';
 import { Canvas, type ThreeEvent } from '@react-three/fiber';
-import { ContactShadows } from '@react-three/drei';
+import { AdaptiveDpr, ContactShadows, Preload } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ResolvedEnvironment } from '@/lib/environment';
 import Room from './Room';
@@ -19,6 +19,7 @@ import Rug from './furniture/Rug';
 import WallArt from './furniture/WallArt';
 import Character from './Character';
 import PlayerControls from './PlayerControls';
+import ArchitecturalDetails from './ArchitecturalDetails';
 import { DeskKeepsakes, KeepsakeCabinet, PajamaWardrobe } from './KeepsakeShowcase';
 
 function interactive(handler?: () => void) {
@@ -75,8 +76,9 @@ export default function Scene({
   return (
     <Canvas
       shadows
-      camera={{ fov: 62, near: 0.08, far: 110 }}
+      camera={{ fov: 61, near: 0.08, far: 110 }}
       dpr={[1, 1.5]}
+      performance={{ min: 0.55 }}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
@@ -94,6 +96,7 @@ export default function Scene({
         <pointLight position={[5.5, 3.25, 3.7]} intensity={isNight ? 0.58 : 0.14} color="#ffe0b3" distance={7} />
 
         <Room environment={environment} />
+        <ArchitecturalDetails />
 
         <Rug position={[-4.65, 0.012, -4.45]} size={[5.3, 3.8]} color="#b9aa98" />
         <group position={[-4.3, 0, -3.75]} scale={1.28}><Sofa rotationY={Math.PI} /></group>
@@ -117,6 +120,8 @@ export default function Scene({
         <Character position={[0.25, 0, -0.25]} onClick={onCompanionClick} />
         {children}
         <ContactShadows position={[0, 0.015, 0]} opacity={isNight ? 0.32 : 0.22} scale={25} blur={3.1} far={6} resolution={256} frames={1} />
+        <AdaptiveDpr pixelated={false} />
+        <Preload all />
         <PlayerControls />
       </Suspense>
     </Canvas>
