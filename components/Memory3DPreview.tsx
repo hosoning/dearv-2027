@@ -47,12 +47,20 @@ function GenericObject({ object }: { object: MemoryObject }) {
   );
 }
 
+function Centered({ scale, offset, children }: { scale: number; offset: [number, number, number]; children: React.ReactNode }) {
+  return (
+    <group scale={scale}>
+      <group position={offset}>{children}</group>
+    </group>
+  );
+}
+
 function PreviewObject({ object }: { object: MemoryObject }) {
-  if (object.id === 'starter-tie-set') return <group position={[0.55, -1.08, -0.23]} scale={1.8}><TieSet /></group>;
-  if (object.id === 'starter-gold-520') return <group position={[-0.47, -1.08, -0.25]} scale={2.4}><GoldCoin /></group>;
-  if (object.id === 'starter-star-certificate') return <group position={[0.46, -1.72, -0.18]} scale={1.9}><StarCertificate /></group>;
-  if (object.id === 'starter-music-house') return <group position={[-0.48, -1.73, -0.2]} scale={1.9}><MusicHouse /></group>;
-  if (object.id === 'starter-silk-pajamas') return <group position={[0, -1.38, -0.03]} scale={1.45}><SilkPajamas /></group>;
+  if (object.id === 'starter-tie-set') return <Centered scale={1.8} offset={[0.55, -1.08, -0.23]}><TieSet /></Centered>;
+  if (object.id === 'starter-gold-520') return <Centered scale={2.4} offset={[-0.47, -1.08, -0.25]}><GoldCoin /></Centered>;
+  if (object.id === 'starter-star-certificate') return <Centered scale={1.9} offset={[0.46, -1.72, -0.18]}><StarCertificate /></Centered>;
+  if (object.id === 'starter-music-house') return <Centered scale={1.9} offset={[-0.48, -1.73, -0.2]}><MusicHouse /></Centered>;
+  if (object.id === 'starter-silk-pajamas') return <Centered scale={1.45} offset={[0, -1.38, -0.03]}><SilkPajamas /></Centered>;
   return <GenericObject object={object} />;
 }
 
@@ -78,7 +86,6 @@ export default function Memory3DPreview({ object }: { object: MemoryObject }) {
         <ContactShadows position={[0, -1.05, 0]} opacity={0.42} scale={4.8} blur={2.8} far={4} resolution={256} />
         <OrbitControls enablePan={false} minDistance={2.4} maxDistance={6} minPolarAngle={0.7} maxPolarAngle={1.85} autoRotate autoRotateSpeed={0.55} />
       </Canvas>
-      <div className="pointer-events-none absolute inset-x-0 bottom-3 text-center text-[9px] uppercase tracking-[0.2em] text-white/30">drag to inspect</div>
     </div>
   );
 }
