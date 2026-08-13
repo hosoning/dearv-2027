@@ -1,6 +1,7 @@
 'use client';
 
 import { RoundedBox } from '@react-three/drei';
+import * as THREE from 'three';
 
 function CeramicVase({ position, scale = 1, color = '#b9aa98' }: { position: [number, number, number]; scale?: number; color?: string }) {
   return (
@@ -69,11 +70,8 @@ function SofaConsole() {
         </RoundedBox>
       ))}
       <BooksStack position={[-0.72, 0.85, 0]} rotationY={0.08} />
-      <mesh position={[0.2, 0.9, 0]} castShadow>
-        <sphereGeometry args={[0.11, 22, 18]} />
-        <meshStandardMaterial color="#c5b49f" roughness={0.7} />
-      </mesh>
-      <mesh position={[0.58, 0.89, 0]} castShadow>
+      <CeramicVase position={[0.3, 0.84, 0]} scale={0.36} color="#c0b09d" />
+      <mesh position={[0.7, 0.89, 0]} castShadow>
         <cylinderGeometry args={[0.085, 0.085, 0.2, 24]} />
         <meshPhysicalMaterial color="#e7d4b6" transmission={0.18} transparent opacity={0.88} roughness={0.38} />
       </mesh>
