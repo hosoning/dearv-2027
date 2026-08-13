@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { createFloorTexture, createWallTexture } from '@/lib/textures';
+import { createFloorTexture, createWallTexture, createWalnutTexture } from '@/lib/textures';
 import type { ResolvedEnvironment } from '@/lib/environment';
 import WindowWorld from './WindowWorld';
 
@@ -51,13 +51,13 @@ function WallMoulding() {
   return (
     <>
       {PANEL_Z.map((z) => (
-        <group key={`left-${z}`} position={[-4.93, 1.82, z]} rotation={[0, Math.PI / 2, 0]}>
+        <group key={`left-${z}`} position={[-7.93, 2.04, z]} rotation={[0, Math.PI / 2, 0]}>
           <mesh>
-            <boxGeometry args={[1.48, 2.35, 0.035]} />
+            <boxGeometry args={[2.05, 2.9, 0.035]} />
             <meshStandardMaterial color="#efe9de" roughness={0.92} />
           </mesh>
           <mesh position={[0, 0, 0.022]}>
-            <boxGeometry args={[1.26, 2.05, 0.022]} />
+            <boxGeometry args={[1.78, 2.58, 0.022]} />
             <meshStandardMaterial color="#e5dccd" roughness={0.88} />
           </mesh>
         </group>
@@ -79,12 +79,12 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
     texture.repeat.set(ROOM_WIDTH / 1.7, ROOM_DEPTH / 1.7);
     return texture;
   }, []);
-
   const wallTexture = useMemo(() => {
     const texture = createWallTexture();
     texture.repeat.set(4, 2);
     return texture;
   }, []);
+  const walnutTexture = useMemo(() => createWalnutTexture(), []);
 
   const halfW = ROOM_WIDTH / 2;
   const halfD = ROOM_DEPTH / 2;
@@ -111,7 +111,6 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
         <meshStandardMaterial color="#f4efe6" roughness={0.96} />
       </mesh>
       <CeilingDetails isNight={isNight} />
-
       <WindowWorld environment={environment} />
 
       <mesh position={[-(windowWidth / 2 + sideWidth / 2), ROOM_HEIGHT / 2, -halfD]} receiveShadow>
@@ -175,7 +174,7 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
       </mesh>
       <mesh position={[halfW, ROOM_HEIGHT / 2, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
         <planeGeometry args={[ROOM_DEPTH, ROOM_HEIGHT]} />
-        <meshStandardMaterial color="#4d362a" roughness={0.72} />
+        <meshStandardMaterial map={walnutTexture} color="#76533c" roughness={0.64} />
       </mesh>
       <mesh position={[0, ROOM_HEIGHT / 2, halfD]} rotation={[0, Math.PI, 0]} receiveShadow>
         <planeGeometry args={[ROOM_WIDTH, ROOM_HEIGHT]} />
@@ -197,7 +196,7 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
 
       <mesh position={[0, 1.8, 6.84]}>
         <boxGeometry args={[4.6, 3.15, 0.16]} />
-        <meshStandardMaterial color="#5a4032" roughness={0.55} />
+        <meshStandardMaterial map={walnutTexture} color="#76533c" roughness={0.55} />
       </mesh>
       {[-1.9, -1.28, -0.64, 0, 0.64, 1.28, 1.9].map((x) => (
         <mesh key={x} position={[x, 1.8, 6.73]}>
