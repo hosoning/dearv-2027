@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { ContactShadows, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -47,12 +48,8 @@ function GenericObject({ object }: { object: MemoryObject }) {
   );
 }
 
-function Centered({ scale, offset, children }: { scale: number; offset: [number, number, number]; children: React.ReactNode }) {
-  return (
-    <group scale={scale}>
-      <group position={offset}>{children}</group>
-    </group>
-  );
+function Centered({ scale, offset, children }: { scale: number; offset: [number, number, number]; children: ReactNode }) {
+  return <group scale={scale}><group position={offset}>{children}</group></group>;
 }
 
 function PreviewObject({ object }: { object: MemoryObject }) {
