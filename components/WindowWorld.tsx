@@ -52,7 +52,7 @@ function WeatherParticles({ weather }: { weather: ResolvedEnvironment['weather']
 }
 
 export default function WindowWorld({ environment }: { environment: ResolvedEnvironment }) {
-  const oceanBackdrop = useTexture('env/highrise_ocean_backdrop.jpg');
+  const oceanBackdrop = useTexture('env/highrise_ocean_backdrop_v2.webp');
   oceanBackdrop.colorSpace = THREE.SRGBColorSpace;
   oceanBackdrop.anisotropy = 8;
 
@@ -60,8 +60,8 @@ export default function WindowWorld({ environment }: { environment: ResolvedEnvi
     <group position={[0, 0, -11.7]}>
       {/* A rectilinear backplate keeps the ocean horizon broad and legible through
           the full facade, while the matching HDR remains responsible for light and reflections. */}
-      <mesh position={[0, 4.05, -8.2]}>
-        <planeGeometry args={[38, 21.38]} />
+      <mesh position={[0, 3.0, -1.25]}>
+        <planeGeometry args={[38, 7.5]} />
         <meshBasicMaterial map={oceanBackdrop} toneMapped={false} fog={false} side={THREE.DoubleSide} />
       </mesh>
       <WeatherParticles weather={environment.weather} />
@@ -69,4 +69,4 @@ export default function WindowWorld({ environment }: { environment: ResolvedEnvi
   );
 }
 
-useTexture.preload('env/highrise_ocean_backdrop.jpg');
+useTexture.preload('env/highrise_ocean_backdrop_v2.webp');

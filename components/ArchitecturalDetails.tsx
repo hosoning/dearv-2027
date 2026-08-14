@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { RoundedBox } from '@react-three/drei';
 import type { ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createMarbleTexture, createWalnutTexture } from '@/lib/textures';
+import { createFabricTexture, createMarbleTexture, createWalnutTexture } from '@/lib/textures';
 
 function clickThrough(handler?: () => void) {
   return (event: ThreeEvent<MouseEvent>) => {
@@ -53,8 +53,26 @@ function FoyerSuite() {
         {[-1.82, -0.62, 0.62, 1.82].map((x) => (
           <mesh key={x} position={[x, 0.53, 0.28]}><boxGeometry args={[0.025, 0.72, 0.018]} /><meshStandardMaterial color="#bba077" /></mesh>
         ))}
-        <mesh position={[0, 2.65, 0.28]}><boxGeometry args={[4.5, 2.35, 0.07]} /><meshStandardMaterial color="#aa8b64" metalness={0.55} roughness={0.28} /></mesh>
-        <mesh position={[0, 2.65, 0.32]}><planeGeometry args={[4.25, 2.12]} /><meshPhysicalMaterial color="#bfc7c7" metalness={0.66} roughness={0.08} /></mesh>
+        {/* A foyer wall treatment, not a TV: fluted walnut with three tall mirror leaves. */}
+        <RoundedBox args={[5.25, 2.55, 0.09]} radius={0.04} smoothness={4} position={[0, 2.52, 0.24]} castShadow>
+          <meshStandardMaterial color="#70513d" roughness={0.62} />
+        </RoundedBox>
+        {Array.from({ length: 27 }).map((_, index) => (
+          <mesh key={`flute-${index}`} position={[-2.48 + index * 0.19, 2.52, 0.305]}>
+            <boxGeometry args={[0.025, 2.35, 0.025]} />
+            <meshStandardMaterial color={index % 2 ? '#8a684e' : '#5f4434'} roughness={0.58} />
+          </mesh>
+        ))}
+        {[-1.12, 0, 1.12].map((x) => (
+          <group key={`mirror-${x}`} position={[x, 2.55, 0.35]}>
+            <RoundedBox args={[0.82, 2.12, 0.045]} radius={0.16} smoothness={7}>
+              <meshStandardMaterial color="#b99b70" metalness={0.72} roughness={0.2} />
+            </RoundedBox>
+            <RoundedBox args={[0.73, 2.03, 0.018]} radius={0.14} smoothness={7} position={[0, 0, 0.03]}>
+              <meshPhysicalMaterial color="#d7dedc" metalness={0.76} roughness={0.075} clearcoat={0.5} />
+            </RoundedBox>
+          </group>
+        ))}
       </group>
       {/* Bench sits to the east of the entrance, exactly as in the approved plan. */}
       <group position={[11.35, 0, 10.55]}>
@@ -165,14 +183,25 @@ function StudySuite({ onArchiveClick, onLettersClick }: { onArchiveClick?: () =>
 }
 
 function BedroomSuite() {
+  const headboardFabric = useMemo(() => createFabricTexture(512, '#8d7666'), []);
   return (
     <group>
-      <group position={[-14.72, 2.0, 7.0]} rotation={[0, Math.PI / 2, 0]}>
-        <RoundedBox args={[7.0, 3.35, 0.18]} radius={0.06} smoothness={4} castShadow receiveShadow><meshStandardMaterial color="#806451" roughness={0.75} /></RoundedBox>
-        <RoundedBox args={[6.42, 2.85, 0.08]} radius={0.05} smoothness={4} position={[0, 0, -0.12]}><meshStandardMaterial color="#c9b9a8" roughness={0.92} /></RoundedBox>
-        <mesh position={[0, 1.22, -0.17]}><boxGeometry args={[5.7, 0.025, 0.025]} /><meshBasicMaterial color="#ffd69f" toneMapped={false} /></mesh>
+      {/* The bed is centred on the solid north wall, leaving access on all three open sides. */}
+      <group position={[-11.95, 2.0, 11.62]}>
+        <RoundedBox args={[5.1, 2.86, 0.12]} radius={0.055} smoothness={5} castShadow receiveShadow>
+          <meshStandardMaterial color="#6d5140" roughness={0.65} />
+        </RoundedBox>
+        {[-2.1, -1.4, -0.7, 0, 0.7, 1.4, 2.1].map((x, index) => (
+          <RoundedBox key={x} args={[0.6, 2.46, 0.16]} radius={0.13} smoothness={8} position={[x, 0, -0.105]} castShadow>
+            <meshPhysicalMaterial map={headboardFabric} color={index % 2 ? '#9a8677' : '#897466'} roughness={0.94} sheen={0.46} sheenColor="#c8b7a9" />
+          </RoundedBox>
+        ))}
+        <mesh position={[0, 1.29, -0.22]}><boxGeometry args={[4.55, 0.022, 0.022]} /><meshBasicMaterial color="#ffd69f" toneMapped={false} /></mesh>
       </group>
-      {[5.25, 8.75].map((z) => <group key={z} position={[-13.65, 0, z]}><RoundedBox args={[0.8, 0.5, 0.66]} radius={0.055} smoothness={4} position={[0, 0.25, 0]} castShadow><meshStandardMaterial color="#745640" roughness={0.57} /></RoundedBox><mesh position={[0, 1.42, 0]}><cylinderGeometry args={[0.025, 0.025, 1.75, 12]} /><meshStandardMaterial color="#b8996b" metalness={0.65} roughness={0.24} /></mesh><mesh position={[0, 2.2, 0]}><sphereGeometry args={[0.2, 24, 16]} /><meshPhysicalMaterial color="#ead8bf" transmission={0.42} transparent opacity={0.82} roughness={0.28} /></mesh></group>)}
+      {[-13.72, -10.18].map((x) => <group key={x} position={[x, 0, 10.7]}><RoundedBox args={[0.8, 0.5, 0.66]} radius={0.055} smoothness={4} position={[0, 0.25, 0]} castShadow><meshStandardMaterial color="#745640" roughness={0.57} /></RoundedBox><mesh position={[0, 1.42, 0]}><cylinderGeometry args={[0.025, 0.025, 1.75, 12]} /><meshStandardMaterial color="#b8996b" metalness={0.65} roughness={0.24} /></mesh><mesh position={[0, 2.2, 0]}><sphereGeometry args={[0.2, 24, 16]} /><meshPhysicalMaterial color="#ead8bf" transmission={0.42} transparent opacity={0.82} roughness={0.28} /></mesh></group>)}
+      <RoundedBox args={[3.4, 0.48, 0.72]} radius={0.14} smoothness={7} position={[-11.95, 0.3, 7.62]} castShadow>
+        <meshPhysicalMaterial color="#9d8f83" roughness={0.88} sheen={0.45} />
+      </RoundedBox>
     </group>
   );
 }
@@ -195,7 +224,7 @@ function WalkInCloset() {
   return (
     <group>
       {[-4.7, -3.15, -1.6, 1.5].map((z, index) => <WardrobeBay key={z} position={[-14.55, 0, z]} rotationY={Math.PI / 2} colorIndex={index} />)}
-      {[-13.55, -12.0, -10.45, -8.9].map((x, index) => <WardrobeBay key={x} position={[x, 0, -5.62]} colorIndex={index + 2} />)}
+      {[-13.55, -12.0].map((x, index) => <WardrobeBay key={x} position={[x, 0, -5.62]} colorIndex={index + 2} />)}
       <RoundedBox args={[1.35, 0.88, 3.35]} radius={0.08} smoothness={5} position={[-10.9, 0.44, -2.65]} castShadow><meshStandardMaterial color="#765542" roughness={0.56} /></RoundedBox>
       <mesh position={[-10.9, 0.91, -2.65]}><boxGeometry args={[1.2, 0.06, 3.05]} /><meshStandardMaterial color="#c1ad91" roughness={0.48} /></mesh>
     </group>

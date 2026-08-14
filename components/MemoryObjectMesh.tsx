@@ -4,7 +4,6 @@ import { useMemo } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import type { MemoryObject } from '@/lib/types';
 import { decodeMemoryNote } from '@/lib/memory-system';
-import { GoldCoin, MusicHouse, SilkPajamas, StarCertificate, TieSet } from './KeepsakeShowcase';
 
 function stop(event: ThreeEvent<MouseEvent>, onClick?: () => void) {
   event.stopPropagation();
@@ -13,7 +12,9 @@ function stop(event: ThreeEvent<MouseEvent>, onClick?: () => void) {
 
 export default function MemoryObjectMesh({ object, onClick }: { object: MemoryObject; onClick?: () => void }) {
   const meta = useMemo(() => decodeMemoryNote(object.note), [object.note]);
-  const position: [number, number, number] = [object.pos_x, object.pos_y, object.pos_z];
+  const position: [number, number, number] = meta.displayLocation === 'gift-cabinet'
+    ? [object.pos_x, object.pos_y, -5.4]
+    : [object.pos_x, object.pos_y, object.pos_z];
   const common = {
     onClick: (event: ThreeEvent<MouseEvent>) => stop(event, onClick),
     onPointerOver: (event: ThreeEvent<PointerEvent>) => {
@@ -25,14 +26,9 @@ export default function MemoryObjectMesh({ object, onClick }: { object: MemoryOb
     },
   };
 
-  const starterContent = object.id === 'starter-tie-set' ? <TieSet />
-    : object.id === 'starter-gold-520' ? <GoldCoin />
-      : object.id === 'starter-star-certificate' ? <StarCertificate />
-        : object.id === 'starter-music-house' ? <MusicHouse />
-          : object.id === 'starter-silk-pajamas' ? <SilkPajamas /> : null;
-  if (starterContent) {
-    return <group position={position} {...common}>{starterContent}</group>;
-  }
+  // Starter keepsakes are authored directly inside their fitted cabinet/wardrobe.
+  // Their database records remain in the archive, but are not duplicated in space.
+  if (object.id.startsWith('starter-')) return null;
 
   if (meta.visual === 'book') {
     return (

@@ -65,7 +65,7 @@ export function positionForLocation(location: DisplayLocation, existingCount = 0
     case 'archive':
       return [14.05, 1.2 + (existingCount % 3) * 0.58, -7.2 + offset];
     case 'gift-cabinet':
-      return [-7.0 + (existingCount % 2) * 0.48, 0.7 + (existingCount % 3) * 0.58, -5.28];
+      return [-7.55 + (existingCount % 2) * 1.02, 0.69 + (existingCount % 3) * 0.72, -5.4];
     case 'desk':
       return [11.6 + (existingCount % 3) * 0.42, 0.94, -4.2];
     case 'wall':

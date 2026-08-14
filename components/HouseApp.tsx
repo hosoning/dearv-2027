@@ -32,13 +32,13 @@ import PlacedItemMesh from './PlacedItemMesh';
 import MemoryObjectMesh from './MemoryObjectMesh';
 import LetterPanel from './LetterPanel';
 import DialogBox from './DialogBox';
-import MobileJoysticks from './MobileJoysticks';
 import EntranceGate from './EntranceGate';
 import OwnerPanel, { type OwnerMemoryInput } from './OwnerPanel';
 import MemoryDetailPanel from './MemoryDetailPanel';
 import DisplayModeControls from './DisplayModeControls';
 import MemoryVisualCard from './MemoryVisualCard';
 import AuthGate from './AuthGate';
+import RoomNavigator from './RoomNavigator';
 
 const Scene = dynamic(() => import('./Scene'), { ssr: false });
 
@@ -198,17 +198,10 @@ function CloudHouse({ language, setLanguage, t }: ReturnType<typeof useLanguage>
         </div>
       )}
 
-      {!isMobile && (
-        <div className="pointer-events-none fixed bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-[11px] text-white/55 backdrop-blur-xl">
-          {t('walkHint')}
-        </div>
-      )}
-      {isMobile && (
-        <>
-          <MobileJoysticks />
-          <div className="mobile-control-hint pointer-events-none fixed bottom-3 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/20 px-3 py-1 text-[10px] text-white/35">{t('mobileHint')}</div>
-        </>
-      )}
+      <RoomNavigator language={language} />
+      <div className="pointer-events-none fixed bottom-[68px] left-1/2 z-20 hidden -translate-x-1/2 rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[10px] text-white/45 backdrop-blur-xl sm:block">
+        {isMobile ? t('mobileHint') : t('walkHint')}
+      </div>
 
       {collectionOpen && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/45 p-3 backdrop-blur-sm sm:items-center" onMouseDown={(event) => event.target === event.currentTarget && setCollectionOpen(false)}>

@@ -45,7 +45,7 @@ export function TieSet() {
   }, []);
 
   return (
-    <group position={[-0.55, 1.08, 0.23]} scale={0.92}>
+    <group position={[-0.55, 0.74, 0.23]} scale={0.92}>
       <RoundedBox args={[0.9, 0.09, 0.54]} radius={0.035} smoothness={4} castShadow receiveShadow>
         <meshStandardMaterial color="#c8b89f" roughness={0.7} />
       </RoundedBox>
@@ -85,7 +85,7 @@ export function TieSet() {
 
 export function GoldCoin() {
   return (
-    <group position={[0.47, 1.08, 0.25]}>
+    <group position={[0.47, 0.78, 0.25]}>
       <RoundedBox args={[0.5, 0.08, 0.34]} radius={0.025} smoothness={4} position={[0, -0.12, -0.04]} castShadow>
         <meshStandardMaterial color="#211d1a" roughness={0.48} />
       </RoundedBox>
@@ -284,6 +284,20 @@ export function KeepsakeCabinet({
           <meshStandardMaterial color="#7e6246" roughness={0.5} />
         </mesh>
       ))}
+      {/* Every keepsake has a visible, weight-bearing museum plinth. */}
+      <RoundedBox args={[1.08, 0.08, 0.42]} radius={0.025} smoothness={4} position={[-0.55, 0.69, 0.22]} castShadow>
+        <meshStandardMaterial color="#2a2420" roughness={0.52} />
+      </RoundedBox>
+      <RoundedBox args={[0.72, 0.11, 0.42]} radius={0.03} smoothness={4} position={[0.47, 0.7, 0.22]} castShadow>
+        <meshStandardMaterial color="#2a2420" roughness={0.48} />
+      </RoundedBox>
+      <mesh position={[-0.46, 1.55, 0.12]} rotation={[-0.18, 0, 0]} castShadow>
+        <boxGeometry args={[0.62, 0.42, 0.12]} />
+        <meshStandardMaterial color="#332a24" roughness={0.56} />
+      </mesh>
+      <RoundedBox args={[0.78, 0.08, 0.5]} radius={0.03} smoothness={4} position={[0.48, 1.43, 0.2]} castShadow>
+        <meshStandardMaterial color="#332a24" roughness={0.56} />
+      </RoundedBox>
       {[0.95, 1.7, 2.43].map((y) => (
         <mesh key={`light-${y}`} position={[0, y, 0.31]}>
           <boxGeometry args={[2.45, 0.018, 0.025]} />
@@ -315,14 +329,14 @@ export function PajamaWardrobe({
       <RoundedBox args={[2.8, 3.1, 0.72]} radius={0.04} smoothness={4} position={[0, 1.55, 0]} castShadow receiveShadow>
         <meshStandardMaterial map={walnut} color="#76533c" roughness={0.5} />
       </RoundedBox>
-      <RoundedBox args={[2.45, 2.75, 0.04]} radius={0.025} smoothness={3} position={[0, 1.58, 0.39]}>
+      <RoundedBox args={[2.45, 2.75, 0.04]} radius={0.025} smoothness={3} position={[0, 1.58, -0.28]}>
         <meshStandardMaterial color="#b99c76" roughness={0.78} />
       </RoundedBox>
-      <mesh position={[0, 2.66, 0.46]}>
+      <mesh position={[0, 2.66, 0.18]}>
         <cylinderGeometry args={[0.025, 0.025, 1.9, 14]} />
         <meshStandardMaterial color="#c7aa76" metalness={0.72} roughness={0.2} />
       </mesh>
-      <pointLight position={[0, 2.62, 0.5]} intensity={0.35} distance={2.6} color="#ffdbac" />
+      <pointLight position={[0, 2.62, 0.32]} intensity={0.35} distance={2.6} color="#ffdbac" />
       <SilkPajamas />
     </group>
   );

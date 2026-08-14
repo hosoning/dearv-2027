@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTexture } from '@react-three/drei';
+import * as THREE from 'three';
 import { createFloorTexture, createWallTexture, createWalnutTexture } from '@/lib/textures';
 import type { ResolvedEnvironment } from '@/lib/environment';
 import WindowWorld from './WindowWorld';
@@ -134,6 +136,52 @@ function FullGlassFacade() {
   );
 }
 
+function MasterSideWindow() {
+  const oceanBackdrop = useTexture('env/highrise_ocean_backdrop_v2.webp');
+  oceanBackdrop.colorSpace = THREE.SRGBColorSpace;
+  oceanBackdrop.anisotropy = 8;
+  const x = -ROOM_WIDTH / 2;
+  const z = 6.75;
+  const y = 2.18;
+  return (
+    <group>
+      <mesh position={[x - 3.2, 3.0, z]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[10.5, 6.4]} />
+        <meshBasicMaterial map={oceanBackdrop} toneMapped={false} fog={false} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[x + 0.105, y, z]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[5.2, 2.72, 0.045]} />
+        <meshPhysicalMaterial color="#dbe8e9" transmission={0.97} transparent opacity={0.13} roughness={0.035} thickness={0.18} ior={1.48} clearcoat={1} clearcoatRoughness={0.03} />
+      </mesh>
+      {[-2.6, 0, 2.6].map((offset) => (
+        <mesh key={offset} position={[x + 0.14, y, z + offset]}>
+          <boxGeometry args={[0.12, 2.86, 0.085]} />
+          <meshStandardMaterial color="#454748" metalness={0.78} roughness={0.2} />
+        </mesh>
+      ))}
+      <mesh position={[x + 0.14, 0.78, z]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[5.32, 0.11, 0.12]} />
+        <meshStandardMaterial color="#4b4640" metalness={0.48} roughness={0.3} />
+      </mesh>
+      <mesh position={[x + 0.15, 3.58, z]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[5.32, 0.11, 0.12]} />
+        <meshStandardMaterial color="#4b4640" metalness={0.48} roughness={0.3} />
+      </mesh>
+      {/* Soft full-height drapery stacks at each side without masking the view. */}
+      {[z - 2.9, z + 2.9].map((curtainZ) => (
+        <group key={curtainZ} position={[x + 0.27, 2.16, curtainZ]}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <mesh key={index} position={[0, 0, (index - 2) * 0.09]}>
+              <capsuleGeometry args={[0.07, 2.62, 5, 10]} />
+              <meshPhysicalMaterial color="#ded6cb" transparent opacity={0.68} roughness={0.9} transmission={0.08} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
 function InternalArchitecture() {
   return (
     <group>
@@ -145,10 +193,10 @@ function InternalArchitecture() {
       <InteriorDoor position={[-5.08, 0, -4.55]} rotationY={Math.PI / 2} hinge={-1} />
       <InteriorDoor position={[-5.08, 0, -9.2]} rotationY={Math.PI / 2} />
 
-      {/* The ensuite has a private-wing door and a second door from the living area. */}
-      <WallBlock position={[-11.3, ROOM_HEIGHT / 2, -6]} size={[7.4, ROOM_HEIGHT, 0.2]} />
-      <WallBlock position={[-5.68, ROOM_HEIGHT / 2, -6]} size={[0.95, ROOM_HEIGHT, 0.2]} />
-      <InteriorDoor position={[-6.88, 0, -5.88]} hinge={-1} />
+      {/* Ensuite wall: the private door is now on the closet's left side; the second door stays at the living hall. */}
+      <WallBlock position={[-14.43, ROOM_HEIGHT / 2, -6]} size={[1.14, ROOM_HEIGHT, 0.2]} />
+      <WallBlock position={[-9.42, ROOM_HEIGHT / 2, -6]} size={[6.66, ROOM_HEIGHT, 0.2]} />
+      <InteriorDoor position={[-13.05, 0, -5.88]} hinge={1} />
 
       {/* The study is a private room with solid walls, not a glass office. */}
       <WallBlock position={[9.1, ROOM_HEIGHT / 2, -5.08]} size={[0.2, ROOM_HEIGHT, 13.45]} />
@@ -182,7 +230,7 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
 
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh name="walkable-floor" rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[ROOM_WIDTH, ROOM_DEPTH]} />
         <meshStandardMaterial map={floorTexture} color="#d8c5aa" roughness={0.56} metalness={0.015} />
       </mesh>
@@ -207,8 +255,13 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
       <CeilingDetails isNight={isNight} />
       <WindowWorld environment={environment} />
       <FullGlassFacade />
+      <MasterSideWindow />
 
-      <WallBlock position={[-halfW, ROOM_HEIGHT / 2, 0]} size={[0.18, ROOM_HEIGHT, ROOM_DEPTH]} />
+      {/* West/master exterior wall is split around a real bedroom window. */}
+      <WallBlock position={[-halfW, ROOM_HEIGHT / 2, -3.93]} size={[0.18, ROOM_HEIGHT, 16.15]} />
+      <WallBlock position={[-halfW, ROOM_HEIGHT / 2, 10.68]} size={[0.18, ROOM_HEIGHT, 2.65]} />
+      <WallBlock position={[-halfW, 0.36, 6.75]} size={[0.18, 0.72, 5.7]} />
+      <WallBlock position={[-halfW, 3.79, 6.75]} size={[0.18, 0.42, 5.7]} />
       <mesh position={[halfW, ROOM_HEIGHT / 2, 0]} receiveShadow>
         <boxGeometry args={[0.18, ROOM_HEIGHT, ROOM_DEPTH]} />
         <meshStandardMaterial map={walnutTexture} color="#76553f" roughness={0.63} />

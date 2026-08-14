@@ -19,9 +19,9 @@ const SOURCE_BLOCKERS = [
   { minX: -5.32, maxX: -5.02, minZ: -11.8, maxZ: -9.9 },
   { minX: -5.32, maxX: -5.02, minZ: -8.5, maxZ: -5.25 },
   { minX: -5.32, maxX: -5.02, minZ: -3.8, maxZ: 11.8 },
-  // Ensuite top wall, split around its private-wing door.
-  { minX: -14.85, maxX: -7.6, minZ: -6.14, maxZ: -5.86 },
-  { minX: -6.15, maxX: -5.18, minZ: -6.14, maxZ: -5.86 },
+  // Ensuite top wall, split around the closet-side private door.
+  { minX: -14.85, maxX: -13.78, minZ: -6.14, maxZ: -5.86 },
+  { minX: -12.32, maxX: -5.18, minZ: -6.14, maxZ: -5.86 },
   // Solid study walls and wide timber doorway.
   { minX: 8.98, maxX: 9.24, minZ: -11.8, maxZ: 1.65 },
   { minX: 8.98, maxX: 9.24, minZ: 3.15, maxZ: 3.65 },
@@ -31,7 +31,7 @@ const SOURCE_BLOCKERS = [
   { minX: -5.3, maxX: -3.85, minZ: 6.0, maxZ: 11.65 },
   { minX: -2.95, maxX: 2.95, minZ: 6.3, maxZ: 8.2 },
   // Open master-suite furniture.
-  { minX: -14.8, maxX: -12.0, minZ: 5.65, maxZ: 8.35 },
+  { minX: -13.45, maxX: -10.45, minZ: 6.6, maxZ: 11.75 },
   { minX: -14.82, maxX: -13.75, minZ: -5.55, maxZ: 3.25 },
   { minX: -14.25, maxX: -5.35, minZ: -6.02, maxZ: -5.2 },
   { minX: -11.7, maxX: -10.1, minZ: -4.5, maxZ: -0.8 },
@@ -40,9 +40,9 @@ const SOURCE_BLOCKERS = [
   { minX: -11.9, maxX: -8.25, minZ: -11.8, maxZ: -10.75 },
   { minX: -8.15, maxX: -6.95, minZ: -11.75, maxZ: -10.25 },
   { minX: -7.2, maxX: -5.3, minZ: -11.45, maxZ: -9.25 },
-  // L-shaped living sofa and coffee table; the glass-side promenade stays open.
-  { minX: -1.75, maxX: 3.65, minZ: -2.78, maxZ: -1.55 },
-  { minX: -1.8, maxX: -0.42, minZ: -4.78, maxZ: -2.3 },
+  // Continuous L-shaped living sofa and coffee table; the glass-side promenade stays open.
+  { minX: -2.72, maxX: 3.45, minZ: -3.12, maxZ: -1.6 },
+  { minX: 1.55, maxX: 3.45, minZ: -5.08, maxZ: -2.3 },
   { minX: 0.35, maxX: 2.0, minZ: -5.55, maxZ: -4.0 },
   // Study desk, lounge chair and wall library.
   { minX: 10.7, maxX: 12.9, minZ: -6.85, maxZ: -1.85 },
@@ -76,6 +76,26 @@ export default function PlayerControls() {
   const dragging = useRef(false);
   const velocity = useRef(new THREE.Vector2());
   const lastPointer = useRef({ x: 0, y: 0 });
+  const pointerStart = useRef({ x: 0, y: 0, time: 0 });
+  const markerRef = useRef<THREE.Group>(null);
+  const raycaster = useRef(new THREE.Raycaster());
+  const floorPlane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const floorPoint = useRef(new THREE.Vector3());
+  const cinematicTarget = useRef<{
+    position: [number, number, number];
+    lookAt: [number, number, number];
+  } | null>(null);
+
+  useEffect(() => {
+    const onNavigate = (event: Event) => {
+      const detail = (event as CustomEvent<{ position: [number, number, number]; lookAt: [number, number, number] }>).detail;
+      if (!detail) return;
+      cinematicTarget.current = detail;
+      controlsState.walkTarget = null;
+    };
+    window.addEventListener('dearv:navigate', onNavigate);
+    return () => window.removeEventListener('dearv:navigate', onNavigate);
+  }, []);
 
   useEffect(() => {
     // Match Camera A in the approved plan: inside the foyer, looking diagonally
@@ -142,17 +162,40 @@ export default function PlayerControls() {
     const onPointerDown = (event: PointerEvent) => {
       dragging.current = true;
       lastPointer.current = { x: event.clientX, y: event.clientY };
+      pointerStart.current = { x: event.clientX, y: event.clientY, time: performance.now() };
     };
     const onPointerMove = (event: PointerEvent) => {
       if (!dragging.current) return;
       const dx = event.clientX - lastPointer.current.x;
       const dy = event.clientY - lastPointer.current.y;
       lastPointer.current = { x: event.clientX, y: event.clientY };
+      const travelled = Math.hypot(event.clientX - pointerStart.current.x, event.clientY - pointerStart.current.y);
+      if (travelled < 5) return;
+      controlsState.walkTarget = null;
+      controlsState.cameraTarget = null;
       yaw.current -= dx * 0.0032;
-      pitch.current = THREE.MathUtils.clamp(pitch.current - dy * 0.0032, -1.08, 1.08);
+      pitch.current = THREE.MathUtils.clamp(pitch.current - dy * 0.0032, -0.88, 0.82);
     };
-    const onPointerUp = () => {
+    const onPointerUp = (event: PointerEvent) => {
+      const travelled = Math.hypot(event.clientX - pointerStart.current.x, event.clientY - pointerStart.current.y);
+      const elapsed = performance.now() - pointerStart.current.time;
       dragging.current = false;
+      if (travelled > 8 || elapsed > 520) return;
+
+      const rect = element.getBoundingClientRect();
+      const pointer = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+      raycaster.current.setFromCamera(pointer, camera);
+      const hit = raycaster.current.ray.intersectPlane(floorPlane.current, floorPoint.current);
+      if (!hit) return;
+      const x = THREE.MathUtils.clamp(hit.x, -BOUND_X, BOUND_X);
+      const z = THREE.MathUtils.clamp(hit.z, -BOUND_Z, BOUND_Z);
+      if (!blocked(x, z)) {
+        controlsState.cameraTarget = null;
+        controlsState.walkTarget = { x, z };
+      }
     };
     element.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
@@ -162,14 +205,38 @@ export default function PlayerControls() {
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
     };
-  }, [gl]);
+  }, [camera, gl]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
+    const cameraTarget = cinematicTarget.current ?? controlsState.cameraTarget;
+    if (cameraTarget) {
+      const [x, y, z] = cameraTarget.position;
+      camera.position.x = THREE.MathUtils.damp(camera.position.x, x, 5.8, dt);
+      camera.position.y = THREE.MathUtils.damp(camera.position.y, y, 5.8, dt);
+      camera.position.z = THREE.MathUtils.damp(camera.position.z, z, 5.8, dt);
+      const dx = cameraTarget.lookAt[0] - camera.position.x;
+      const dz = cameraTarget.lookAt[2] - camera.position.z;
+      yaw.current = Math.atan2(-dx, -dz);
+      pitch.current = THREE.MathUtils.clamp(
+        Math.atan2(camera.position.y - cameraTarget.lookAt[1], Math.hypot(dx, dz)),
+        -0.7,
+        0.7
+      );
+      camera.rotation.y = THREE.MathUtils.damp(camera.rotation.y, yaw.current, 9, dt);
+      camera.rotation.x = THREE.MathUtils.damp(camera.rotation.x, pitch.current, 9, dt);
+      if (Math.hypot(camera.position.x - x, camera.position.y - y, camera.position.z - z) < 0.025) {
+        controlsState.cameraTarget = null;
+        cinematicTarget.current = null;
+      }
+      if (markerRef.current) markerRef.current.visible = false;
+      return;
+    }
+
     const { x: lookX, y: lookY } = controlsState.joystickLook;
     if (lookX !== 0 || lookY !== 0) {
       yaw.current -= lookX * LOOK_SPEED * dt;
-      pitch.current = THREE.MathUtils.clamp(pitch.current - lookY * LOOK_SPEED * dt, -1.08, 1.08);
+      pitch.current = THREE.MathUtils.clamp(pitch.current - lookY * LOOK_SPEED * dt, -0.88, 0.82);
     }
     camera.rotation.y = THREE.MathUtils.damp(camera.rotation.y, yaw.current, 15, dt);
     camera.rotation.x = THREE.MathUtils.damp(camera.rotation.x, pitch.current, 15, dt);
@@ -183,6 +250,46 @@ export default function PlayerControls() {
       if (a) moveX -= 1;
       if (d) moveX += 1;
     }
+
+    if (moveX !== 0 || moveZ !== 0) controlsState.walkTarget = null;
+
+    const walkTarget = controlsState.walkTarget;
+    if (walkTarget) {
+      const dx = walkTarget.x - camera.position.x;
+      const dz = walkTarget.z - camera.position.z;
+      const distance = Math.hypot(dx, dz);
+      if (markerRef.current) {
+        markerRef.current.visible = true;
+        markerRef.current.position.set(walkTarget.x, 0.035, walkTarget.z);
+        const pulse = 1 + Math.sin(state.clock.elapsedTime * 5.5) * 0.08;
+        markerRef.current.scale.setScalar(pulse);
+      }
+      if (distance < 0.2) {
+        controlsState.walkTarget = null;
+        velocity.current.set(0, 0);
+        if (markerRef.current) markerRef.current.visible = false;
+        return;
+      }
+      const step = Math.min(distance, MOVE_SPEED * 0.82 * dt);
+      const stepX = (dx / distance) * step;
+      const stepZ = (dz / distance) * step;
+      const targetX = THREE.MathUtils.clamp(camera.position.x + stepX, -BOUND_X, BOUND_X);
+      const targetZ = THREE.MathUtils.clamp(camera.position.z + stepZ, -BOUND_Z, BOUND_Z);
+      const movedX = !blocked(targetX, camera.position.z);
+      const movedZ = !blocked(camera.position.x, targetZ);
+      if (movedX) camera.position.x = targetX;
+      if (movedZ) camera.position.z = targetZ;
+      if (!movedX && !movedZ) {
+        controlsState.walkTarget = null;
+        if (markerRef.current) markerRef.current.visible = false;
+        return;
+      }
+      yaw.current = Math.atan2(-dx, -dz);
+      camera.rotation.y = THREE.MathUtils.damp(camera.rotation.y, yaw.current, 7.5, dt);
+      camera.position.y = EYE_HEIGHT + Math.sin(state.clock.elapsedTime * 6.4) * 0.004;
+      return;
+    }
+    if (markerRef.current) markerRef.current.visible = false;
 
     const inputLength = Math.hypot(moveX, moveZ);
     if (inputLength > 1) {
@@ -218,5 +325,16 @@ export default function PlayerControls() {
     camera.position.y = EYE_HEIGHT + Math.sin(state.clock.elapsedTime * 7.2) * 0.006 * walking;
   });
 
-  return null;
+  return (
+    <group ref={markerRef} visible={false}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.16, 0.22, 40]} />
+        <meshBasicMaterial color="#f4d6a5" transparent opacity={0.82} depthWrite={false} toneMapped={false} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.045, 28]} />
+        <meshBasicMaterial color="#fff6e7" transparent opacity={0.9} depthWrite={false} toneMapped={false} />
+      </mesh>
+    </group>
+  );
 }
