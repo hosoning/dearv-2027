@@ -3,6 +3,7 @@ extends Node3D
 
 const CEILING_HEIGHT := 3.25
 const WALL_THICKNESS := 0.16
+const HERO_MODEL_ROOT := "res://assets/models/"
 
 var wall_material: StandardMaterial3D
 var warm_wood_material: StandardMaterial3D
@@ -20,6 +21,7 @@ func _ready() -> void:
 	_build_windows()
 	_build_doors()
 	_build_lighting()
+	_build_master_suite_assets()
 	_build_kitchen()
 	_build_study_rig()
 	_build_sofa_interaction()
@@ -142,17 +144,71 @@ func _build_study_rig() -> void:
 	var study := Node3D.new()
 	study.name = "StudyInteractionRig"
 	add_child(study)
-	# Wide centred desk with clearance on every side; replaced by authored hero GLB in production.
-	_box(study, "DeskTop", Vector3(14.35, 0.78, 3.0), Vector3(3.8, 0.12, 1.35), warm_wood_material, true)
-	for x in [12.75, 15.95]:
-		_box(study, "DeskLeg", Vector3(x, 0.39, 3.0), Vector3(0.16, 0.78, 1.1), dark_metal_material, true)
-	_box(study, "ComputerScreen", Vector3(14.35, 1.35, 2.82), Vector3(1.45, 0.82, 0.07), dark_metal_material, false)
+	var has_authored_study := _instantiate_hero_asset(
+		study,
+		"executive_study_rig.glb",
+		Vector3(14.35, 0.0, 3.0),
+		0.0
+	)
+	if has_authored_study:
+		_collision_box(study, "ExecutiveDeskCollision", Vector3(14.35, 0.44, 3.0), Vector3(3.9, 0.88, 1.3))
+	else:
+		# Offline authoring fallback. The shipped cloud build uses the GLB above.
+		_box(study, "DeskTop", Vector3(14.35, 0.78, 3.0), Vector3(3.8, 0.12, 1.35), warm_wood_material, true)
+		for x in [12.75, 15.95]:
+			_box(study, "DeskLeg", Vector3(x, 0.39, 3.0), Vector3(0.16, 0.78, 1.1), dark_metal_material, true)
+		_box(study, "ComputerScreen", Vector3(14.35, 1.35, 2.82), Vector3(1.45, 0.82, 0.07), dark_metal_material, false)
 	var computer := ComputerInteractable.new()
 	computer.name = "StudyComputer"
 	computer.object_id = "study_computer"
 	computer.position = Vector3(14.35, 1.35, 2.55)
 	computer.add_child(_area_shape(Vector3(1.8, 1.4, 1.0)))
 	study.add_child(computer)
+
+
+func _build_master_suite_assets() -> void:
+	var suite := Node3D.new()
+	suite.name = "AuthoredMasterSuite"
+	add_child(suite)
+
+	if _instantiate_hero_asset(suite, "upholstered_bed.glb", Vector3(-11.45, 0.0, -7.2), 0.0):
+		_collision_box(suite, "MasterBedCollision", Vector3(-11.45, 0.42, -7.2), Vector3(2.45, 0.84, 2.55))
+	else:
+		_build_bed_fallback(suite)
+
+	if _instantiate_hero_asset(suite, "walk_in_wardrobe.glb", Vector3(-11.45, 0.0, 3.45), 0.0):
+		_collision_box(suite, "WardrobeBackCollision", Vector3(-11.45, 1.32, 1.50), Vector3(5.85, 2.64, 0.48))
+		_collision_box(suite, "WardrobeLeftCollision", Vector3(-14.12, 1.32, 3.45), Vector3(0.48, 2.64, 4.35))
+		_collision_box(suite, "WardrobeRightCollision", Vector3(-8.78, 1.32, 3.45), Vector3(0.48, 2.64, 4.35))
+		_collision_box(suite, "DressingIslandCollision", Vector3(-11.45, 0.52, 3.85), Vector3(2.08, 1.04, 0.95))
+	else:
+		_build_wardrobe_fallback(suite)
+
+	if _instantiate_hero_asset(suite, "bathroom_suite.glb", Vector3(-11.45, 0.0, 11.0), 0.0):
+		_collision_box(suite, "BathCollision", Vector3(-15.17, 0.48, 10.75), Vector3(2.55, 0.96, 1.45))
+		_collision_box(suite, "VanityCollision", Vector3(-11.45, 0.62, 10.28), Vector3(3.60, 1.24, 0.85))
+		_collision_box(suite, "ToiletCollision", Vector3(-9.20, 0.55, 10.42), Vector3(0.95, 1.10, 1.25))
+		_collision_box(suite, "ShowerCollision", Vector3(-7.80, 1.20, 10.90), Vector3(1.78, 2.40, 1.60))
+	else:
+		_build_bathroom_fallback(suite)
+
+
+func _build_bed_fallback(parent: Node3D) -> void:
+	_box(parent, "BedFrameFallback", Vector3(-11.45, 0.32, -7.2), Vector3(2.35, 0.48, 2.45), dark_metal_material, true)
+	_box(parent, "BedMattressFallback", Vector3(-11.45, 0.67, -7.2), Vector3(2.10, 0.32, 2.22), wall_material, true)
+	_box(parent, "BedHeadboardFallback", Vector3(-11.45, 1.28, -8.32), Vector3(2.72, 1.72, 0.20), dark_metal_material, true)
+
+
+func _build_wardrobe_fallback(parent: Node3D) -> void:
+	_box(parent, "WardrobeBackFallback", Vector3(-11.45, 1.32, 1.50), Vector3(5.85, 2.64, 0.48), warm_wood_material, true)
+	_box(parent, "WardrobeLeftFallback", Vector3(-14.12, 1.32, 3.45), Vector3(0.48, 2.64, 4.35), warm_wood_material, true)
+	_box(parent, "WardrobeRightFallback", Vector3(-8.78, 1.32, 3.45), Vector3(0.48, 2.64, 4.35), warm_wood_material, true)
+	_box(parent, "DressingIslandFallback", Vector3(-11.45, 0.52, 3.85), Vector3(2.08, 1.04, 0.95), warm_wood_material, true)
+
+
+func _build_bathroom_fallback(parent: Node3D) -> void:
+	_box(parent, "VanityFallback", Vector3(-11.45, 0.62, 10.28), Vector3(3.60, 1.24, 0.85), pale_stone_material, true)
+	_box(parent, "ShowerFallback", Vector3(-7.80, 1.20, 10.90), Vector3(1.78, 2.40, 1.60), glass_material, true)
 
 
 func _build_sofa_interaction() -> void:
@@ -374,6 +430,37 @@ func _add_bar_stool(parent: Node3D, position: Vector3) -> void:
 
 func _wall(position: Vector3, size: Vector3) -> void:
 	_box(self, "Wall", position, size, wall_material, true)
+
+
+func _instantiate_hero_asset(parent: Node3D, filename: String, position: Vector3, rotation_y: float) -> bool:
+	var path := HERO_MODEL_ROOT + filename
+	if not ResourceLoader.exists(path):
+		return false
+	var resource := ResourceLoader.load(path)
+	if not resource is PackedScene:
+		push_warning("DearV hero asset is not a PackedScene: %s" % path)
+		return false
+	var instance := (resource as PackedScene).instantiate() as Node3D
+	if not instance:
+		return false
+	instance.name = filename.get_basename().to_pascal_case()
+	instance.position = position
+	instance.rotation_degrees.y = rotation_y
+	parent.add_child(instance)
+	return true
+
+
+func _collision_box(parent: Node3D, node_name: String, position: Vector3, size: Vector3) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.position = position
+	var shape_node := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	shape_node.shape = shape
+	body.add_child(shape_node)
+	parent.add_child(body)
+	return body
 
 
 func _box(parent: Node3D, node_name: String, position: Vector3, size: Vector3, material: Material, collision: bool) -> MeshInstance3D:
