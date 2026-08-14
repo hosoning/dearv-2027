@@ -215,7 +215,7 @@ export function SilkPajamas() {
   }, []);
 
   return (
-    <group position={[0, 1.38, 0.03]}>
+    <group position={[0, 1.38, 0.43]}>
       <mesh position={[0, 0.26, 0]} castShadow>
         <extrudeGeometry args={[shirtShape, { depth: 0.035, bevelEnabled: true, bevelSize: 0.01, bevelThickness: 0.008, bevelSegments: 2 }]} />
         <meshPhysicalMaterial map={silk} color="#61707e" roughness={0.3} sheen={0.9} sheenRoughness={0.3} />
@@ -332,11 +332,11 @@ export function PajamaWardrobe({
       <RoundedBox args={[2.45, 2.75, 0.04]} radius={0.025} smoothness={3} position={[0, 1.58, -0.28]}>
         <meshStandardMaterial color="#b99c76" roughness={0.78} />
       </RoundedBox>
-      <mesh position={[0, 2.66, 0.18]}>
+      <mesh position={[0, 2.66, 0.47]}>
         <cylinderGeometry args={[0.025, 0.025, 1.9, 14]} />
         <meshStandardMaterial color="#c7aa76" metalness={0.72} roughness={0.2} />
       </mesh>
-      <pointLight position={[0, 2.62, 0.32]} intensity={0.35} distance={2.6} color="#ffdbac" />
+      <pointLight position={[0, 2.62, 0.58]} intensity={0.5} distance={2.8} color="#ffdbac" />
       <SilkPajamas />
     </group>
   );
