@@ -61,6 +61,24 @@ export interface RoomRuntimeState {
   updated_at: string;
 }
 
+export type FoodStage =
+  | 'raw'
+  | 'washed'
+  | 'chopped'
+  | 'cooked'
+  | 'plated'
+  | 'burnt';
+
+export interface InventoryItem {
+  room_id: string;
+  instance_id: string;
+  definition_id: string;
+  stage: FoodStage;
+  location: string;
+  metadata: Record<string, unknown>;
+  updated_at: string;
+}
+
 export interface CatalogEntry {
   id: string;
   name: string;

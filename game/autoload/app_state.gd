@@ -5,13 +5,15 @@ signal interaction_state_changed(object_id: String, value: Variant)
 signal inspect_requested(payload: Dictionary)
 signal inspect_closed
 
-const STATE_VERSION := 1
+const STATE_VERSION := 2
 
 var access_token := ""
 var refresh_token := ""
 var user_id := ""
 var active_room_id := ""
 var interactions: Dictionary = {}
+var inventory: Dictionary = {}
+var prepared_food: Dictionary = {}
 var is_inspecting := false
 
 
@@ -32,6 +34,9 @@ func clear_session() -> void:
 	refresh_token = ""
 	user_id = ""
 	active_room_id = ""
+	interactions.clear()
+	inventory.clear()
+	prepared_food.clear()
 	session_changed.emit(false)
 
 
@@ -62,6 +67,8 @@ func serialize_local_state() -> Dictionary:
 		"user_id": user_id,
 		"active_room_id": active_room_id,
 		"interactions": interactions,
+		"inventory": inventory,
+		"prepared_food": prepared_food,
 	}
 
 
@@ -70,3 +77,5 @@ func hydrate_local_state(payload: Dictionary) -> void:
 		return
 	active_room_id = str(payload.get("active_room_id", ""))
 	interactions = payload.get("interactions", {}) as Dictionary
+	inventory = payload.get("inventory", {}) as Dictionary
+	prepared_food = payload.get("prepared_food", {}) as Dictionary

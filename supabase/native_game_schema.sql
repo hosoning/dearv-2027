@@ -23,12 +23,26 @@ create table if not exists room_runtime_state (
   primary key (room_id, object_id)
 );
 
+create table if not exists inventory_items (
+  room_id uuid not null references rooms(id) on delete cascade,
+  instance_id text not null,
+  definition_id text not null,
+  stage text not null default 'raw',
+  location text not null default 'fridge',
+  metadata jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  primary key (room_id, instance_id)
+);
+
 create index if not exists room_runtime_state_room_id_idx
   on room_runtime_state(room_id);
 
 alter table room_runtime_state enable row level security;
+alter table inventory_items enable row level security;
 revoke all on table room_runtime_state from anon;
+revoke all on table inventory_items from anon;
 grant select, insert, update, delete on table room_runtime_state to authenticated;
+grant select, insert, update, delete on table inventory_items to authenticated;
 
 drop policy if exists "runtime state follows room ownership" on room_runtime_state;
 create policy "runtime state follows room ownership" on room_runtime_state
@@ -44,6 +58,24 @@ create policy "runtime state follows room ownership" on room_runtime_state
     exists (
       select 1 from rooms
       where rooms.id = room_runtime_state.room_id
+        and rooms.user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "inventory follows room ownership" on inventory_items;
+create policy "inventory follows room ownership" on inventory_items
+  for all
+  using (
+    exists (
+      select 1 from rooms
+      where rooms.id = inventory_items.room_id
+        and rooms.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from rooms
+      where rooms.id = inventory_items.room_id
         and rooms.user_id = auth.uid()
     )
   );
@@ -73,4 +105,9 @@ create trigger placed_items_native_updated_at
 drop trigger if exists room_runtime_state_native_updated_at on room_runtime_state;
 create trigger room_runtime_state_native_updated_at
   before update on room_runtime_state
+  for each row execute function set_native_updated_at();
+
+drop trigger if exists inventory_items_native_updated_at on inventory_items;
+create trigger inventory_items_native_updated_at
+  before update on inventory_items
   for each row execute function set_native_updated_at();

@@ -17,6 +17,10 @@ func _ready() -> void:
 
 
 func queue_interaction(_object_id: String, _value: Variant) -> void:
+	queue_save()
+
+
+func queue_save() -> void:
 	_dirty = true
 	_flush_timer.start()
 
@@ -43,6 +47,24 @@ func _flush() -> void:
 				"room_runtime_state",
 				rows,
 				"?on_conflict=room_id,object_id"
+			)
+		var inventory_rows: Array[Dictionary] = []
+		for value in AppState.inventory.values():
+			if not value is Dictionary:
+				continue
+			inventory_rows.append({
+				"room_id": AppState.active_room_id,
+				"instance_id": str(value.get("instance_id", "")),
+				"definition_id": str(value.get("definition_id", "")),
+				"stage": str(value.get("stage", "raw")),
+				"location": str(value.get("location", "fridge")),
+				"metadata": value.get("metadata", {}),
+			})
+		if not inventory_rows.is_empty():
+			await Supabase.upsert_rows(
+				"inventory_items",
+				inventory_rows,
+				"?on_conflict=room_id,instance_id"
 			)
 
 

@@ -30,6 +30,8 @@ Next.js PWA remains the lightweight portal and owner-facing content manager.
 - Stateful doors, switches and faucets
 - In-world computer handoff
 - Inspectable 3D gifts with story/page metadata
+- Stateful openable furniture, refrigerator inventory and a wash/chop/cook/
+  plate food pipeline shared by the kitchen appliances
 - Offline-first state persistence and Supabase session/data transport
 - Procedural ocean shader foundation for a real high-rise coastal world
 

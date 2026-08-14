@@ -17,6 +17,7 @@ AppState="*res://autoload/app_state.gd"
 Supabase="*res://autoload/supabase_client.gd"
 SaveRepository="*res://autoload/save_repository.gd"
 RemoteAssets="*res://autoload/remote_asset_loader.gd"
+Kitchen="*res://kitchen/kitchen_runtime.gd"
 
 [display]
 
