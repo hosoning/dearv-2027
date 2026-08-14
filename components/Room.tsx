@@ -7,7 +7,8 @@ import WindowWorld from './WindowWorld';
 
 export const ROOM_WIDTH = 30;
 export const ROOM_DEPTH = 24;
-export const ROOM_HEIGHT = 5.2;
+// A generous penthouse ceiling, while still reading correctly from a 1.62 m eye height.
+export const ROOM_HEIGHT = 4.0;
 
 const WALL = '#eee8df';
 const TRIM = '#9a8064';
@@ -94,25 +95,25 @@ function FullGlassFacade() {
   const halfW = ROOM_WIDTH / 2;
   const z = -ROOM_DEPTH / 2;
   const bottom = 0.2;
-  const height = 4.42;
+  const height = ROOM_HEIGHT - bottom - 0.42;
   const y = bottom + height / 2;
   return (
     <group>
       <mesh position={[0, y, z + 0.07]}>
-        <planeGeometry args={[ROOM_WIDTH - 0.55, height]} />
-        <meshPhysicalMaterial color="#d8e7ea" transmission={0.97} transparent opacity={0.17} roughness={0.07} thickness={0.06} />
+        <boxGeometry args={[ROOM_WIDTH - 0.55, height, 0.045]} />
+        <meshPhysicalMaterial color="#c9d8dc" transmission={0.9} transparent opacity={0.24} roughness={0.08} thickness={0.16} ior={1.46} clearcoat={1} clearcoatRoughness={0.08} />
       </mesh>
       {/* The ensuite keeps the continuous facade but uses privacy-frosted glass. */}
       <mesh position={[-10.1, y, z + 0.105]}>
         <planeGeometry args={[9.45, height]} />
-        <meshPhysicalMaterial color="#edf0ec" transmission={0.42} transparent opacity={0.56} roughness={0.72} thickness={0.12} />
+        <meshPhysicalMaterial color="#edf0ec" transmission={0.34} transparent opacity={0.62} roughness={0.68} thickness={0.16} />
       </mesh>
       <WallBlock position={[0, bottom / 2, z]} size={[ROOM_WIDTH, bottom, 0.18]} />
       <WallBlock position={[0, ROOM_HEIGHT - 0.27, z]} size={[ROOM_WIDTH, 0.54, 0.18]} />
       {[-halfW + 0.25, -10, -5, 0, 5, 10, halfW - 0.25].map((x) => (
         <mesh key={x} position={[x, y, z + 0.12]} castShadow>
-          <boxGeometry args={[0.075, height + 0.05, 0.09]} />
-          <meshStandardMaterial color="#4a4038" metalness={0.62} roughness={0.27} />
+          <boxGeometry args={[0.09, height + 0.05, 0.13]} />
+          <meshStandardMaterial color="#383b3d" metalness={0.78} roughness={0.2} />
         </mesh>
       ))}
       <mesh position={[0, bottom, z + 0.12]}>
@@ -127,25 +128,25 @@ function InternalArchitecture() {
   return (
     <group>
       {/* The open master wing has one common entrance; only the ensuite is enclosed. */}
-      <WallBlock position={[-5.2, 2.6, 4.08]} size={[0.2, 5.2, 15.85]} />
-      <WallBlock position={[-5.2, 2.6, -5.63]} size={[0.2, 5.2, 0.75]} />
-      <WallBlock position={[-5.2, 2.6, -7.25]} size={[0.2, 5.2, 2.5]} />
-      <WallBlock position={[-5.2, 2.6, -10.95]} size={[0.2, 5.2, 2.1]} />
+      <WallBlock position={[-5.2, ROOM_HEIGHT / 2, 4.08]} size={[0.2, ROOM_HEIGHT, 15.85]} />
+      <WallBlock position={[-5.2, ROOM_HEIGHT / 2, -5.63]} size={[0.2, ROOM_HEIGHT, 0.75]} />
+      <WallBlock position={[-5.2, ROOM_HEIGHT / 2, -7.25]} size={[0.2, ROOM_HEIGHT, 2.5]} />
+      <WallBlock position={[-5.2, ROOM_HEIGHT / 2, -10.95]} size={[0.2, ROOM_HEIGHT, 2.1]} />
       <InteriorDoor position={[-5.08, 0, -4.55]} rotationY={Math.PI / 2} hinge={-1} />
       <InteriorDoor position={[-5.08, 0, -9.2]} rotationY={Math.PI / 2} />
 
       {/* The ensuite has a private-wing door and a second door from the living area. */}
-      <WallBlock position={[-11.3, 2.6, -6]} size={[7.4, 5.2, 0.2]} />
-      <WallBlock position={[-5.68, 2.6, -6]} size={[0.95, 5.2, 0.2]} />
+      <WallBlock position={[-11.3, ROOM_HEIGHT / 2, -6]} size={[7.4, ROOM_HEIGHT, 0.2]} />
+      <WallBlock position={[-5.68, ROOM_HEIGHT / 2, -6]} size={[0.95, ROOM_HEIGHT, 0.2]} />
       <InteriorDoor position={[-6.88, 0, -5.88]} hinge={-1} />
 
       {/* The study is a private room with solid walls, not a glass office. */}
-      <WallBlock position={[9.1, 2.6, -5.08]} size={[0.2, 5.2, 13.45]} />
-      <WallBlock position={[9.1, 2.6, 3.38]} size={[0.2, 5.2, 0.45]} />
-      <WallBlock position={[12.05, 2.6, 3.6]} size={[5.9, 5.2, 0.2]} />
+      <WallBlock position={[9.1, ROOM_HEIGHT / 2, -5.08]} size={[0.2, ROOM_HEIGHT, 13.45]} />
+      <WallBlock position={[9.1, ROOM_HEIGHT / 2, 3.38]} size={[0.2, ROOM_HEIGHT, 0.45]} />
+      <WallBlock position={[12.05, ROOM_HEIGHT / 2, 3.6]} size={[5.9, ROOM_HEIGHT, 0.2]} />
       <InteriorDoor position={[8.98, 0, 2.4]} rotationY={Math.PI / 2} />
 
-      <mesh position={[-5.06, 4.55, 3.4]}>
+      <mesh position={[-5.06, ROOM_HEIGHT - 0.42, 3.4]}>
         <boxGeometry args={[0.08, 0.06, 16.4]} />
         <meshStandardMaterial color="#ffd39a" emissive="#ffbd74" emissiveIntensity={0.6} toneMapped={false} />
       </mesh>
@@ -209,7 +210,7 @@ export default function Room({ environment }: { environment: ResolvedEnvironment
         <meshStandardMaterial map={wallTexture} color="#e9e2d8" roughness={0.91} />
       </mesh>
       <WallBlock position={[12.15, ROOM_HEIGHT / 2, halfD]} size={[5.7, ROOM_HEIGHT, 0.18]} walnut />
-      <WallBlock position={[8.55, 4.08, halfD]} size={[1.5, 2.24, 0.2]} walnut />
+      <WallBlock position={[8.55, 3.46, halfD]} size={[1.5, 1.08, 0.2]} walnut />
       <DoorFrame position={[8.55, 0, halfD - 0.09]} rotationY={Math.PI} width={1.52} />
       <mesh position={[8.55, 1.42, halfD - 0.15]} castShadow>
         <boxGeometry args={[1.36, 2.74, 0.12]} />

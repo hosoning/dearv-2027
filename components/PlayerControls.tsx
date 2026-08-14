@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { controlsState } from '@/lib/controlsState';
 import { ROOM_WIDTH, ROOM_DEPTH } from './Room';
 
-const EYE_HEIGHT = 1.6;
+const EYE_HEIGHT = 1.62;
 const MOVE_SPEED = 3.8;
 const LOOK_SPEED = 2.05;
 const MARGIN = 0.48;
@@ -14,7 +14,7 @@ const BOUND_X = ROOM_WIDTH / 2 - MARGIN;
 const BOUND_Z = ROOM_DEPTH / 2 - MARGIN;
 const PLAYER_RADIUS = 0.18;
 
-const BLOCKERS = [
+const SOURCE_BLOCKERS = [
   // Private-wing boundary with separate master and living-to-ensuite doors.
   { minX: -5.32, maxX: -5.02, minZ: -11.8, maxZ: -9.9 },
   { minX: -5.32, maxX: -5.02, minZ: -8.5, maxZ: -5.25 },
@@ -31,7 +31,7 @@ const BLOCKERS = [
   { minX: -5.3, maxX: -3.85, minZ: 6.0, maxZ: 11.65 },
   { minX: -2.95, maxX: 2.95, minZ: 6.3, maxZ: 8.2 },
   // Open master-suite furniture.
-  { minX: -14.65, maxX: -10.35, minZ: 5.3, maxZ: 8.7 },
+  { minX: -14.8, maxX: -12.0, minZ: 5.65, maxZ: 8.35 },
   { minX: -14.82, maxX: -13.75, minZ: -5.55, maxZ: 3.25 },
   { minX: -14.25, maxX: -5.35, minZ: -6.02, maxZ: -5.2 },
   { minX: -11.7, maxX: -10.1, minZ: -4.5, maxZ: -0.8 },
@@ -41,15 +41,23 @@ const BLOCKERS = [
   { minX: -8.15, maxX: -6.95, minZ: -11.75, maxZ: -10.25 },
   { minX: -7.2, maxX: -5.3, minZ: -11.45, maxZ: -9.25 },
   // L-shaped living sofa and coffee table; the glass-side promenade stays open.
-  { minX: -1.85, maxX: 3.75, minZ: -3.45, maxZ: -1.0 },
-  { minX: -2.65, maxX: -0.58, minZ: -6.85, maxZ: -2.4 },
-  { minX: 0.05, maxX: 2.35, minZ: -5.85, maxZ: -3.75 },
+  { minX: -1.75, maxX: 3.65, minZ: -2.78, maxZ: -1.55 },
+  { minX: -1.8, maxX: -0.42, minZ: -4.78, maxZ: -2.3 },
+  { minX: 0.35, maxX: 2.0, minZ: -5.55, maxZ: -4.0 },
   // Study desk, lounge chair and wall library.
   { minX: 10.7, maxX: 12.9, minZ: -6.85, maxZ: -1.85 },
   { minX: 11.75, maxX: 13.75, minZ: -0.75, maxZ: 1.25 },
   { minX: 12.75, maxX: 13.9, minZ: -5.05, maxZ: -3.55 },
   { minX: 14.0, maxX: 14.8, minZ: -11.1, maxZ: 2.8 },
 ];
+
+// Source coordinates follow the authored floor plan. The whole apartment is mirrored
+// for the occupant's view: facing the windows, the master wing is on the right.
+const BLOCKERS = SOURCE_BLOCKERS.map((box) => ({
+  ...box,
+  minX: -box.maxX,
+  maxX: -box.minX,
+}));
 
 function blocked(x: number, z: number) {
   return BLOCKERS.some(
@@ -72,11 +80,11 @@ export default function PlayerControls() {
   useEffect(() => {
     // Match Camera A in the approved plan: inside the foyer, looking diagonally
     // toward the open gallery instead of straight into the study's north wall.
-    camera.position.set(9.45, EYE_HEIGHT, ROOM_DEPTH / 2 - 2.2);
+    camera.position.set(-9.45, EYE_HEIGHT, ROOM_DEPTH / 2 - 2.2);
     camera.rotation.order = 'YXZ';
-    yaw.current = 0.52;
+    yaw.current = -0.52;
     pitch.current = 0;
-    camera.rotation.y = 0.52;
+    camera.rotation.y = -0.52;
   }, [camera]);
 
   useEffect(() => {

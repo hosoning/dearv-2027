@@ -1,8 +1,10 @@
 'use client';
 
+import { useMemo } from 'react';
 import { RoundedBox } from '@react-three/drei';
 import type { ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
+import { createMarbleTexture, createWalnutTexture } from '@/lib/textures';
 
 function clickThrough(handler?: () => void) {
   return (event: ThreeEvent<MouseEvent>) => {
@@ -60,7 +62,7 @@ function FoyerSuite() {
         {[-1.28, 1.28].map((x) => <mesh key={x} position={[x, 0.25, 0]}><boxGeometry args={[0.08, 0.5, 0.58]} /><meshStandardMaterial color="#604331" roughness={0.58} /></mesh>)}
         <RoundedBox args={[2.65, 0.16, 0.66]} radius={0.07} smoothness={5} position={[0, 0.64, 0]}><meshStandardMaterial color="#c0b4a7" roughness={0.95} /></RoundedBox>
       </group>
-      <mesh position={[10.1, 4.15, 10.8]}><boxGeometry args={[7.5, 0.035, 0.035]} /><meshStandardMaterial color="#ffd49a" emissive="#ffc278" emissiveIntensity={0.85} toneMapped={false} /></mesh>
+      <mesh position={[10.1, 3.68, 10.8]}><boxGeometry args={[7.5, 0.035, 0.035]} /><meshStandardMaterial color="#ffd49a" emissive="#ffc278" emissiveIntensity={0.85} toneMapped={false} /></mesh>
     </group>
   );
 }
@@ -77,12 +79,14 @@ function BarStool({ position, rotationY = 0 }: { position: [number, number, numb
 }
 
 function KitchenSuite() {
+  const walnut = useMemo(() => createWalnutTexture(), []);
+  const marble = useMemo(() => createMarbleTexture(), []);
   return (
     <group>
       {/* North run: sink, cooktop, pantry and double-door refrigerator. */}
-      <RoundedBox args={[10.2, 0.92, 1.05]} radius={0.055} smoothness={4} position={[0, 0.46, 11.15]} castShadow receiveShadow><meshStandardMaterial color="#74604f" roughness={0.58} /></RoundedBox>
-      <mesh position={[0, 0.96, 10.98]} castShadow receiveShadow><boxGeometry args={[10.4, 0.11, 1.28]} /><meshStandardMaterial color="#d7d0c6" roughness={0.46} /></mesh>
-      {[-3.65, -2.05, -0.45, 1.15].map((x) => <RoundedBox key={x} args={[1.42, 1.5, 0.48]} radius={0.035} smoothness={3} position={[x, 3.05, 11.55]} castShadow><meshStandardMaterial color="#8b735f" roughness={0.67} /></RoundedBox>)}
+      <RoundedBox args={[10.2, 0.92, 1.05]} radius={0.055} smoothness={4} position={[0, 0.46, 11.15]} castShadow receiveShadow><meshStandardMaterial map={walnut} color="#8a6c54" roughness={0.52} /></RoundedBox>
+      <mesh position={[0, 0.96, 10.98]} castShadow receiveShadow><boxGeometry args={[10.4, 0.11, 1.28]} /><meshPhysicalMaterial map={marble} color="#f1eee9" roughness={0.25} clearcoat={0.3} clearcoatRoughness={0.16} /></mesh>
+      {[-3.65, -2.05, -0.45, 1.15].map((x) => <RoundedBox key={x} args={[1.42, 1.5, 0.48]} radius={0.035} smoothness={3} position={[x, 3.05, 11.55]} castShadow><meshStandardMaterial map={walnut} color="#9a7c62" roughness={0.58} /></RoundedBox>)}
       <RoundedBox args={[1.82, 3.5, 1.08]} radius={0.055} smoothness={4} position={[4.02, 1.75, 11.0]} castShadow><meshStandardMaterial color="#82786d" metalness={0.18} roughness={0.43} /></RoundedBox>
       <mesh position={[4.02, 1.76, 10.43]}><boxGeometry args={[0.035, 3.15, 0.025]} /><meshStandardMaterial color="#56504a" metalness={0.5} roughness={0.28} /></mesh>
       <mesh position={[1.2, 0.99, 10.8]}><boxGeometry args={[1.42, 0.035, 0.68]} /><meshStandardMaterial color="#27292b" roughness={0.24} /></mesh>
@@ -91,14 +95,14 @@ function KitchenSuite() {
       {[-2.02, -1.28].flatMap((x) => [10.55, 10.98].map((z) => [x, z] as const)).map(([x, z]) => <mesh key={`${x}-${z}`} position={[x, 1.025, z]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.18, 0.018, 10, 32]} /><meshStandardMaterial color="#77736c" metalness={0.5} roughness={0.32} /></mesh>)}
 
       {/* West return: uninterrupted worktop plus integrated oven tower. */}
-      <RoundedBox args={[1.05, 0.92, 4.7]} radius={0.055} smoothness={4} position={[-4.65, 0.46, 8.55]} castShadow><meshStandardMaterial color="#74604f" roughness={0.58} /></RoundedBox>
-      <mesh position={[-4.48, 0.96, 8.55]}><boxGeometry args={[1.28, 0.11, 4.9]} /><meshStandardMaterial color="#d7d0c6" roughness={0.46} /></mesh>
+      <RoundedBox args={[1.05, 0.92, 4.7]} radius={0.055} smoothness={4} position={[-4.65, 0.46, 8.55]} castShadow><meshStandardMaterial map={walnut} color="#8a6c54" roughness={0.52} /></RoundedBox>
+      <mesh position={[-4.48, 0.96, 8.55]}><boxGeometry args={[1.28, 0.11, 4.9]} /><meshPhysicalMaterial map={marble} color="#f1eee9" roughness={0.25} clearcoat={0.3} clearcoatRoughness={0.16} /></mesh>
       <RoundedBox args={[0.52, 1.55, 1.05]} radius={0.035} smoothness={3} position={[-4.34, 1.85, 7.25]}><meshStandardMaterial color="#373536" metalness={0.36} roughness={0.28} /></RoundedBox>
       <mesh position={[-4.05, 1.86, 7.25]} rotation={[0, Math.PI / 2, 0]}><planeGeometry args={[0.8, 0.9]} /><meshStandardMaterial color="#1e2021" metalness={0.5} roughness={0.18} /></mesh>
 
       {/* The island is a clean bar surface: no sink or cooktop. */}
-      <RoundedBox args={[5.4, 0.92, 1.35]} radius={0.08} smoothness={5} position={[0, 0.46, 7.25]} castShadow receiveShadow><meshStandardMaterial color="#765a45" roughness={0.52} /></RoundedBox>
-      <RoundedBox args={[5.65, 0.14, 1.52]} radius={0.08} smoothness={5} position={[0, 0.98, 7.25]} castShadow><meshStandardMaterial color="#d4cdc3" roughness={0.42} /></RoundedBox>
+      <RoundedBox args={[5.4, 0.92, 1.35]} radius={0.08} smoothness={5} position={[0, 0.46, 7.25]} castShadow receiveShadow><meshStandardMaterial map={walnut} color="#815f47" roughness={0.48} /></RoundedBox>
+      <RoundedBox args={[5.65, 0.14, 1.52]} radius={0.08} smoothness={5} position={[0, 0.98, 7.25]} castShadow><meshPhysicalMaterial map={marble} color="#f3f0eb" roughness={0.22} clearcoat={0.42} clearcoatRoughness={0.14} /></RoundedBox>
       {[-1.8, -0.6, 0.6, 1.8].map((x) => <BarStool key={x} position={[x, 0, 6.22]} rotationY={Math.PI} />)}
       <CeramicVase position={[1.85, 1.05, 7.25]} scale={0.34} color="#b5aa9e" />
     </group>
@@ -110,7 +114,7 @@ const BOOK_COLORS = ['#6c5647', '#9b8065', '#4d665e', '#8f6b5d', '#b6a184'];
 function StudyBookWall({ onClick }: { onClick?: () => void }) {
   return (
     <group position={[14.48, 0, -4.0]} rotation={[0, -Math.PI / 2, 0]} onClick={clickThrough(onClick)}>
-      <mesh position={[0, 2.35, 0]} castShadow><boxGeometry args={[13.4, 4.35, 0.58]} /><meshStandardMaterial color="#4c372d" roughness={0.54} /></mesh>
+      <mesh position={[0, 2.0, 0]} castShadow><boxGeometry args={[13.4, 3.75, 0.58]} /><meshStandardMaterial color="#4c372d" roughness={0.54} /></mesh>
       {[-5.4, -3.6, -1.8, 0, 1.8, 3.6, 5.4].map((x, bay) => (
         <group key={x} position={[x, 0, -0.34]}>
           {[1.0, 1.72, 2.44, 3.16, 3.88].map((y) => <mesh key={y} position={[0, y, 0]}><boxGeometry args={[1.55, 0.055, 0.48]} /><meshStandardMaterial color="#9b7757" roughness={0.5} /></mesh>)}
@@ -217,7 +221,7 @@ function BathroomSuite() {
         <mesh position={[-0.88, 1.62, 0.88]} rotation={[0, Math.PI / 2, 0]}><boxGeometry args={[1.8, 3.1, 0.06]} /><meshPhysicalMaterial color="#dce7e6" transmission={0.9} transparent opacity={0.2} roughness={0.12} /></mesh>
         <mesh position={[0, 3.18, 0]}><boxGeometry args={[1.9, 0.06, 0.09]} /><meshStandardMaterial color="#7d756c" metalness={0.56} roughness={0.28} /></mesh>
       </group>
-      <mesh position={[-10.0, 4.12, -8.8]}><boxGeometry args={[8.4, 0.03, 0.03]} /><meshBasicMaterial color="#ffd9a3" toneMapped={false} /></mesh>
+      <mesh position={[-10.0, 3.66, -8.8]}><boxGeometry args={[8.4, 0.03, 0.03]} /><meshBasicMaterial color="#ffd9a3" toneMapped={false} /></mesh>
     </group>
   );
 }
@@ -225,8 +229,8 @@ function BathroomSuite() {
 function Curtains() {
   return (
     <group>
-      {[[-13.7, 1], [13.7, -1]].map(([base, direction]) => <group key={base} position={[base, 2.48, -11.72]}>{Array.from({ length: 7 }).map((_, index) => <RoundedBox key={index} args={[0.22, 4.55, 0.09]} radius={0.08} smoothness={4} position={[(index - 3) * 0.17 * direction, 0, 0]}><meshPhysicalMaterial color="#e5ddd3" transparent opacity={0.58} roughness={0.82} transmission={0.18} /></RoundedBox>)}</group>)}
-      <mesh position={[0, 4.76, -11.68]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.028, 0.028, 28.2, 14]} /><meshStandardMaterial color="#ae9169" metalness={0.64} roughness={0.25} /></mesh>
+      {[[-13.7, 1], [13.7, -1]].map(([base, direction]) => <group key={base} position={[base, 1.98, -11.72]}>{Array.from({ length: 7 }).map((_, index) => <RoundedBox key={index} args={[0.22, 3.55, 0.09]} radius={0.08} smoothness={4} position={[(index - 3) * 0.17 * direction, 0, 0]}><meshPhysicalMaterial color="#e5ddd3" transparent opacity={0.58} roughness={0.82} transmission={0.18} /></RoundedBox>)}</group>)}
+      <mesh position={[0, 3.78, -11.68]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[0.028, 0.028, 28.2, 14]} /><meshStandardMaterial color="#ae9169" metalness={0.64} roughness={0.25} /></mesh>
     </group>
   );
 }

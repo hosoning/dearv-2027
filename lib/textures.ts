@@ -13,6 +13,7 @@ function finishTexture(canvas: HTMLCanvasElement, repeat = true) {
   const texture = new THREE.CanvasTexture(canvas);
   if (repeat) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
   return texture;
 }
 
@@ -23,11 +24,11 @@ export function createFloorTexture(size = 512): THREE.CanvasTexture {
   const plankWidth = plankLength / 4;
   const baseHue = 28;
 
-  ctx.fillStyle = `hsl(${baseHue}, 35%, 42%)`;
+  ctx.fillStyle = `hsl(${baseHue}, 31%, 54%)`;
   ctx.fillRect(0, 0, size, size);
 
   const drawPlank = (x: number, y: number, angle: number) => {
-    const shade = 30 + Math.random() * 14;
+    const shade = 44 + Math.random() * 13;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle);
@@ -36,10 +37,10 @@ export function createFloorTexture(size = 512): THREE.CanvasTexture {
     grad.addColorStop(1, `hsl(${baseHue + Math.random() * 6}, 40%, ${shade - 6}%)`);
     ctx.fillStyle = grad;
     ctx.fillRect(-plankLength / 2, -plankWidth / 2, plankLength, plankWidth);
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.strokeStyle = 'rgba(50,30,18,0.16)';
     ctx.lineWidth = 1;
     ctx.strokeRect(-plankLength / 2, -plankWidth / 2, plankLength, plankWidth);
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.strokeStyle = 'rgba(70,42,25,0.055)';
     for (let i = 0; i < 3; i++) {
       const gy = -plankWidth / 2 + (i + 0.5) * (plankWidth / 3);
       ctx.beginPath();
