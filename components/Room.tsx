@@ -101,7 +101,11 @@ function FullGlassFacade() {
     <group>
       <mesh position={[0, y, z + 0.07]}>
         <boxGeometry args={[ROOM_WIDTH - 0.55, height, 0.045]} />
-        <meshPhysicalMaterial color="#c9d8dc" transmission={0.9} transparent opacity={0.24} roughness={0.08} thickness={0.16} ior={1.46} clearcoat={1} clearcoatRoughness={0.08} />
+        <meshPhysicalMaterial color="#d8e5e8" transmission={0.96} transparent opacity={0.14} roughness={0.045} thickness={0.22} ior={1.49} clearcoat={1} clearcoatRoughness={0.035} reflectivity={0.82} />
+      </mesh>
+      <mesh position={[0, y, z + 0.1]}>
+        <planeGeometry args={[ROOM_WIDTH - 0.7, height - 0.08]} />
+        <meshPhysicalMaterial color="#9bc2cc" transparent opacity={0.035} roughness={0.02} metalness={0.08} depthWrite={false} />
       </mesh>
       {/* The ensuite keeps the continuous facade but uses privacy-frosted glass. */}
       <mesh position={[-10.1, y, z + 0.105]}>
@@ -120,6 +124,12 @@ function FullGlassFacade() {
         <boxGeometry args={[ROOM_WIDTH - 0.4, 0.075, 0.1]} />
         <meshStandardMaterial color="#4a4038" metalness={0.62} roughness={0.27} />
       </mesh>
+      {[-12.4, -7.4, -2.4, 2.6, 7.6, 12.6].map((x) => (
+        <mesh key={`reflection-${x}`} position={[x, y + 0.18, z + 0.145]} rotation={[0, 0, -0.1]}>
+          <planeGeometry args={[0.045, height * 0.78]} />
+          <meshBasicMaterial color="#eefcff" transparent opacity={0.07} depthWrite={false} toneMapped={false} />
+        </mesh>
+      ))}
     </group>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import type { ResolvedEnvironment } from '@/lib/environment';
 
@@ -51,11 +52,21 @@ function WeatherParticles({ weather }: { weather: ResolvedEnvironment['weather']
 }
 
 export default function WindowWorld({ environment }: { environment: ResolvedEnvironment }) {
+  const oceanBackdrop = useTexture('env/highrise_ocean_backdrop.jpg');
+  oceanBackdrop.colorSpace = THREE.SRGBColorSpace;
+  oceanBackdrop.anisotropy = 8;
+
   return (
     <group position={[0, 0, -11.7]}>
-      {/* The visible landscape now comes from a photographic CC0 HDR panorama.
-          Only the glass-side weather layer remains procedural. */}
+      {/* A rectilinear backplate keeps the ocean horizon broad and legible through
+          the full facade, while the matching HDR remains responsible for light and reflections. */}
+      <mesh position={[0, 4.05, -8.2]}>
+        <planeGeometry args={[38, 21.38]} />
+        <meshBasicMaterial map={oceanBackdrop} toneMapped={false} fog={false} side={THREE.DoubleSide} />
+      </mesh>
       <WeatherParticles weather={environment.weather} />
     </group>
   );
 }
+
+useTexture.preload('env/highrise_ocean_backdrop.jpg');

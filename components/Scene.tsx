@@ -51,12 +51,12 @@ export default function Scene({
       <Suspense fallback={null}>
         <color attach="background" args={[isNight ? '#11131a' : '#d8d1c7']} />
         <Environment
-          files="env/residential_garden_2k.hdr"
+          files="env/highrise_beach_ocean_2k.hdr"
           background
-          backgroundIntensity={isNight ? 0.18 : 1.0}
+          backgroundIntensity={isNight ? 0.16 : 0.78}
           environmentIntensity={isNight ? 0.22 : 0.52}
-          backgroundRotation={[0, Math.PI * 0.36, 0]}
-          environmentRotation={[0, Math.PI * 0.36, 0]}
+          backgroundRotation={[0, 0, 0]}
+          environmentRotation={[0, 0, 0]}
         />
         <fog attach="fog" args={[isNight ? '#191820' : '#d8d0c5', 32, 75]} />
         <hemisphereLight args={[isNight ? '#7183a3' : '#fff2df', '#5b4738', isNight ? 0.28 : 0.62]} />
