@@ -34,3 +34,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Godot private game build/cache
+/game/.godot/
+/game/builds/
+/game/export_presets.cfg
+/game/config/local.cfg
+
+# Blender temporary and backup files
+*.blend1
+*.blend2
+*.blend@
+/game/assets/**/*.blend
+/game/assets/materials/
+/game/assets/previews/

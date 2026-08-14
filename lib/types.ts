@@ -17,6 +17,10 @@ export interface PlacedItem {
   pos_y: number;
   pos_z: number;
   rotation_y: number;
+  scale_x?: number;
+  scale_y?: number;
+  scale_z?: number;
+  state?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -42,7 +46,19 @@ export interface MemoryObject {
   pos_x: number;
   pos_y: number;
   pos_z: number;
+  asset_url?: string | null;
+  asset_version?: number;
+  display_config?: Record<string, unknown>;
+  interaction_config?: Record<string, unknown>;
+  updated_at?: string;
   created_at: string;
+}
+
+export interface RoomRuntimeState {
+  room_id: string;
+  object_id: string;
+  state: Record<string, unknown>;
+  updated_at: string;
 }
 
 export interface CatalogEntry {
