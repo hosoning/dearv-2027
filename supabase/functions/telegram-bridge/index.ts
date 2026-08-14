@@ -1,1 +1,126 @@
-m«ëˆ§½©buªàºg§¶Ë©i¶¬{÷îËb¢{?µé^‚¶¦n¸ïâ×±¶Å,j›jÇºà7an{¦Š)ßŠW¨¢ë_ŠW›n·š‘ºŞjG§r‡^v‹­¦ën¦)í¢X§zÊ•éà¶î˜7]yÊy×œ¡×¢›­†¥¥Ø¬¦V²¶¬™ë,j¢Šzn¶)éº×â•ç^}«¥µú+²×bŠ.¶›­¢ëiº×â•ç^}«¥µú+²×hº
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+type TelegramMessage = {
+  message_id: number;
+  text?: string;
+  chat: { id: number };
+  from?: { id: number; first_name?: string; username?: string };
+};
+
+const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN") ?? "";
+const allowedChatId = Deno.env.get("TELEGRAM_ALLOWED_CHAT_ID") ?? "";
+const telegramWebhookSecret = Deno.env.get("TELEGRAM_WEBHOOK_SECRET") ?? "";
+const progressSecret = Deno.env.get("DEARV_PROGRESS_SECRET") ?? "";
+const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const db = createClient(supabaseUrl, serviceRoleKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8" },
+  });
+
+async function sendMessage(chatId: number | string, text: string) {
+  if (!botToken) throw new Error("TELEGRAM_BOT_TOKEN is missing");
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      disable_web_page_preview: true,
+    }),
+  });
+  if (!response.ok) throw new Error(`Telegram send failed: ${response.status}`);
+}
+
+async function latestStatus(): Promise<string> {
+  const { data } = await db
+    .from("project_progress")
+    .select("phase,summary,status,commit_sha,details_url,created_at")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!data) return "DearV æ­£åœ¨è£½ä½œä¸­ï¼Œç›®å‰é‚„æ²’æœ‰æ–°çš„é›²ç«¯ build è¨˜éŒ„ã€‚";
+  const icon = data.status === "success" ? "âœ…" : data.status === "failure" ? "âŒ" : "ğŸ› ï¸";
+  const sha = data.commit_sha ? `\nç‰ˆæœ¬ï¼š${String(data.commit_sha).slice(0, 8)}` : "";
+  const link = data.details_url ? `\nè©³æƒ…ï¼š${data.details_url}` : "";
+  return `${icon} ${data.phase}\n${data.summary}${sha}${link}`;
+}
+
+async function handleTelegram(message: TelegramMessage) {
+  const chatId = String(message.chat.id);
+  if (!allowedChatId || chatId !== allowedChatId) {
+    await sendMessage(message.chat.id, "é€™æ˜¯ DearV ç§äººé€²åº¦æ©Ÿå™¨äººï¼Œé€™å€‹å¸³è™Ÿæ²’æœ‰å­˜å–æ¬Šé™ã€‚");
+    return;
+  }
+  const text = (message.text ?? "").trim();
+  if (!text) return;
+  if (text === "/start") {
+    await sendMessage(message.chat.id, "DearV å·²é€£ç·šã€‚\n\n/status æŸ¥çœ‹æœ€æ–°é€²åº¦\nç›´æ¥è¼¸å…¥æ–‡å­—å³å¯æäº¤ä¿®æ”¹æ„è¦‹ã€‚ä½ çš„å…§å®¹åªæœƒé€²å…¥ç§äººå°ˆæ¡ˆå¾…è¾¦ã€‚");
+    return;
+  }
+  if (text === "/status") {
+    await sendMessage(message.chat.id, await latestStatus());
+    return;
+  }
+  const { error } = await db.from("telegram_feedback").upsert({
+    telegram_chat_id: message.chat.id,
+    telegram_user_id: message.from?.id ?? null,
+    telegram_message_id: message.message_id,
+    message: text,
+    context: {
+      first_name: message.from?.first_name ?? null,
+      username: message.from?.username ?? null,
+    },
+  }, { onConflict: "telegram_chat_id,telegram_message_id", ignoreDuplicates: true });
+  if (error) throw error;
+  await sendMessage(message.chat.id, "æ”¶åˆ°ï¼Œå·²æ”¾é€² DearV ç§äººè£½ä½œå¾…è¾¦ã€‚æˆ‘æœƒä¿ç•™åŸæ–‡ï¼Œä¹‹å¾Œè™•ç†æ™‚å›å ±å°æ‡‰ç‰ˆæœ¬ã€‚");
+}
+
+async function handleProgress(payload: Record<string, unknown>) {
+  const rawStatus = String(payload.status ?? "running");
+  const normalizedStatus = rawStatus === "success"
+    ? "success"
+    : rawStatus === "cancelled"
+    ? "cancelled"
+    : rawStatus === "failure" || rawStatus === "timed_out" || rawStatus === "action_required"
+    ? "failure"
+    : "running";
+  const row = {
+    phase: String(payload.phase ?? "Cloud build"),
+    summary: String(payload.summary ?? "DearV has a new progress update."),
+    status: normalizedStatus,
+    commit_sha: payload.commit_sha ? String(payload.commit_sha) : null,
+    details_url: payload.details_url ? String(payload.details_url) : null,
+    metadata: payload.metadata ?? {},
+  };
+  const { error } = await db.from("project_progress").insert(row);
+  if (error) throw error;
+  if (allowedChatId) await sendMessage(allowedChatId, await latestStatus());
+}
+
+Deno.serve(async (request) => {
+  if (request.method === "GET") return json({ ok: true, service: "dearv-telegram-bridge" });
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  try {
+    const telegramSecret = request.headers.get("x-telegram-bot-api-secret-token") ?? "";
+    const ciSecret = request.headers.get("x-dearv-progress-secret") ?? "";
+    const body = await request.json();
+    if (telegramWebhookSecret && telegramSecret === telegramWebhookSecret) {
+      if (body?.message) await handleTelegram(body.message as TelegramMessage);
+      return json({ ok: true });
+    }
+    if (progressSecret && ciSecret === progressSecret) {
+      await handleProgress(body as Record<string, unknown>);
+      return json({ ok: true });
+    }
+    return json({ error: "unauthorized" }, 401);
+  } catch (error) {
+    console.error(error);
+    return json({ error: "bridge_failed" }, 500);
+  }
+});
