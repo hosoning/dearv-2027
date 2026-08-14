@@ -7,11 +7,9 @@ import * as THREE from 'three';
 import type { ResolvedEnvironment } from '@/lib/environment';
 import Room from './Room';
 import Sofa from './furniture/Sofa';
-import DiningTable from './furniture/DiningTable';
 import Bed from './furniture/Bed';
 import CoffeeTable from './furniture/CoffeeTable';
 import FloorLamp from './furniture/FloorLamp';
-import TVConsole from './furniture/TVConsole';
 import Rug from './furniture/Rug';
 import WallArt from './furniture/WallArt';
 import Character from './Character';
@@ -89,28 +87,26 @@ export default function Scene({
         <Room environment={environment} />
         <ArchitecturalDetails onArchiveClick={onArchiveClick} onLettersClick={onLettersClick} />
 
-        <Rug position={[2.4, 0.012, -5.0]} size={[9.2, 6.7]} color="#b5a796" />
-        <group position={[2.4, 0, -2.6]} scale={1.72}><Sofa rotationY={Math.PI} /></group>
-        <group position={[2.4, 0, -5.05]} scale={1.5}><CoffeeTable /></group>
-        <FloorLamp position={[-1.35, 0, -3.55]} />
-        <TVConsole position={[2.4, 0, -8.65]} />
+        {/* The final plan has no dining zone. The living group is pulled north to leave a glass-side promenade. */}
+        <Rug position={[2.25, 0.012, -4.6]} size={[9.45, 6.25]} color="#b5a796" />
+        <group position={[2.35, 0, -2.25]} scale={1.86}><Sofa rotationY={Math.PI} /></group>
+        <group position={[-0.12, 0, -4.68]} scale={1.63}><Sofa rotationY={Math.PI / 2} /></group>
+        <group position={[2.35, 0, -4.85]} scale={1.58}><CoffeeTable /></group>
+        <FloorLamp position={[5.65, 0, -2.72]} />
 
-        <Rug position={[-1.0, 0.011, 1.55]} size={[6.7, 4.45]} color="#c6b8a6" />
-        <group position={[-1.0, 0, 1.65]} scale={1.48}><DiningTable rotationY={Math.PI / 2} /></group>
+        <Rug position={[12.0, 0.01, -4.15]} size={[4.75, 12.4]} color="#978b7d" />
+        <Rug position={[-10.7, 0.011, 7.15]} size={[7.55, 7.45]} color="#c1b09e" />
+        <group position={[-11.55, 0, 7.0]} scale={1.62}><Bed rotationY={-Math.PI / 2} /></group>
+        <DeskKeepsakes position={[11.8, 0.94, -4.25]} rotationY={Math.PI / 2} />
 
-        <Rug position={[9.8, 0.01, 7.3]} size={[10.0, 6.65]} color="#978b7d" />
-        <Rug position={[-8.55, 0.011, -0.15]} size={[7.35, 6.6]} color="#c1b09e" />
-        <group position={[-8.45, 0, 0.55]} scale={1.56}><Bed rotationY={Math.PI} /></group>
-        <DeskKeepsakes />
-
-        <KeepsakeCabinet onClick={onGiftsClick} />
-        <PajamaWardrobe onClick={onGiftsClick} />
-        <Planter position={[13.7, 0, -9.9]} scale={1.35} />
-        <Planter position={[-3.85, 0, -10.2]} scale={1.18} />
-        <Planter position={[4.8, 0, 4.8]} scale={0.92} />
-        <WallArt position={[14.88, 2.35, 1.45]} rotationY={-Math.PI / 2} size={[1.3, 1.7]} color="#6e8276" />
-        <WallArt position={[-14.88, 2.25, 5.1]} rotationY={Math.PI / 2} size={[1.15, 1.42]} color="#b98964" />
-        <Character position={[2.1, 0, 0.15]} onClick={onCompanionClick} />
+        {/* Gifts remain physical, but are integrated into the wardrobe wall instead of standing in the living room. */}
+        <KeepsakeCabinet position={[-7.0, 0, -5.62]} rotationY={0} onClick={onGiftsClick} />
+        <PajamaWardrobe position={[-14.52, 0, 2.75]} rotationY={Math.PI / 2} onClick={onGiftsClick} />
+        <Planter position={[7.25, 0, -10.2]} scale={1.26} />
+        <Planter position={[13.55, 0, -10.0]} scale={1.18} />
+        <Planter position={[5.4, 0, 4.85]} scale={0.9} />
+        <WallArt position={[9.2, 2.35, -0.15]} rotationY={Math.PI / 2} size={[1.25, 1.55]} color="#6e8276" />
+        <Character position={[5.0, 0, -0.3]} onClick={onCompanionClick} />
         {children}
         <ContactShadows position={[0, 0.015, 0]} opacity={isNight ? 0.3 : 0.2} scale={42} blur={3.2} far={7} resolution={256} frames={1} />
         <AdaptiveDpr pixelated={false} />

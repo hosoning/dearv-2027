@@ -15,27 +15,39 @@ const BOUND_Z = ROOM_DEPTH / 2 - MARGIN;
 const PLAYER_RADIUS = 0.18;
 
 const BLOCKERS = [
-  // Master-suite wall, split around its two doors.
-  { minX: -5.32, maxX: -5.02, minZ: -11.7, maxZ: -6.42 },
-  { minX: -5.32, maxX: -5.02, minZ: -5.16, maxZ: 1.0 },
-  { minX: -5.32, maxX: -5.02, minZ: 2.4, maxZ: 5.05 },
-  // Bathroom-to-bedroom wall, split around the internal door.
-  { minX: -14.85, maxX: -11.35, minZ: -4.4, maxZ: -4.1 },
-  { minX: -10.04, maxX: -5.28, minZ: -4.4, maxZ: -4.1 },
-  // Study glass partition with a wide entrance.
-  { minX: 4.15, maxX: 5.18, minZ: 3.76, maxZ: 4.05 },
-  { minX: 7.05, maxX: 14.72, minZ: 3.76, maxZ: 4.05 },
-  // Large fixed furniture.
-  { minX: -14.45, maxX: -4.95, minZ: 10.4, maxZ: 11.75 },
-  { minX: -10.8, maxX: -5.2, minZ: 6.45, maxZ: 8.2 },
-  { minX: 4.1, maxX: 14.75, minZ: 10.9, maxZ: 11.75 },
-  { minX: 7.55, maxX: 12.4, minZ: 6.4, maxZ: 8.25 },
-  { minX: -10.3, maxX: -6.55, minZ: -1.55, maxZ: 2.65 },
-  { minX: -14.7, maxX: -13.2, minZ: -3.75, maxZ: 3.35 },
-  { minX: -14.2, maxX: -10.25, minZ: -9.65, maxZ: -7.65 },
-  { minX: 0.05, maxX: 4.8, minZ: -3.75, maxZ: -1.55 },
-  { minX: 0.4, maxX: 4.35, minZ: -6.2, maxZ: -4.0 },
-  { minX: 12.95, maxX: 14.6, minZ: -3.8, maxZ: -0.45 },
+  // Private-wing boundary with separate master and living-to-ensuite doors.
+  { minX: -5.32, maxX: -5.02, minZ: -11.8, maxZ: -9.9 },
+  { minX: -5.32, maxX: -5.02, minZ: -8.5, maxZ: -5.25 },
+  { minX: -5.32, maxX: -5.02, minZ: -3.8, maxZ: 11.8 },
+  // Ensuite top wall, split around its private-wing door.
+  { minX: -14.85, maxX: -7.6, minZ: -6.14, maxZ: -5.86 },
+  { minX: -6.15, maxX: -5.18, minZ: -6.14, maxZ: -5.86 },
+  // Solid study walls and wide timber doorway.
+  { minX: 8.98, maxX: 9.24, minZ: -11.8, maxZ: 1.65 },
+  { minX: 8.98, maxX: 9.24, minZ: 3.15, maxZ: 3.65 },
+  { minX: 9.0, maxX: 14.8, minZ: 3.46, maxZ: 3.74 },
+  // Kitchen and island.
+  { minX: -5.25, maxX: 5.25, minZ: 10.3, maxZ: 11.75 },
+  { minX: -5.3, maxX: -3.85, minZ: 6.0, maxZ: 11.65 },
+  { minX: -2.95, maxX: 2.95, minZ: 6.3, maxZ: 8.2 },
+  // Open master-suite furniture.
+  { minX: -13.8, maxX: -9.35, minZ: 5.05, maxZ: 8.95 },
+  { minX: -14.82, maxX: -13.75, minZ: -5.55, maxZ: 3.25 },
+  { minX: -14.25, maxX: -5.35, minZ: -6.02, maxZ: -5.2 },
+  { minX: -11.7, maxX: -10.1, minZ: -4.5, maxZ: -0.8 },
+  // Bathroom fixtures.
+  { minX: -14.15, maxX: -12.0, minZ: -10.65, maxZ: -7.05 },
+  { minX: -11.9, maxX: -8.25, minZ: -11.8, maxZ: -10.75 },
+  { minX: -8.15, maxX: -6.95, minZ: -11.75, maxZ: -10.25 },
+  { minX: -7.2, maxX: -5.3, minZ: -11.45, maxZ: -9.25 },
+  // L-shaped living sofa and coffee table; the glass-side promenade stays open.
+  { minX: -0.1, maxX: 4.85, minZ: -3.35, maxZ: -1.15 },
+  { minX: -1.1, maxX: 0.95, minZ: -6.85, maxZ: -2.55 },
+  { minX: 1.2, maxX: 3.55, minZ: -5.9, maxZ: -3.8 },
+  // Study desk, lounge chair and wall library.
+  { minX: 10.7, maxX: 12.9, minZ: -6.85, maxZ: -1.85 },
+  { minX: 11.45, maxX: 13.15, minZ: -0.45, maxZ: 1.35 },
+  { minX: 14.0, maxX: 14.8, minZ: -11.1, maxZ: 2.8 },
 ];
 
 function blocked(x: number, z: number) {
