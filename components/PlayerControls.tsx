@@ -31,7 +31,7 @@ const BLOCKERS = [
   { minX: -5.3, maxX: -3.85, minZ: 6.0, maxZ: 11.65 },
   { minX: -2.95, maxX: 2.95, minZ: 6.3, maxZ: 8.2 },
   // Open master-suite furniture.
-  { minX: -13.8, maxX: -9.35, minZ: 5.05, maxZ: 8.95 },
+  { minX: -14.65, maxX: -10.35, minZ: 5.3, maxZ: 8.7 },
   { minX: -14.82, maxX: -13.75, minZ: -5.55, maxZ: 3.25 },
   { minX: -14.25, maxX: -5.35, minZ: -6.02, maxZ: -5.2 },
   { minX: -11.7, maxX: -10.1, minZ: -4.5, maxZ: -0.8 },
@@ -41,12 +41,13 @@ const BLOCKERS = [
   { minX: -8.15, maxX: -6.95, minZ: -11.75, maxZ: -10.25 },
   { minX: -7.2, maxX: -5.3, minZ: -11.45, maxZ: -9.25 },
   // L-shaped living sofa and coffee table; the glass-side promenade stays open.
-  { minX: -0.1, maxX: 4.85, minZ: -3.35, maxZ: -1.15 },
-  { minX: -1.1, maxX: 0.95, minZ: -6.85, maxZ: -2.55 },
-  { minX: 1.2, maxX: 3.55, minZ: -5.9, maxZ: -3.8 },
+  { minX: -1.85, maxX: 3.75, minZ: -3.45, maxZ: -1.0 },
+  { minX: -2.65, maxX: -0.58, minZ: -6.85, maxZ: -2.4 },
+  { minX: 0.05, maxX: 2.35, minZ: -5.85, maxZ: -3.75 },
   // Study desk, lounge chair and wall library.
   { minX: 10.7, maxX: 12.9, minZ: -6.85, maxZ: -1.85 },
-  { minX: 11.45, maxX: 13.15, minZ: -0.45, maxZ: 1.35 },
+  { minX: 11.75, maxX: 13.75, minZ: -0.75, maxZ: 1.25 },
+  { minX: 12.75, maxX: 13.9, minZ: -5.05, maxZ: -3.55 },
   { minX: 14.0, maxX: 14.8, minZ: -11.1, maxZ: 2.8 },
 ];
 
@@ -69,10 +70,13 @@ export default function PlayerControls() {
   const lastPointer = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    camera.position.set(8.55, EYE_HEIGHT, ROOM_DEPTH / 2 - 1.45);
+    // Match Camera A in the approved plan: inside the foyer, looking diagonally
+    // toward the open gallery instead of straight into the study's north wall.
+    camera.position.set(9.45, EYE_HEIGHT, ROOM_DEPTH / 2 - 2.2);
     camera.rotation.order = 'YXZ';
-    yaw.current = 0;
+    yaw.current = 0.52;
     pitch.current = 0;
+    camera.rotation.y = 0.52;
   }, [camera]);
 
   useEffect(() => {

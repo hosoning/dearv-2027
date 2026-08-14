@@ -88,20 +88,20 @@ export default function Scene({
         <ArchitecturalDetails onArchiveClick={onArchiveClick} onLettersClick={onLettersClick} />
 
         {/* The final plan has no dining zone. The living group is pulled north to leave a glass-side promenade. */}
-        <Rug position={[2.25, 0.012, -4.6]} size={[9.45, 6.25]} color="#b5a796" />
-        <group position={[2.35, 0, -2.25]} scale={1.86}><Sofa rotationY={Math.PI} /></group>
-        <group position={[-0.12, 0, -4.68]} scale={1.63}><Sofa rotationY={Math.PI / 2} /></group>
-        <group position={[2.35, 0, -4.85]} scale={1.58}><CoffeeTable /></group>
-        <FloorLamp position={[5.65, 0, -2.72]} />
+        <Rug position={[1.25, 0.012, -4.55]} size={[8.6, 6.35]} color="#b5a796" />
+        <group position={[0.95, 0, -2.18]} scale={2.22}><Sofa rotationY={Math.PI} /></group>
+        <group position={[-1.62, 0, -4.62]} scale={1.72}><Sofa rotationY={Math.PI / 2} /></group>
+        <group position={[1.18, 0, -4.78]} scale={1.52}><CoffeeTable /></group>
+        <FloorLamp position={[4.35, 0, -2.8]} />
 
         <Rug position={[12.0, 0.01, -4.15]} size={[4.75, 12.4]} color="#978b7d" />
-        <Rug position={[-10.7, 0.011, 7.15]} size={[7.55, 7.45]} color="#c1b09e" />
-        <group position={[-11.55, 0, 7.0]} scale={1.62}><Bed rotationY={-Math.PI / 2} /></group>
+        <Rug position={[-11.8, 0.011, 7.05]} size={[6.25, 7.15]} color="#c1b09e" />
+        <group position={[-12.55, 0, 7.0]} scale={1.6}><Bed rotationY={Math.PI / 2} /></group>
         <DeskKeepsakes position={[11.8, 0.94, -4.25]} rotationY={Math.PI / 2} />
 
         {/* Gifts remain physical, but are integrated into the wardrobe wall instead of standing in the living room. */}
         <KeepsakeCabinet position={[-7.0, 0, -5.62]} rotationY={0} onClick={onGiftsClick} />
-        <PajamaWardrobe position={[-14.52, 0, 2.75]} rotationY={Math.PI / 2} onClick={onGiftsClick} />
+        <PajamaWardrobe position={[-14.52, 0, -0.05]} rotationY={Math.PI / 2} onClick={onGiftsClick} />
         <Planter position={[7.25, 0, -10.2]} scale={1.26} />
         <Planter position={[13.55, 0, -10.0]} scale={1.18} />
         <Planter position={[5.4, 0, 4.85]} scale={0.9} />

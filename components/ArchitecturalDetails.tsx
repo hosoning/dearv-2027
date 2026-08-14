@@ -54,7 +54,8 @@ function FoyerSuite() {
         <mesh position={[0, 2.65, 0.28]}><boxGeometry args={[4.5, 2.35, 0.07]} /><meshStandardMaterial color="#aa8b64" metalness={0.55} roughness={0.28} /></mesh>
         <mesh position={[0, 2.65, 0.32]}><planeGeometry args={[4.25, 2.12]} /><meshPhysicalMaterial color="#bfc7c7" metalness={0.66} roughness={0.08} /></mesh>
       </group>
-      <group position={[9.1, 0, 10.35]}>
+      {/* Bench sits to the east of the entrance, exactly as in the approved plan. */}
+      <group position={[11.35, 0, 10.55]}>
         <RoundedBox args={[3.1, 0.12, 0.76]} radius={0.05} smoothness={4} position={[0, 0.5, 0]} castShadow><meshStandardMaterial color="#6f503c" roughness={0.52} /></RoundedBox>
         {[-1.28, 1.28].map((x) => <mesh key={x} position={[x, 0.25, 0]}><boxGeometry args={[0.08, 0.5, 0.58]} /><meshStandardMaterial color="#604331" roughness={0.58} /></mesh>)}
         <RoundedBox args={[2.65, 0.16, 0.66]} radius={0.07} smoothness={5} position={[0, 0.64, 0]}><meshStandardMaterial color="#c0b4a7" roughness={0.95} /></RoundedBox>
@@ -64,9 +65,9 @@ function FoyerSuite() {
   );
 }
 
-function BarStool({ position }: { position: [number, number, number] }) {
+function BarStool({ position, rotationY = 0 }: { position: [number, number, number]; rotationY?: number }) {
   return (
-    <group position={position}>
+    <group position={position} rotation={[0, rotationY, 0]}>
       <RoundedBox args={[0.52, 0.12, 0.48]} radius={0.08} smoothness={5} position={[0, 0.78, 0]} castShadow><meshStandardMaterial color="#a99a8c" roughness={0.88} /></RoundedBox>
       <mesh position={[0, 0.4, 0]}><cylinderGeometry args={[0.045, 0.07, 0.76, 14]} /><meshStandardMaterial color="#6d5847" metalness={0.22} roughness={0.42} /></mesh>
       <mesh position={[0, 0.05, 0]}><cylinderGeometry args={[0.26, 0.3, 0.06, 28]} /><meshStandardMaterial color="#6d5847" metalness={0.22} roughness={0.42} /></mesh>
@@ -98,7 +99,7 @@ function KitchenSuite() {
       {/* The island is a clean bar surface: no sink or cooktop. */}
       <RoundedBox args={[5.4, 0.92, 1.35]} radius={0.08} smoothness={5} position={[0, 0.46, 7.25]} castShadow receiveShadow><meshStandardMaterial color="#765a45" roughness={0.52} /></RoundedBox>
       <RoundedBox args={[5.65, 0.14, 1.52]} radius={0.08} smoothness={5} position={[0, 0.98, 7.25]} castShadow><meshStandardMaterial color="#d4cdc3" roughness={0.42} /></RoundedBox>
-      {[-1.8, -0.6, 0.6, 1.8].map((x) => <BarStool key={x} position={[x, 0, 6.22]} />)}
+      {[-1.8, -0.6, 0.6, 1.8].map((x) => <BarStool key={x} position={[x, 0, 6.22]} rotationY={Math.PI} />)}
       <CeramicVase position={[1.85, 1.05, 7.25]} scale={0.34} color="#b5aa9e" />
     </group>
   );
@@ -130,6 +131,18 @@ function LoungeChair({ position, rotationY = 0 }: { position: [number, number, n
   );
 }
 
+function OfficeChair({ position, rotationY = 0 }: { position: [number, number, number]; rotationY?: number }) {
+  return (
+    <group position={position} rotation={[0, rotationY, 0]}>
+      <mesh position={[0, 0.37, 0]} castShadow><cylinderGeometry args={[0.045, 0.065, 0.62, 14]} /><meshStandardMaterial color="#342f2c" metalness={0.45} roughness={0.32} /></mesh>
+      <RoundedBox args={[0.9, 0.18, 0.82]} radius={0.12} smoothness={6} position={[0, 0.72, 0]} castShadow><meshStandardMaterial color="#3d3835" roughness={0.86} /></RoundedBox>
+      <RoundedBox args={[0.82, 1.05, 0.17]} radius={0.12} smoothness={6} position={[0, 1.28, -0.31]} rotation={[-0.1, 0, 0]} castShadow><meshStandardMaterial color="#403b38" roughness={0.88} /></RoundedBox>
+      {[-0.42, 0.42].map((x) => <RoundedBox key={x} args={[0.12, 0.42, 0.66]} radius={0.06} smoothness={4} position={[x, 0.91, 0]}><meshStandardMaterial color="#332f2c" roughness={0.78} /></RoundedBox>)}
+      {[0, 1.26, 2.51, 3.77, 5.03].map((angle) => <group key={angle} rotation={[0, angle, 0]}><mesh position={[0, 0.08, 0.34]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.055, 0.055, 0.08, 12]} /><meshStandardMaterial color="#2c2927" roughness={0.5} /></mesh><mesh position={[0, 0.13, 0.18]} rotation={[Math.PI / 2, 0, 0]}><boxGeometry args={[0.055, 0.36, 0.045]} /><meshStandardMaterial color="#393431" metalness={0.35} roughness={0.38} /></mesh></group>)}
+    </group>
+  );
+}
+
 function StudySuite({ onArchiveClick, onLettersClick }: { onArchiveClick?: () => void; onLettersClick?: () => void }) {
   return (
     <group>
@@ -141,7 +154,8 @@ function StudySuite({ onArchiveClick, onLettersClick }: { onArchiveClick?: () =>
         <group position={[-1.25, 0.93, 0.15]}><mesh position={[0, 0.42, 0]} rotation={[0, 0, -0.3]}><cylinderGeometry args={[0.035, 0.045, 0.75, 12]} /><meshStandardMaterial color="#b89968" metalness={0.68} roughness={0.22} /></mesh><mesh position={[0.11, 0.82, 0]} rotation={[0, 0, -0.25]}><coneGeometry args={[0.27, 0.34, 24]} /><meshStandardMaterial color="#c6a670" metalness={0.56} roughness={0.26} /></mesh><pointLight position={[0.2, 0.65, 0.1]} intensity={0.32} distance={2.7} color="#ffd39b" /></group>
         <BooksStack position={[-0.5, 0.93, 0.2]} rotationY={0.12} />
       </group>
-      <LoungeChair position={[12.3, 0, 0.45]} rotationY={-0.42} />
+      <LoungeChair position={[12.75, 0, 0.25]} rotationY={-2.35} />
+      <OfficeChair position={[13.35, 0, -4.35]} rotationY={-Math.PI / 2} />
     </group>
   );
 }
@@ -176,7 +190,7 @@ function WardrobeBay({ position, rotationY = 0, colorIndex = 0 }: { position: [n
 function WalkInCloset() {
   return (
     <group>
-      {[-4.7, -3.15, -1.6, -0.05, 1.5].map((z, index) => <WardrobeBay key={z} position={[-14.55, 0, z]} rotationY={Math.PI / 2} colorIndex={index} />)}
+      {[-4.7, -3.15, -1.6, 1.5].map((z, index) => <WardrobeBay key={z} position={[-14.55, 0, z]} rotationY={Math.PI / 2} colorIndex={index} />)}
       {[-13.55, -12.0, -10.45, -8.9].map((x, index) => <WardrobeBay key={x} position={[x, 0, -5.62]} colorIndex={index + 2} />)}
       <RoundedBox args={[1.35, 0.88, 3.35]} radius={0.08} smoothness={5} position={[-10.9, 0.44, -2.65]} castShadow><meshStandardMaterial color="#765542" roughness={0.56} /></RoundedBox>
       <mesh position={[-10.9, 0.91, -2.65]}><boxGeometry args={[1.2, 0.06, 3.05]} /><meshStandardMaterial color="#c1ad91" roughness={0.48} /></mesh>

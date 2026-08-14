@@ -71,7 +71,7 @@ export function positionForLocation(location: DisplayLocation, existingCount = 0
     case 'wall':
       return [9.25, 1.5 + (existingCount % 2) * 0.82, -0.8 + offset];
     case 'wardrobe':
-      return [-14.15, 0.78 + (existingCount % 2) * 0.52, -2.8 + offset];
+      return [-14.15, 0.78 + (existingCount % 2) * 0.52, -0.05 + offset];
     default:
       return [0, 0, 0];
   }
@@ -120,7 +120,7 @@ export function createStarterMemories(roomId: string): MemoryObject[] {
     starter(roomId, 'silk-pajamas', '条纹丝质睡衣', {
       category: 'gift', displayLocation: 'wardrobe', interaction: 'zoom', visual: 'clothing', direction: 'given',
       description: '深色条纹的长袖长裤丝质睡衣，袖口保留了专属刺绣的位置。',
-    }, [-14.15, 0, 2.75]),
+    }, [-14.15, 0, -0.05]),
     starter(roomId, 'first-moment', '这间回忆小屋', {
       category: 'moment', displayLocation: 'archive', interaction: 'view', visual: 'object', direction: 'shared',
       description: '这里不是一次性完成的展示页，而是一间会随着礼物、信件和照片继续生长的家。',
