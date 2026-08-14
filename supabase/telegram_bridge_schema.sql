@@ -35,6 +35,7 @@ create index if not exists project_progress_created_at_idx
 alter table telegram_feedback enable row level security;
 alter table project_progress enable row level security;
 revoke all on table telegram_feedback, project_progress from anon, authenticated;
+grant select, insert, update, delete on table telegram_feedback, project_progress to service_role;
 
 comment on table telegram_feedback is
   'Private feedback received from the owner through the DearV Telegram bot.';
