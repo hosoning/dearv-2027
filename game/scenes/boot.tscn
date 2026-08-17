@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://core/boot.gd" id="1_boot"]
 [ext_resource type="Script" path="res://player/comfort_controller.gd" id="2_player"]
@@ -7,6 +7,8 @@
 [ext_resource type="Shader" path="res://shaders/ocean.gdshader" id="5_ocean"]
 [ext_resource type="Script" path="res://environment/day_night_director.gd" id="6_daynight"]
 [ext_resource type="Script" path="res://home/apartment_builder.gd" id="7_apartment"]
+[ext_resource type="Script" path="res://home/memory_gallery.gd" id="8_gallery"]
+[ext_resource type="Script" path="res://companion/companion_slot.gd" id="9_companion"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape_player"]
 radius = 0.32
@@ -81,6 +83,12 @@ mesh = SubResource("PlaneMesh_ocean")
 
 [node name="Apartment" type="Node3D" parent="."]
 script = ExtResource("7_apartment")
+
+[node name="MemoryGallery" type="Node3D" parent="."]
+script = ExtResource("8_gallery")
+
+[node name="CompanionSlot" type="Node3D" parent="."]
+script = ExtResource("9_companion")
 
 [node name="HeroSectional" parent="." instance=ExtResource("4_sofa")]
 position = Vector3(0.1, 0.02, 4.1)
