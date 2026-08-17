@@ -21,20 +21,29 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      BLENDER_USER_CONFIG: /tmp/blender-config
     steps:
       - name: Check out project
         uses: actions/checkout@v4
         with:
           ref: claude/memory-house-3d-handoff-a0d0e1
 
-      - name: Install Blender in the cloud runner
+      - name: Install Blender and headless graphics runtime
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends blender python3-numpy
+          sudo apt-get install -y --no-install-recommends \
+            blender python3-numpy \
+            libegl1 libgl1 libglx0 libgles2 \
+            libx11-6 libxext6 libxi6 libxrender1 libxfixes3 libsm6 \
+            xvfb
+          ldconfig -p | grep -E 'libEGL\.so\.1|libGL\.so\.1'
 
       - name: Generate GLBs and rendered previews
         run: |
-          blender --background --python game/tools/build_hero_furniture.py
+          xvfb-run -a -s "-screen 0 1600x1000x24" \
+            blender --background --factory-startup --python game/tools/build_hero_furniture.py
           test -s game/assets/models/upholstered_bed.glb
           test -s game/assets/models/executive_study_rig.glb
           test -s game/assets/models/walk_in_wardrobe.glb
