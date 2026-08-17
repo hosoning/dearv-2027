@@ -46,13 +46,37 @@ jobs:
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           unzip -q /tmp/templates.tpz -d /tmp/templates
           cp -R /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          echo "Installed Web templates:"
+          find "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable" -maxdepth 1 -type f -iname '*web*' -printf '%f\n' | sort
+
+      - name: Bind the official single-thread Web release template
+        run: |
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          WEB_TEMPLATE="$(find "$TEMPLATE_DIR" -maxdepth 1 -type f \( -name 'web_nothreads_release.zip' -o -name 'web_release.zip' -o -name '*web*release*.zip' \) | sort | head -n 1)"
+          if [ -z "$WEB_TEMPLATE" ]; then
+            echo "No Web release template found in $TEMPLATE_DIR" >&2
+            find "$TEMPLATE_DIR" -maxdepth 1 -type f -printf '%f\n' | sort
+            exit 1
+          fi
+          echo "Using $WEB_TEMPLATE"
+          python3 - "$WEB_TEMPLATE" <<'PY'
+          from pathlib import Path
+          import sys
+          template = sys.argv[1].replace('\\', '/')
+          path = Path('game/export_presets.cfg')
+          source = path.read_text()
+          source = source.replace('custom_template/release=""', f'custom_template/release="{template}"')
+          source = source.replace('custom_template/debug=""', f'custom_template/debug="{template}"')
+          path.write_text(source)
+          PY
+          grep -E 'custom_template/(debug|release)' game/export_presets.cfg
 
       - name: Import project and export single-threaded Web build
         run: |
           rm -rf public/native
           mkdir -p public/native
           "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --path game --editor --quit
-          "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --path game --export-release Web ../public/native/index.html
+          "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --verbose --path game --export-release Web ../public/native/index.html
           test -s public/native/index.html
           test -s public/native/index.wasm
           test -s public/native/index.pck
@@ -60,6 +84,7 @@ jobs:
 
       - name: Publish Web build back to branch
         run: |
+          git checkout -- game/export_presets.cfg
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f public/native
