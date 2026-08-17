@@ -46,27 +46,23 @@ jobs:
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           unzip -q /tmp/templates.tpz -d /tmp/templates
           cp -R /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
-          echo "Installed Web templates:"
-          find "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable" -maxdepth 1 -type f -iname '*web*' -printf '%f\n' | sort
+          test -s "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_release.zip"
+          test -s "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_debug.zip"
 
-      - name: Bind the official single-thread Web release template
+      - name: Bind the official non-dlink single-thread Web templates
         run: |
           TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
-          WEB_TEMPLATE="$(find "$TEMPLATE_DIR" -maxdepth 1 -type f \( -name 'web_nothreads_release.zip' -o -name 'web_release.zip' -o -name '*web*release*.zip' \) | sort | head -n 1)"
-          if [ -z "$WEB_TEMPLATE" ]; then
-            echo "No Web release template found in $TEMPLATE_DIR" >&2
-            find "$TEMPLATE_DIR" -maxdepth 1 -type f -printf '%f\n' | sort
-            exit 1
-          fi
-          echo "Using $WEB_TEMPLATE"
-          python3 - "$WEB_TEMPLATE" <<'PY'
+          RELEASE_TEMPLATE="$TEMPLATE_DIR/web_nothreads_release.zip"
+          DEBUG_TEMPLATE="$TEMPLATE_DIR/web_nothreads_debug.zip"
+          python3 - "$RELEASE_TEMPLATE" "$DEBUG_TEMPLATE" <<'PY'
           from pathlib import Path
           import sys
-          template = sys.argv[1].replace('\\', '/')
+          release = sys.argv[1].replace('\\', '/')
+          debug = sys.argv[2].replace('\\', '/')
           path = Path('game/export_presets.cfg')
           source = path.read_text()
-          source = source.replace('custom_template/release=""', f'custom_template/release="{template}"')
-          source = source.replace('custom_template/debug=""', f'custom_template/debug="{template}"')
+          source = source.replace('custom_template/release=""', f'custom_template/release="{release}"')
+          source = source.replace('custom_template/debug=""', f'custom_template/debug="{debug}"')
           path.write_text(source)
           PY
           grep -E 'custom_template/(debug|release)' game/export_presets.cfg
