@@ -2,12 +2,15 @@ class_name ComfortController
 extends CharacterBody3D
 
 signal focus_changed(target: Interactable)
+signal touch_move_changed(origin: Vector2, current: Vector2, active: bool)
+signal touch_look_changed(origin: Vector2, current: Vector2, active: bool)
 
 @export var walk_speed := 3.2
 @export var acceleration := 12.0
 @export var deceleration := 16.0
 @export var look_sensitivity := 0.0022
 @export var touch_look_sensitivity := 0.003
+@export var touch_move_radius := 92.0
 @export var interaction_distance := 2.7
 @export var camera_pitch_min := deg_to_rad(-48.0)
 @export var camera_pitch_max := deg_to_rad(58.0)
@@ -15,7 +18,13 @@ signal focus_changed(target: Interactable)
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var camera_pivot: Node3D = $CameraPivot
 
+var _move_touch_id := -1
+var _move_touch_origin := Vector2.ZERO
+var _move_touch_current := Vector2.ZERO
+var _touch_move := Vector2.ZERO
 var _look_touch_id := -1
+var _look_touch_origin := Vector2.ZERO
+var _look_touch_current := Vector2.ZERO
 var _look_drag_distance := 0.0
 var _focused: Interactable
 var _pose_locked := false
@@ -43,16 +52,51 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event is InputEventScreenTouch:
-		if event.pressed and _look_touch_id == -1:
+		_handle_screen_touch(event)
+	elif event is InputEventScreenDrag:
+		_handle_screen_drag(event)
+
+
+func _handle_screen_touch(event: InputEventScreenTouch) -> void:
+	var half_width := get_viewport().get_visible_rect().size.x * 0.5
+	if event.pressed:
+		if event.position.x < half_width and _move_touch_id == -1:
+			_move_touch_id = event.index
+			_move_touch_origin = event.position
+			_move_touch_current = event.position
+			_touch_move = Vector2.ZERO
+			touch_move_changed.emit(_move_touch_origin, _move_touch_current, true)
+		elif _look_touch_id == -1:
 			_look_touch_id = event.index
+			_look_touch_origin = event.position
+			_look_touch_current = event.position
 			_look_drag_distance = 0.0
-		elif not event.pressed and event.index == _look_touch_id:
-			if _look_drag_distance < 18.0:
-				_try_interact()
-			_look_touch_id = -1
-	elif event is InputEventScreenDrag and event.index == _look_touch_id:
+			touch_look_changed.emit(_look_touch_origin, _look_touch_current, true)
+		return
+
+	if event.index == _move_touch_id:
+		_move_touch_id = -1
+		_touch_move = Vector2.ZERO
+		touch_move_changed.emit(_move_touch_origin, event.position, false)
+	elif event.index == _look_touch_id:
+		if _look_drag_distance < 18.0:
+			_try_interact()
+		_look_touch_id = -1
+		touch_look_changed.emit(_look_touch_origin, event.position, false)
+
+
+func _handle_screen_drag(event: InputEventScreenDrag) -> void:
+	if event.index == _move_touch_id:
+		_move_touch_current = event.position
+		var offset := _move_touch_current - _move_touch_origin
+		var clamped := offset.limit_length(touch_move_radius)
+		_touch_move = clamped / touch_move_radius
+		touch_move_changed.emit(_move_touch_origin, _move_touch_origin + clamped, true)
+	elif event.index == _look_touch_id:
+		_look_touch_current = event.position
 		_look_drag_distance += event.relative.length()
 		_apply_look(event.relative * touch_look_sensitivity)
+		touch_look_changed.emit(_look_touch_origin, _look_touch_current, true)
 
 
 func _physics_process(delta: float) -> void:
@@ -61,6 +105,9 @@ func _physics_process(delta: float) -> void:
 		_update_focus()
 		return
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	if _touch_move.length_squared() > input.length_squared():
+		# Screen-space joystick: up means forward, down means back.
+		input = Vector2(_touch_move.x, _touch_move.y)
 	var forward := -global_transform.basis.z
 	var right := global_transform.basis.x
 	forward.y = 0.0
