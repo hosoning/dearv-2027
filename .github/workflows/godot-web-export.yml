@@ -1,0 +1,72 @@
+name: Export Godot Web home
+
+on:
+  push:
+    branches:
+      - claude/memory-house-3d-handoff-a0d0e1
+    paths:
+      - "game/**"
+      - ".github/workflows/godot-web-export.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: godot-web-export
+  cancel-in-progress: true
+
+jobs:
+  export-web:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: 4.7.1
+      GODOT_RELEASE: 4.7.1-stable
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+        with:
+          ref: claude/memory-house-3d-handoff-a0d0e1
+
+      - name: Download Godot editor
+        run: |
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            --output /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64"
+
+      - name: Install official export templates
+        run: |
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            --output /tmp/templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -q /tmp/templates.tpz -d /tmp/templates
+          cp -R /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+
+      - name: Import project and export single-threaded Web build
+        run: |
+          rm -rf public/native
+          mkdir -p public/native
+          "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --path game --editor --quit
+          "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --path game --export-release Web ../public/native/index.html
+          test -s public/native/index.html
+          test -s public/native/index.wasm
+          test -s public/native/index.pck
+          touch public/native/.nojekyll
+
+      - name: Publish Web build back to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f public/native
+          if git diff --cached --quiet; then
+            echo "No Godot Web changes"
+          else
+            git commit -m "Publish Godot Web home"
+            git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
+            git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
+          fi
