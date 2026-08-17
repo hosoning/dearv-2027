@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: claude/memory-house-3d-handoff-a0d0e1
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -35,12 +36,21 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_-idhgIzi_uUs5cv68qp7wQ_W0PlamxT'
           NEXT_PUBLIC_DOOR_CODE: ${{ secrets.NEXT_PUBLIC_DOOR_CODE }}
           NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
-      - name: Publish exported files into legacy Pages source
+      - name: Publish exported files without clobbering Godot native build
         run: |
+          rm -rf /tmp/dearv-native
+          if [ -d site/native ]; then
+            cp -R site/native /tmp/dearv-native
+          fi
+
           rm -rf site
           mkdir -p site
           cp -R out/. site/
+          if [ -d /tmp/dearv-native ]; then
+            cp -R /tmp/dearv-native site/native
+          fi
           touch .nojekyll
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add site .nojekyll
@@ -48,5 +58,7 @@ jobs:
             echo "No generated site changes"
           else
             git commit -m "Publish generated Pages site"
+            git fetch origin claude/memory-house-3d-handoff-a0d0e1
+            git rebase origin/claude/memory-house-3d-handoff-a0d0e1
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
