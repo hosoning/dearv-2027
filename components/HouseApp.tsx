@@ -153,6 +153,7 @@ function CloudHouse({ language, setLanguage, t }: ReturnType<typeof useLanguage>
   const seasonLabel = t(environment.season);
   const weatherLabel = t(environment.weather === 'clear' ? 'clearWeather' : environment.weather);
   const phaseLabel = t(environment.dayPhase);
+  const nativeLabel = language === 'zh-TW' ? '進入 3D Home' : language === 'zh-CN' ? '进入 3D Home' : 'Enter 3D Home';
 
   return (
     <div className="app-viewport fixed inset-0 overflow-hidden bg-stone-900 text-white">
@@ -186,6 +187,12 @@ function CloudHouse({ language, setLanguage, t }: ReturnType<typeof useLanguage>
         <div className="pointer-events-auto flex flex-wrap justify-end gap-2">
           <DisplayModeControls />
           <LanguageSwitcher language={language} setLanguage={setLanguage} />
+          <a
+            href="./native/"
+            className="rounded-full border border-amber-100/20 bg-amber-100/10 px-3 py-2 text-xs text-amber-50/85 shadow-[0_8px_30px_rgba(183,137,80,.12)] backdrop-blur-xl transition hover:border-amber-100/35 hover:bg-amber-100/15 hover:text-white"
+          >
+            {nativeLabel}
+          </a>
           <button type="button" onClick={() => setCollectionOpen(true)} className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs text-white/75 backdrop-blur-xl hover:bg-black/40">{t('archive')}</button>
           <button type="button" onClick={() => setLettersOpen(true)} className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-xs text-white/75 backdrop-blur-xl hover:bg-black/40">{t('letters')}</button>
           <button type="button" onClick={() => setOwnerOpen(true)} aria-label={t('owner')} className="h-9 w-9 rounded-full border border-white/10 bg-black/25 text-xs text-white/45 backdrop-blur-xl hover:text-white">⌁</button>
