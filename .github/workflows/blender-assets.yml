@@ -6,6 +6,7 @@ on:
       - claude/memory-house-3d-handoff-a0d0e1
     paths:
       - "game/tools/build_hero_furniture.py"
+      - "game/tools/build_memory_gifts.py"
       - ".github/workflows/blender-assets.yml"
   workflow_dispatch:
 
@@ -20,7 +21,7 @@ jobs:
   generate:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       LIBGL_ALWAYS_SOFTWARE: "1"
       BLENDER_USER_CONFIG: /tmp/blender-config
@@ -40,7 +41,7 @@ jobs:
             xvfb
           ldconfig -p | grep -E 'libEGL\.so\.1|libGL\.so\.1'
 
-      - name: Generate GLBs and rendered previews
+      - name: Generate furniture GLBs and rendered previews
         run: |
           xvfb-run -a -s "-screen 0 1600x1000x24" \
             blender --background --factory-startup --python game/tools/build_hero_furniture.py
@@ -53,6 +54,15 @@ jobs:
           test -s game/assets/previews/walk_in_wardrobe.png
           test -s game/assets/previews/bathroom_suite.png
 
+      - name: Generate reference-based memory gifts
+        run: |
+          xvfb-run -a -s "-screen 0 1200x1200x24" \
+            blender --background --factory-startup --python game/tools/build_memory_gifts.py
+          test -s game/assets/models/gift_520_flower_box.glb
+          test -s game/assets/models/christmas_music_lantern.glb
+          test -s game/assets/previews/gift_520_flower_box.png
+          test -s game/assets/previews/christmas_music_lantern.png
+
       - name: Publish generated assets back to the branch
         run: |
           git config user.name "github-actions[bot]"
@@ -62,7 +72,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No generated asset changes"
           else
-            git commit -m "Generate Blender hero furniture pack"
+            git commit -m "Generate Blender hero furniture and memory gifts"
             git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
