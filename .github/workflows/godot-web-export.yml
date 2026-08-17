@@ -78,12 +78,21 @@ jobs:
           test -s public/native/index.pck
           touch public/native/.nojekyll
 
+      - name: Mirror native build into the legacy Pages source
+        run: |
+          rm -rf site/native
+          mkdir -p site/native
+          cp -R public/native/. site/native/
+          test -s site/native/index.html
+          test -s site/native/index.wasm
+          test -s site/native/index.pck
+
       - name: Publish Web build back to branch
         run: |
           git checkout -- game/export_presets.cfg
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f public/native
+          git add -f public/native site/native
           if git diff --cached --quiet; then
             echo "No Godot Web changes"
           else
