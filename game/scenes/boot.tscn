@@ -84,7 +84,7 @@ script = ExtResource("7_apartment")
 
 [node name="HeroSectional" parent="." instance=ExtResource("4_sofa")]
 position = Vector3(0.1, 0.02, 4.1)
-rotation_degrees = Vector3(0, 180, 0)
+rotation_degrees = Vector3(0, 0, 0)
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.2, 0.1, -11.2)
