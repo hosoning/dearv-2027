@@ -9,6 +9,8 @@ extends CanvasLayer
 @onready var inspector_actions: VBoxContainer = $Inspector/Card/Content/Actions
 @onready var close_button: Button = $Inspector/Card/Content/Close
 
+var touch_overlay: TouchControlsOverlay
+
 
 func _ready() -> void:
 	prompt_panel.visible = false
@@ -20,6 +22,12 @@ func _ready() -> void:
 
 func bind_player(player: ComfortController) -> void:
 	player.focus_changed.connect(_on_focus_changed)
+	if not touch_overlay:
+		touch_overlay = TouchControlsOverlay.new()
+		touch_overlay.name = "TouchControlsOverlay"
+		$SafeArea.add_child(touch_overlay)
+		touch_overlay.move_to_front()
+	touch_overlay.bind_player(player)
 
 
 func _unhandled_input(event: InputEvent) -> void:
