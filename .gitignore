@@ -48,3 +48,5 @@ next-env.d.ts
 /game/assets/**/*.blend
 /game/assets/materials/
 /game/assets/previews/
+__pycache__/
+*.pyc
