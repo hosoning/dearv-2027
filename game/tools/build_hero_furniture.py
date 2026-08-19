@@ -248,7 +248,7 @@ def build_bed():
     root = root_object("DearV_Upholstered_Bed")
     charcoal = mat("Warm charcoal upholstery", (0.105, 0.11, 0.115, 1.0), 0.82)
     linen = mat("Ivory washed linen", (0.72, 0.69, 0.64, 1.0), 0.88)
-    duvet = mat("Stone duvet", (0.43, 0.40, 0.37, 1.0), 0.9)
+    duvet = mat("Clay duvet", (0.46, 0.24, 0.19, 1.0), 0.87)
     bronze = mat("Champagne bronze", (0.18, 0.135, 0.09, 1.0), 0.3, 0.72)
 
     # Turned legs lift the whole bed clear of the floor. Without them the
@@ -260,20 +260,30 @@ def build_bed():
             cylinder("Bed leg", (x, y, leg_h * 0.5), 0.05, leg_h, bronze, root, 16)
             sphere("Bed leg foot", (x, y, 0.014), (0.056, 0.056, 0.028), bronze, root, 12)
 
+    # A real bed base is ~0.30m and a mattress+topper ~0.30m -- the old
+    # 0.48m frame + 0.32m mattress stacked up to over a metre off the
+    # floor, which is what read as "how thick is this mattress." Slimmed
+    # both down; every layer above (duvet/pillows/throw) shifts down by
+    # the same 0.27m so they still land on the mattress surface.
     z0 = leg_h
-    rounded_box("Recessed bed plinth", (0.0, 0.08, z0 + 0.11), (2.16, 2.24, 0.18), bronze, 0.025, 4, parent=root)
-    rounded_box("Upholstered bed frame", (0.0, 0.0, z0 + 0.34), (2.34, 2.46, 0.48), charcoal, 0.105, 8, parent=root)
-    rounded_box("Mattress", (0.0, -0.03, z0 + 0.63), (2.10, 2.25, 0.32), linen, 0.13, 9, parent=root)
-    rounded_box("Pillow-top quilting", (0.0, -0.03, z0 + 0.82), (2.02, 2.16, 0.10), linen, 0.045, 10, parent=root)
+    DROP = 0.27
+    rounded_box("Recessed bed plinth", (0.0, 0.08, z0 + 0.08), (2.16, 2.24, 0.14), bronze, 0.02, 4, parent=root)
+    rounded_box("Upholstered bed frame", (0.0, 0.0, z0 + 0.15), (2.34, 2.46, 0.30), charcoal, 0.09, 8, parent=root)
+    rounded_box("Mattress", (0.0, -0.03, z0 + 0.41), (2.10, 2.25, 0.22), linen, 0.11, 9, parent=root)
+    rounded_box("Pillow-top quilting", (0.0, -0.03, z0 + 0.56), (2.02, 2.16, 0.08), linen, 0.036, 10, parent=root)
     rounded_box("Tall channel headboard", (0.0, 1.10, z0 + 1.28), (2.72, 0.22, 1.74), charcoal, 0.12, 9, parent=root)
     for x in (-0.90, -0.45, 0.0, 0.45, 0.90):
         pipe_between("Headboard channel", (x, 0.975, z0 + 0.62), (x, 0.975, z0 + 1.92), 0.014, bronze, root)
-    rounded_box("Soft duvet", (0.0, -0.24, z0 + 0.89), (2.03, 1.74, 0.23), duvet, 0.11, 9, parent=root)
-    rounded_box("Duvet folded edge", (0.0, 0.46, z0 + 1.00), (2.03, 0.38, 0.24), linen, 0.10, 9, rotation=(math.radians(-5), 0, 0), parent=root)
+    # A duvet needs to actually read as bedding: covers most of the
+    # mattress length (not just a narrow band) and uses a colour that
+    # contrasts clearly against the linen mattress instead of a close
+    # tonal match.
+    rounded_box("Soft duvet", (0.0, -0.16, z0 + 0.89 - DROP), (2.03, 2.02, 0.15), duvet, 0.09, 10, parent=root)
+    rounded_box("Duvet folded edge", (0.0, 0.62, z0 + 1.00 - DROP), (2.03, 0.42, 0.26), linen, 0.10, 9, rotation=(math.radians(-5), 0, 0), parent=root)
     for index, x in enumerate((-0.56, 0.56)):
-        rounded_box(f"Sleeping pillow {index + 1}", (x, 0.70, z0 + 1.14), (0.91, 0.25, 0.48), linen, 0.105, 10, rotation=(math.radians(-12), 0, math.radians((-1) ** index * 2.5)), parent=root)
-        rounded_box(f"Accent pillow {index + 1}", (x * 0.58, 0.49, z0 + 1.11), (0.58, 0.22, 0.53), charcoal, 0.11, 10, rotation=(math.radians(-7), 0, math.radians((-1) ** index * 5)), parent=root)
-    rounded_box("Cashmere throw", (0.46, -0.78, z0 + 1.04), (0.88, 0.72, 0.055), charcoal, 0.025, 5, rotation=(0, 0, math.radians(-4)), parent=root)
+        rounded_box(f"Sleeping pillow {index + 1}", (x, 0.70, z0 + 1.14 - DROP), (0.91, 0.25, 0.48), linen, 0.105, 10, rotation=(math.radians(-12), 0, math.radians((-1) ** index * 2.5)), parent=root)
+        rounded_box(f"Accent pillow {index + 1}", (x * 0.58, 0.49, z0 + 1.11 - DROP), (0.58, 0.22, 0.53), charcoal, 0.11, 10, rotation=(math.radians(-7), 0, math.radians((-1) ** index * 5)), parent=root)
+    rounded_box("Cashmere throw", (0.46, -0.78, z0 + 1.04 - DROP), (0.88, 0.72, 0.055), charcoal, 0.025, 5, rotation=(0, 0, math.radians(-4)), parent=root)
     return root
 
 
@@ -289,6 +299,7 @@ def build_study():
     rounded_box("Left sculpted pedestal", (-1.54, 0.0, 0.42), (0.56, 1.04, 0.74), walnut, 0.055, 6, parent=root)
     for z in (0.25, 0.49, 0.70):
         rounded_box("Flush drawer face", (-1.835, -0.01, z), (0.025, 0.91, 0.16), walnut, 0.008, 3, parent=root)
+        pipe_between(f"Drawer pull {z}", (-1.855, -0.22, z), (-1.855, 0.20, z), 0.012, metal, root)
     # A solid panel leg (not a thin metal frame) matches the weight of the
     # pedestal on the other end -- an "executive" desk shouldn't stand on
     # hairpin legs. A recessed bronze inlay keeps it from looking like a
@@ -296,14 +307,17 @@ def build_study():
     rounded_box("Right panel leg", (1.565, 0.0, 0.42), (0.32, 1.04, 0.74), walnut, 0.05, 6, parent=root)
     rounded_box("Right panel inlay", (1.735, 0.0, 0.42), (0.028, 0.82, 0.54), metal, 0.01, 3, parent=root)
 
-    rounded_box("Monitor", (0.25, 0.14, 1.48), (1.45, 0.08, 0.84), metal, 0.035, 5, parent=root)
-    rounded_box("Monitor display", (0.25, 0.092, 1.48), (1.31, 0.012, 0.70), screen, 0.008, 2, parent=root)
+    # A real desktop monitor is roughly 0.7m across, not half the desk.
+    rounded_box("Monitor", (0.25, 0.14, 1.31), (0.78, 0.06, 0.46), metal, 0.025, 5, parent=root)
+    rounded_box("Monitor display", (0.25, 0.108, 1.31), (0.70, 0.01, 0.385), screen, 0.006, 2, parent=root)
     pipe_between("Monitor stem", (0.25, 0.12, 0.93), (0.25, 0.12, 1.08), 0.035, metal, root)
-    rounded_box("Monitor foot", (0.25, 0.04, 0.90), (0.58, 0.34, 0.035), metal, 0.018, 4, parent=root)
+    rounded_box("Monitor foot", (0.25, 0.04, 0.90), (0.42, 0.28, 0.035), metal, 0.018, 4, parent=root)
     rounded_box("Low keyboard", (0.25, -0.36, 0.90), (0.84, 0.31, 0.035), metal, 0.018, 4, rotation=(math.radians(3), 0, 0), parent=root)
     for row in range(4):
         for col in range(12):
             rounded_box("Keyboard key", (-0.11 + col * 0.06, -0.46 + row * 0.054, 0.923), (0.048, 0.044, 0.012), screen, 0.004, 2, parent=root)
+
+    rounded_box("Mouse body", (0.83, -0.30, 0.905), (0.065, 0.115, 0.04), metal, 0.024, 6, rotation=(0, 0, math.radians(-4)), parent=root)
 
     pipe_between("Lamp lower arm", (-1.05, 0.20, 0.94), (-0.95, 0.18, 1.52), 0.026, metal, root)
     pipe_between("Lamp upper arm", (-0.95, 0.18, 1.52), (-0.55, 0.05, 1.78), 0.026, metal, root)
