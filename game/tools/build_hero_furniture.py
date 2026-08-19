@@ -40,7 +40,7 @@ def _material_pattern(name: str) -> str:
     lowered = name.lower()
     if any(word in lowered for word in ("oak", "walnut", "wood", "wardrobe backing")):
         return "wood"
-    if any(word in lowered for word in ("upholstery", "linen", "duvet", "leather", "wool", "silk", "calfskin", "couture", "paper")):
+    if any(word in lowered for word in ("upholstery", "linen", "duvet", "leather", "wool", "silk", "calfskin", "couture", "paper", "bouc")):
         return "fabric"
     if any(word in lowered for word in ("steel", "bronze", "nickel", "rail", "metal")):
         return "metal"
@@ -246,44 +246,34 @@ def all_descendants(root):
 
 def build_bed():
     root = root_object("DearV_Upholstered_Bed")
-    charcoal = mat("Warm charcoal upholstery", (0.105, 0.11, 0.115, 1.0), 0.82)
-    linen = mat("Ivory washed linen", (0.72, 0.69, 0.64, 1.0), 0.88)
-    duvet = mat("Clay duvet", (0.46, 0.24, 0.19, 1.0), 0.87)
-    bronze = mat("Champagne bronze", (0.18, 0.135, 0.09, 1.0), 0.3, 0.72)
+    # Reworked to match a specific reference: a low, monolithic bouclé
+    # platform sitting flush on the floor, no headboard, no visible legs --
+    # just loose linen bedding draped over the top. Neutral oatmeal/stone
+    # tones throughout, no accent color.
+    # Toned apart clearly (the first pass came out nearly monochrome under
+    # the studio lighting): a visibly darker taupe base, light cream
+    # bedding on top.
+    boucle = mat("Taupe bouclé base", (0.40, 0.365, 0.315, 1.0), 0.95)
+    linen = mat("Ivory washed linen", (0.87, 0.845, 0.795, 1.0), 0.82)
+    duvet = mat("Soft stone duvet", (0.78, 0.755, 0.70, 1.0), 0.86)
 
-    # Turned legs lift the whole bed clear of the floor. Without them the
-    # frame reads as a solid block sitting on the ground -- a real bed
-    # always shows a gap of floor/shadow underneath.
-    leg_h = 0.16
-    for x in (-1.0, 1.0):
-        for y in (-1.03, 1.03):
-            cylinder("Bed leg", (x, y, leg_h * 0.5), 0.05, leg_h, bronze, root, 16)
-            sphere("Bed leg foot", (x, y, 0.014), (0.056, 0.056, 0.028), bronze, root, 12)
+    base_h = 0.42
+    rounded_box("Bouclé platform base", (0.0, 0.0, base_h / 2), (2.05, 2.32, base_h), boucle, 0.16, 12, parent=root)
+    rounded_box("Linen mattress topper", (0.0, -0.02, base_h + 0.08), (1.95, 2.22, 0.16), linen, 0.075, 11, parent=root)
 
-    # A real bed base is ~0.30m and a mattress+topper ~0.30m -- the old
-    # 0.48m frame + 0.32m mattress stacked up to over a metre off the
-    # floor, which is what read as "how thick is this mattress." Slimmed
-    # both down; every layer above (duvet/pillows/throw) shifts down by
-    # the same 0.27m so they still land on the mattress surface.
-    z0 = leg_h
-    DROP = 0.27
-    rounded_box("Recessed bed plinth", (0.0, 0.08, z0 + 0.08), (2.16, 2.24, 0.14), bronze, 0.02, 4, parent=root)
-    rounded_box("Upholstered bed frame", (0.0, 0.0, z0 + 0.15), (2.34, 2.46, 0.30), charcoal, 0.09, 8, parent=root)
-    rounded_box("Mattress", (0.0, -0.03, z0 + 0.41), (2.10, 2.25, 0.22), linen, 0.11, 9, parent=root)
-    rounded_box("Pillow-top quilting", (0.0, -0.03, z0 + 0.56), (2.02, 2.16, 0.08), linen, 0.036, 10, parent=root)
-    rounded_box("Tall channel headboard", (0.0, 1.10, z0 + 1.28), (2.72, 0.22, 1.74), charcoal, 0.12, 9, parent=root)
-    for x in (-0.90, -0.45, 0.0, 0.45, 0.90):
-        pipe_between("Headboard channel", (x, 0.975, z0 + 0.62), (x, 0.975, z0 + 1.92), 0.014, bronze, root)
-    # A duvet needs to actually read as bedding: covers most of the
-    # mattress length (not just a narrow band) and uses a colour that
-    # contrasts clearly against the linen mattress instead of a close
-    # tonal match.
-    rounded_box("Soft duvet", (0.0, -0.16, z0 + 0.89 - DROP), (2.03, 2.02, 0.15), duvet, 0.09, 10, parent=root)
-    rounded_box("Duvet folded edge", (0.0, 0.62, z0 + 1.00 - DROP), (2.03, 0.42, 0.26), linen, 0.10, 9, rotation=(math.radians(-5), 0, 0), parent=root)
-    for index, x in enumerate((-0.56, 0.56)):
-        rounded_box(f"Sleeping pillow {index + 1}", (x, 0.70, z0 + 1.14 - DROP), (0.91, 0.25, 0.48), linen, 0.105, 10, rotation=(math.radians(-12), 0, math.radians((-1) ** index * 2.5)), parent=root)
-        rounded_box(f"Accent pillow {index + 1}", (x * 0.58, 0.49, z0 + 1.11 - DROP), (0.58, 0.22, 0.53), charcoal, 0.11, 10, rotation=(math.radians(-7), 0, math.radians((-1) ** index * 5)), parent=root)
-    rounded_box("Cashmere throw", (0.46, -0.78, z0 + 1.04 - DROP), (0.88, 0.72, 0.055), charcoal, 0.025, 5, rotation=(0, 0, math.radians(-4)), parent=root)
+    # Loosely draped duvet: three overlapping, slightly rotated slabs with
+    # a gentle height ripple (not a staircase) between them, so the top
+    # reads as soft rumpled fabric.
+    duvet_z = base_h + 0.16 + 0.05
+    rounded_box("Duvet fold 1", (0.0, -0.55, duvet_z), (1.86, 1.05, 0.11), duvet, 0.05, 10, rotation=(math.radians(1.5), 0, math.radians(-1)), parent=root)
+    rounded_box("Duvet fold 2", (0.05, -0.05, duvet_z + 0.018), (1.82, 0.75, 0.10), duvet, 0.05, 10, rotation=(math.radians(-3), 0, math.radians(1.8)), parent=root)
+    rounded_box("Duvet fold 3", (-0.08, 0.35, duvet_z + 0.03), (1.78, 0.55, 0.09), duvet, 0.05, 10, rotation=(math.radians(3.5), 0, math.radians(-1.6)), parent=root)
+
+    # Two simple pillows leaning at the head end -- there's no headboard
+    # to prop them against, so they lean back on their own.
+    pillow_z = base_h + 0.16 + 0.14
+    for index, x in enumerate((-0.46, 0.46)):
+        rounded_box(f"Linen pillow {index + 1}", (x, 0.92, pillow_z), (0.78, 0.24, 0.30), linen, 0.11, 10, rotation=(math.radians(-9), 0, math.radians((-1) ** index * 1.5)), parent=root)
     return root
 
 
