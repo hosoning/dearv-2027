@@ -7,10 +7,6 @@ on:
     paths:
       - "game/**"
       - ".github/workflows/godot-validate.yml"
-  pull_request:
-    paths:
-      - "game/**"
-      - ".github/workflows/godot-validate.yml"
   workflow_dispatch:
 
 permissions:
