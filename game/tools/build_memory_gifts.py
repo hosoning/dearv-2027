@@ -28,20 +28,86 @@ def reset_scene():
                 blocks.remove(block)
 
 
+def _gift_pattern(name: str) -> str:
+    lowered = name.lower()
+    if any(word in lowered for word in ("gold", "bronze")):
+        return "metal"
+    if any(word in lowered for word in ("satin", "ribbon", "velvet", "rose", "hatbox", "rim")):
+        return "fabric"
+    if any(word in lowered for word in ("evergreen", "roof", "snow")):
+        return "subtle"
+    return "smooth"
+
+
 def mat(name, color, rough=0.55, metal=0.0, emission=None, alpha=1.0):
     m = bpy.data.materials.new(name)
     m.diffuse_color = (*color[:3], alpha)
     m.use_nodes = True
-    bsdf = m.node_tree.nodes.get("Principled BSDF")
+    nodes = m.node_tree.nodes
+    links = m.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
     bsdf.inputs["Base Color"].default_value = (*color[:3], alpha)
     bsdf.inputs["Roughness"].default_value = rough
     bsdf.inputs["Metallic"].default_value = metal
     if alpha < 1.0:
         bsdf.inputs["Alpha"].default_value = alpha
-        m.surface_render_method = 'DITHERED' if hasattr(m, 'surface_render_method') else None
+        if hasattr(m, 'surface_render_method'):
+            m.surface_render_method = 'DITHERED'
+        elif hasattr(m, 'blend_method'):
+            m.blend_method = 'BLEND'
     if emission:
         bsdf.inputs["Emission Color"].default_value = (*emission[:3], 1.0)
         bsdf.inputs["Emission Strength"].default_value = emission[3]
+
+    # Glass and emissive glow stay clean; everything else gets subtle
+    # procedural variation so it doesn't read as flat painted plastic.
+    if alpha < 1.0 or emission:
+        return m
+
+    pattern = _gift_pattern(name)
+    tex_coord = nodes.new("ShaderNodeTexCoord")
+    grain_scale = {"metal": 55.0, "fabric": 30.0, "subtle": 12.0, "smooth": 18.0}[pattern]
+
+    color_noise = nodes.new("ShaderNodeTexNoise")
+    color_noise.inputs["Scale"].default_value = grain_scale
+    color_noise.inputs["Detail"].default_value = 4.0
+    color_noise.inputs["Roughness"].default_value = 0.6
+    links.new(tex_coord.outputs["Object"], color_noise.inputs["Vector"])
+
+    color_ramp = nodes.new("ShaderNodeValToRGB")
+    spread = 0.05 if pattern in ("fabric", "subtle") else 0.03
+    color_ramp.color_ramp.elements[0].position = 0.4
+    color_ramp.color_ramp.elements[0].color = (
+        max(0.0, color[0] * (1 - spread)),
+        max(0.0, color[1] * (1 - spread)),
+        max(0.0, color[2] * (1 - spread)),
+        1.0,
+    )
+    color_ramp.color_ramp.elements[1].position = 0.6
+    color_ramp.color_ramp.elements[1].color = (
+        min(1.0, color[0] * (1 + spread) + 0.015),
+        min(1.0, color[1] * (1 + spread) + 0.015),
+        min(1.0, color[2] * (1 + spread) + 0.015),
+        1.0,
+    )
+    links.new(color_noise.outputs["Fac"], color_ramp.inputs["Fac"])
+    links.new(color_ramp.outputs["Color"], bsdf.inputs["Base Color"])
+
+    rough_noise = nodes.new("ShaderNodeTexNoise")
+    rough_noise.inputs["Scale"].default_value = grain_scale * 2.5
+    rough_map = nodes.new("ShaderNodeMapRange")
+    variance = 0.08 if pattern == "metal" else 0.14
+    rough_map.inputs["To Min"].default_value = max(0.05, rough - variance)
+    rough_map.inputs["To Max"].default_value = min(1.0, rough + variance)
+    links.new(tex_coord.outputs["Object"], rough_noise.inputs["Vector"])
+    links.new(rough_noise.outputs["Fac"], rough_map.inputs["Value"])
+    links.new(rough_map.outputs["Result"], bsdf.inputs["Roughness"])
+
+    bump = nodes.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = {"metal": 0.012, "fabric": 0.05, "subtle": 0.02, "smooth": 0.018}[pattern]
+    links.new(color_noise.outputs["Fac"], bump.inputs["Height"])
+    links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+
     return m
 
 

@@ -36,14 +36,109 @@ def reset_scene() -> None:
                 datablocks.remove(block)
 
 
+def _material_pattern(name: str) -> str:
+    lowered = name.lower()
+    if any(word in lowered for word in ("oak", "walnut", "wood", "wardrobe backing")):
+        return "wood"
+    if any(word in lowered for word in ("upholstery", "linen", "duvet", "leather", "wool", "silk", "calfskin", "couture", "paper")):
+        return "fabric"
+    if any(word in lowered for word in ("steel", "bronze", "nickel", "rail", "metal")):
+        return "metal"
+    if any(word in lowered for word in ("stone", "porcelain", "limestone")):
+        return "stone"
+    return "smooth"
+
+
 def mat(name, color, roughness=0.55, metallic=0.0):
+    """Principled BSDF with procedural surface variation baked in via nodes.
+
+    A flat diffuse_color reads as painted plastic under any lighting. Real
+    upholstery, wood and stone all vary in tone, roughness and micro-relief
+    across the surface — driving Base Color / Roughness / Normal from a
+    couple of Noise Texture nodes (keyed off object-space coordinates, so no
+    UV unwrap is required) gets most of that realism without needing an
+    external texture library.
+    """
+    pattern = _material_pattern(name)
     material = bpy.data.materials.new(name)
     material.diffuse_color = color
     material.use_nodes = True
-    bsdf = material.node_tree.nodes.get("Principled BSDF")
+    nodes = material.node_tree.nodes
+    links = material.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
     bsdf.inputs["Base Color"].default_value = color
     bsdf.inputs["Roughness"].default_value = roughness
     bsdf.inputs["Metallic"].default_value = metallic
+
+    if pattern == "smooth" and roughness < 0.2:
+        # Glass/screen-like materials stay clean; grain would look wrong.
+        return material
+
+    tex_coord = nodes.new("ShaderNodeTexCoord")
+
+    grain_scale = {"wood": 3.5, "fabric": 26.0, "metal": 40.0, "stone": 9.0, "smooth": 14.0}[pattern]
+    mapping = nodes.new("ShaderNodeMapping")
+    mapping.inputs["Scale"].default_value = (1.0, 1.0, 6.0 if pattern == "wood" else 1.0)
+    links.new(tex_coord.outputs["Object"], mapping.inputs["Vector"])
+
+    color_noise = nodes.new("ShaderNodeTexNoise")
+    color_noise.inputs["Scale"].default_value = grain_scale
+    color_noise.inputs["Detail"].default_value = 2.0 if pattern == "wood" else 5.0
+    color_noise.inputs["Roughness"].default_value = 0.6
+    links.new(mapping.outputs["Vector"], color_noise.inputs["Vector"])
+
+    color_ramp = nodes.new("ShaderNodeValToRGB")
+    spread = 0.16 if pattern == "wood" else 0.06 if pattern == "fabric" else 0.03
+    color_ramp.color_ramp.elements[0].position = 0.4
+    color_ramp.color_ramp.elements[0].color = (
+        max(0.0, color[0] * (1 - spread)),
+        max(0.0, color[1] * (1 - spread)),
+        max(0.0, color[2] * (1 - spread)),
+        1.0,
+    )
+    color_ramp.color_ramp.elements[1].position = 0.6
+    color_ramp.color_ramp.elements[1].color = (
+        min(1.0, color[0] * (1 + spread) + 0.02),
+        min(1.0, color[1] * (1 + spread) + 0.02),
+        min(1.0, color[2] * (1 + spread) + 0.02),
+        1.0,
+    )
+    links.new(color_noise.outputs["Fac"], color_ramp.inputs["Fac"])
+    links.new(color_ramp.outputs["Color"], bsdf.inputs["Base Color"])
+
+    rough_noise = nodes.new("ShaderNodeTexNoise")
+    rough_noise.inputs["Scale"].default_value = grain_scale * (0.5 if pattern == "wood" else 2.2)
+    rough_map = nodes.new("ShaderNodeMapRange")
+    rough_variance = 0.1 if pattern == "metal" else 0.16
+    rough_map.inputs["To Min"].default_value = max(0.05, roughness - rough_variance)
+    rough_map.inputs["To Max"].default_value = min(1.0, roughness + rough_variance)
+    links.new(mapping.outputs["Vector"], rough_noise.inputs["Vector"])
+    links.new(rough_noise.outputs["Fac"], rough_map.inputs["Value"])
+    links.new(rough_map.outputs["Result"], bsdf.inputs["Roughness"])
+
+    bump_source = color_noise
+    if pattern == "fabric":
+        weave = nodes.new("ShaderNodeTexWave")
+        weave.wave_type = "BANDS"
+        weave.inputs["Scale"].default_value = grain_scale * 1.4
+        weave.inputs["Distortion"].default_value = 2.4
+        links.new(mapping.outputs["Vector"], weave.inputs["Vector"])
+        bump_source = weave
+        bump_output = "Fac" if "Fac" in bump_source.outputs else "Color"
+    else:
+        bump_output = "Fac"
+
+    bump = nodes.new("ShaderNodeBump")
+    bump.inputs["Strength"].default_value = {
+        "wood": 0.05,
+        "fabric": 0.09,
+        "metal": 0.015,
+        "stone": 0.035,
+        "smooth": 0.02,
+    }[pattern]
+    links.new(bump_source.outputs[bump_output], bump.inputs["Height"])
+    links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+
     return material
 
 
