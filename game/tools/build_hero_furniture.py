@@ -251,18 +251,29 @@ def build_bed():
     duvet = mat("Stone duvet", (0.43, 0.40, 0.37, 1.0), 0.9)
     bronze = mat("Champagne bronze", (0.18, 0.135, 0.09, 1.0), 0.3, 0.72)
 
-    rounded_box("Recessed bed plinth", (0.0, 0.08, 0.11), (2.16, 2.24, 0.18), bronze, 0.025, 4, parent=root)
-    rounded_box("Upholstered bed frame", (0.0, 0.0, 0.34), (2.34, 2.46, 0.48), charcoal, 0.105, 8, parent=root)
-    rounded_box("Mattress", (0.0, -0.03, 0.63), (2.10, 2.25, 0.32), linen, 0.13, 9, parent=root)
-    rounded_box("Tall channel headboard", (0.0, 1.10, 1.28), (2.72, 0.22, 1.74), charcoal, 0.12, 9, parent=root)
+    # Turned legs lift the whole bed clear of the floor. Without them the
+    # frame reads as a solid block sitting on the ground -- a real bed
+    # always shows a gap of floor/shadow underneath.
+    leg_h = 0.16
+    for x in (-1.0, 1.0):
+        for y in (-1.03, 1.03):
+            cylinder("Bed leg", (x, y, leg_h * 0.5), 0.05, leg_h, bronze, root, 16)
+            sphere("Bed leg foot", (x, y, 0.014), (0.056, 0.056, 0.028), bronze, root, 12)
+
+    z0 = leg_h
+    rounded_box("Recessed bed plinth", (0.0, 0.08, z0 + 0.11), (2.16, 2.24, 0.18), bronze, 0.025, 4, parent=root)
+    rounded_box("Upholstered bed frame", (0.0, 0.0, z0 + 0.34), (2.34, 2.46, 0.48), charcoal, 0.105, 8, parent=root)
+    rounded_box("Mattress", (0.0, -0.03, z0 + 0.63), (2.10, 2.25, 0.32), linen, 0.13, 9, parent=root)
+    rounded_box("Pillow-top quilting", (0.0, -0.03, z0 + 0.82), (2.02, 2.16, 0.10), linen, 0.045, 10, parent=root)
+    rounded_box("Tall channel headboard", (0.0, 1.10, z0 + 1.28), (2.72, 0.22, 1.74), charcoal, 0.12, 9, parent=root)
     for x in (-0.90, -0.45, 0.0, 0.45, 0.90):
-        pipe_between("Headboard channel", (x, 0.975, 0.62), (x, 0.975, 1.92), 0.012, bronze, root)
-    rounded_box("Soft duvet", (0.0, -0.24, 0.89), (2.03, 1.74, 0.23), duvet, 0.11, 9, parent=root)
-    rounded_box("Duvet folded edge", (0.0, 0.46, 1.00), (2.03, 0.38, 0.24), linen, 0.10, 9, rotation=(math.radians(-5), 0, 0), parent=root)
+        pipe_between("Headboard channel", (x, 0.975, z0 + 0.62), (x, 0.975, z0 + 1.92), 0.014, bronze, root)
+    rounded_box("Soft duvet", (0.0, -0.24, z0 + 0.89), (2.03, 1.74, 0.23), duvet, 0.11, 9, parent=root)
+    rounded_box("Duvet folded edge", (0.0, 0.46, z0 + 1.00), (2.03, 0.38, 0.24), linen, 0.10, 9, rotation=(math.radians(-5), 0, 0), parent=root)
     for index, x in enumerate((-0.56, 0.56)):
-        rounded_box(f"Sleeping pillow {index + 1}", (x, 0.70, 1.14), (0.91, 0.25, 0.48), linen, 0.105, 10, rotation=(math.radians(-12), 0, math.radians((-1) ** index * 2.5)), parent=root)
-        rounded_box(f"Accent pillow {index + 1}", (x * 0.58, 0.49, 1.11), (0.58, 0.22, 0.53), charcoal, 0.11, 10, rotation=(math.radians(-7), 0, math.radians((-1) ** index * 5)), parent=root)
-    rounded_box("Cashmere throw", (0.46, -0.78, 1.04), (0.88, 0.72, 0.055), charcoal, 0.025, 5, rotation=(0, 0, math.radians(-4)), parent=root)
+        rounded_box(f"Sleeping pillow {index + 1}", (x, 0.70, z0 + 1.14), (0.91, 0.25, 0.48), linen, 0.105, 10, rotation=(math.radians(-12), 0, math.radians((-1) ** index * 2.5)), parent=root)
+        rounded_box(f"Accent pillow {index + 1}", (x * 0.58, 0.49, z0 + 1.11), (0.58, 0.22, 0.53), charcoal, 0.11, 10, rotation=(math.radians(-7), 0, math.radians((-1) ** index * 5)), parent=root)
+    rounded_box("Cashmere throw", (0.46, -0.78, z0 + 1.04), (0.88, 0.72, 0.055), charcoal, 0.025, 5, rotation=(0, 0, math.radians(-4)), parent=root)
     return root
 
 
@@ -278,9 +289,12 @@ def build_study():
     rounded_box("Left sculpted pedestal", (-1.54, 0.0, 0.42), (0.56, 1.04, 0.74), walnut, 0.055, 6, parent=root)
     for z in (0.25, 0.49, 0.70):
         rounded_box("Flush drawer face", (-1.835, -0.01, z), (0.025, 0.91, 0.16), walnut, 0.008, 3, parent=root)
-    pipe_between("Right leg front", (1.58, -0.46, 0.08), (1.58, -0.46, 0.78), 0.035, metal, root)
-    pipe_between("Right leg back", (1.58, 0.46, 0.08), (1.58, 0.46, 0.78), 0.035, metal, root)
-    pipe_between("Right leg rail", (1.58, -0.46, 0.08), (1.58, 0.46, 0.08), 0.035, metal, root)
+    # A solid panel leg (not a thin metal frame) matches the weight of the
+    # pedestal on the other end -- an "executive" desk shouldn't stand on
+    # hairpin legs. A recessed bronze inlay keeps it from looking like a
+    # plain slab.
+    rounded_box("Right panel leg", (1.565, 0.0, 0.42), (0.32, 1.04, 0.74), walnut, 0.05, 6, parent=root)
+    rounded_box("Right panel inlay", (1.735, 0.0, 0.42), (0.028, 0.82, 0.54), metal, 0.01, 3, parent=root)
 
     rounded_box("Monitor", (0.25, 0.14, 1.48), (1.45, 0.08, 0.84), metal, 0.035, 5, parent=root)
     rounded_box("Monitor display", (0.25, 0.092, 1.48), (1.31, 0.012, 0.70), screen, 0.008, 2, parent=root)
