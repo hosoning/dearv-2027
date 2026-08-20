@@ -104,6 +104,9 @@ func _open_inspector(payload: Dictionary) -> void:
 		"appliance":
 			story = "Choose a recipe. Ingredients must first be taken from the refrigerator and placed on the counter."
 			_build_appliance_actions(payload)
+		"prep":
+			story = "Wash or chop ingredients on the counter before cooking. Preparation state is saved automatically."
+			_build_prep_actions(payload)
 	inspector_body.text = story
 	call_deferred("_focus_first_action")
 
@@ -214,6 +217,49 @@ func _build_appliance_actions(payload: Dictionary) -> void:
 		button.text = "Cook %s" % recipe.display_name
 		button.pressed.connect(_start_recipe.bind(target, recipe_id))
 		inspector_actions.add_child(button)
+
+
+func _build_prep_actions(payload: Dictionary) -> void:
+	var items: Array = payload.get("items", [])
+	var action_count := 0
+	for value in items:
+		if not value is Dictionary:
+			continue
+		var item := value as Dictionary
+		var definition_id := str(item.get("definition_id", ""))
+		var definition: FoodDefinition = Kitchen.definitions.get(definition_id)
+		if not definition:
+			continue
+		var instance_id := str(item.get("instance_id", ""))
+		var stage := str(item.get("stage", Kitchen.STAGE_RAW))
+		if definition.can_wash and stage == Kitchen.STAGE_RAW:
+			_add_prep_action("Wash %s" % definition.display_name, instance_id, "wash")
+			action_count += 1
+		if definition.can_chop and stage in [Kitchen.STAGE_RAW, Kitchen.STAGE_WASHED]:
+			_add_prep_action("Chop %s" % definition.display_name, instance_id, "chop")
+			action_count += 1
+	if items.is_empty():
+		_add_disabled_action("Move ingredients here from the refrigerator")
+	elif action_count == 0:
+		_add_disabled_action("These ingredients are ready for cooking")
+
+
+func _add_prep_action(label: String, instance_id: String, action: String) -> void:
+	var button := Button.new()
+	button.text = label
+	button.pressed.connect(_prepare_food.bind(instance_id, action))
+	inspector_actions.add_child(button)
+
+
+func _prepare_food(instance_id: String, action: String) -> void:
+	if not Kitchen.prepare_food(instance_id, action):
+		inspector_body.text = "That preparation step is not available."
+		return
+	_open_inspector({
+		"kind": "prep",
+		"title": "Preparation counter",
+		"items": Kitchen.get_inventory("counter"),
+	})
 
 
 func _move_food_to_counter(instance_id: String) -> void:
