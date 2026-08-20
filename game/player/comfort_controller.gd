@@ -2,6 +2,7 @@ class_name ComfortController
 extends CharacterBody3D
 
 signal focus_changed(target: Interactable)
+signal comfort_pose_changed(active: bool)
 signal touch_move_changed(origin: Vector2, current: Vector2, active: bool)
 signal touch_look_changed(origin: Vector2, current: Vector2, active: bool)
 
@@ -52,10 +53,13 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if AppState.is_inspecting:
 		return
-	if _pose_locked and (event.is_action_pressed("cancel") or event.is_action_pressed("interact")):
-		exit_comfort_pose()
-		get_viewport().set_input_as_handled()
-		return
+	if _pose_locked:
+		var pointer_exit := event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+		var touch_exit := event is InputEventScreenTouch and not event.pressed
+		if event.is_action_pressed("cancel") or event.is_action_pressed("interact") or pointer_exit or touch_exit:
+			exit_comfort_pose()
+			get_viewport().set_input_as_handled()
+			return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_apply_look(event.relative * look_sensitivity)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
@@ -213,6 +217,7 @@ func enter_comfort_pose(anchor: Node3D, camera_height := 1.18) -> void:
 	global_position = anchor.global_position
 	rotation.y = anchor.global_rotation.y
 	_pose_locked = true
+	comfort_pose_changed.emit(true)
 	_animate_camera_position(Vector3(_standing_camera_position.x, camera_height, _standing_camera_position.z))
 
 
@@ -221,6 +226,7 @@ func exit_comfort_pose() -> void:
 		return
 	global_transform = _standing_transform
 	_pose_locked = false
+	comfort_pose_changed.emit(false)
 	_animate_camera_position(_standing_camera_position)
 
 
