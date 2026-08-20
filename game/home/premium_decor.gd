@@ -201,6 +201,12 @@ func _build_dining_room() -> void:
 	_cylinder(root, "DiningTableTop", center + Vector3(0.0, 0.79, 0.0), 0.92, 0.92, 0.11, pale_stone(), Vector3(1.62, 1.0, 0.66))
 	_cylinder(root, "DiningPedestal", center + Vector3(0.0, 0.39, 0.0), 0.34, 0.52, 0.78, walnut, Vector3(1.15, 1.0, 0.82))
 	_add_collision_box(root, "DiningTableCollision", center + Vector3(0.0, 0.44, 0.0), Vector3(3.05, 0.88, 1.28))
+	var serving := ServingStationInteractable.new()
+	serving.name = "DiningTableServingInteraction"
+	serving.object_id = "dining_table_serving"
+	serving.position = center + Vector3(0.0, 1.05, 0.0)
+	serving.add_child(_area_shape(Vector3(3.25, 0.80, 1.48)))
+	root.add_child(serving)
 
 	_add_dining_chair(root, Vector3(5.25, 0.0, -0.16), 0.0, "dining_north_west")
 	_add_dining_chair(root, Vector3(7.05, 0.0, -0.16), 0.0, "dining_north_east")
