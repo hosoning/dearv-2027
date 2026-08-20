@@ -44,11 +44,13 @@ var _bob_phase := 0.0
 var _location_save_timer: Timer
 var _last_saved_position := Vector3.INF
 var _last_saved_yaw := INF
+var _reduced_motion := false
 
 
 func _ready() -> void:
 	_camera_rest_position = camera.position
 	_camera_base_fov = camera.fov
+	_reduced_motion = bool(AppState.get_interaction_state("reduced_walking_motion", false))
 	if not DisplayServer.is_touchscreen_available():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_location_save_timer = Timer.new()
@@ -216,7 +218,23 @@ func _update_gamepad_look(delta: float) -> void:
 	_apply_look(stick.normalized() * scaled_strength * gamepad_look_speed * delta)
 
 
+func is_reduced_motion_enabled() -> bool:
+	return _reduced_motion
+
+
+func set_reduced_motion(enabled: bool) -> void:
+	_reduced_motion = enabled
+	AppState.set_interaction_state("reduced_walking_motion", enabled)
+	if enabled:
+		_bob_phase = 0.0
+
+
 func _update_camera_motion(delta: float, horizontal_speed: float) -> void:
+	if _reduced_motion:
+		var steady_smoothing := 1.0 - exp(-delta * 14.0)
+		camera.position = camera.position.lerp(_camera_rest_position, steady_smoothing)
+		camera.fov = lerpf(camera.fov, _camera_base_fov, 1.0 - exp(-delta * 8.0))
+		return
 	var target_position := _camera_rest_position
 	var moving := horizontal_speed > 0.12 and is_on_floor() and not _pose_locked
 	if moving:
