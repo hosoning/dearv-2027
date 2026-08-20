@@ -58,6 +58,11 @@ func _build_display_zone() -> void:
 		gift.object_id = "gift_520_flower_box"
 		gift.gift_id = "gift_520_flower_box"
 		gift.display_name = "520 Gift Set"
+		gift.story = "An interactive floral keepsake presented in the private memory gallery."
+		gift.pages = [
+			"The flower box can be opened and closed in place, revealing the inner keepsake without leaving the room.",
+			"Its display state is saved locally first and restored when this home is visited again."
+		]
 		gift.animation_mode = "reveal"
 		gift.visual_root = flower
 		gift.position = Vector3(-1.15, 1.45, 5.82)
@@ -71,6 +76,11 @@ func _build_display_zone() -> void:
 		gift.object_id = "christmas_music_lantern"
 		gift.gift_id = "christmas_music_lantern"
 		gift.display_name = "Christmas Music Lantern"
+		gift.story = "A winter lantern with warm light, moving snow and an original music-box motif."
+		gift.pages = [
+			"Switch the lantern on to illuminate the miniature scene and start its gentle chime.",
+			"The chime is generated inside DearV and the lantern remembers whether it was left playing."
+		]
 		gift.animation_mode = "lantern"
 		gift.visual_root = lantern
 		gift.position = Vector3(-4.55, 1.55, 5.82)
