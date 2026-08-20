@@ -94,6 +94,30 @@ func prepare_food(instance_id: String, action: String) -> bool:
 	return true
 
 
+func get_prepared_food(location := "") -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for value in AppState.prepared_food.values():
+		if not value is Dictionary:
+			continue
+		var item := value as Dictionary
+		if location.is_empty() or str(item.get("location", "")) == location:
+			result.append(item)
+	return result
+
+
+func plate_prepared_food(instance_id: String, target_location := "dining_table") -> bool:
+	if not AppState.prepared_food.has(instance_id):
+		return false
+	var item: Dictionary = AppState.prepared_food[instance_id]
+	if str(item.get("stage", "")) != STAGE_COOKED:
+		return false
+	item["stage"] = STAGE_PLATED
+	item["location"] = target_location
+	AppState.prepared_food[instance_id] = item
+	SaveRepository.queue_save()
+	return true
+
+
 func start_recipe(appliance_id: String, recipe_id: String, ingredient_ids: Array[String]) -> bool:
 	if active_appliances.has(appliance_id) or not recipes.has(recipe_id):
 		return false
