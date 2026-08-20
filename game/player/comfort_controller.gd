@@ -14,6 +14,10 @@ signal touch_look_changed(origin: Vector2, current: Vector2, active: bool)
 @export var interaction_distance := 2.7
 @export var camera_pitch_min := deg_to_rad(-48.0)
 @export var camera_pitch_max := deg_to_rad(58.0)
+@export_range(0.0, 0.04, 0.001) var head_bob_height := 0.014
+@export_range(0.0, 0.03, 0.001) var head_bob_sway := 0.008
+@export_range(0.5, 2.5, 0.05) var head_bob_steps_per_meter := 1.45
+@export_range(0.0, 3.0, 0.1) var movement_fov_boost := 1.4
 
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var camera_pivot: Node3D = $CameraPivot
@@ -31,9 +35,14 @@ var _pose_locked := false
 var _standing_transform := Transform3D.IDENTITY
 var _standing_camera_position := Vector3.ZERO
 var _pose_tween: Tween
+var _camera_rest_position := Vector3.ZERO
+var _camera_base_fov := 64.0
+var _bob_phase := 0.0
 
 
 func _ready() -> void:
+	_camera_rest_position = camera.position
+	_camera_base_fov = camera.fov
 	if not DisplayServer.is_touchscreen_available():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -104,6 +113,7 @@ func _handle_screen_drag(event: InputEventScreenDrag) -> void:
 func _physics_process(delta: float) -> void:
 	if _pose_locked:
 		velocity = Vector3.ZERO
+		_update_camera_motion(delta, 0.0)
 		_update_focus()
 		return
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -123,9 +133,26 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y = -0.2
 	move_and_slide()
+	_update_camera_motion(delta, Vector2(velocity.x, velocity.z).length())
 	_update_focus()
 	if Input.is_action_just_pressed("interact"):
 		_try_interact()
+
+
+func _update_camera_motion(delta: float, horizontal_speed: float) -> void:
+	var target_position := _camera_rest_position
+	var moving := horizontal_speed > 0.12 and is_on_floor() and not _pose_locked
+	if moving:
+		_bob_phase += delta * horizontal_speed * TAU * head_bob_steps_per_meter
+		target_position.x += cos(_bob_phase) * head_bob_sway
+		target_position.y += sin(_bob_phase * 2.0) * head_bob_height
+	else:
+		_bob_phase = fmod(_bob_phase, TAU)
+	var smoothing := 1.0 - exp(-delta * 12.0)
+	camera.position = camera.position.lerp(target_position, smoothing)
+	var speed_ratio := clampf(horizontal_speed / maxf(walk_speed, 0.01), 0.0, 1.0)
+	var target_fov := _camera_base_fov + speed_ratio * movement_fov_boost
+	camera.fov = lerpf(camera.fov, target_fov, 1.0 - exp(-delta * 6.0))
 
 
 func _apply_look(delta_look: Vector2) -> void:
