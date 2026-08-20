@@ -294,6 +294,38 @@ func _build_master_suite_assets() -> void:
 		_collision_box(suite, "ShowerCollision", Vector3(-7.80, 1.20, 10.90), Vector3(1.78, 2.40, 1.60))
 	else:
 		_build_bathroom_fallback(suite)
+	_build_bathroom_water_interaction(suite)
+
+
+func _build_bathroom_water_interaction(parent: Node3D) -> void:
+	var filler := Node3D.new()
+	filler.name = "BathFillerRig"
+	filler.position = Vector3(-14.15, 0.0, 10.12)
+	parent.add_child(filler)
+	_box(filler, "BathFillerStem", Vector3(0.0, 0.82, 0.0), Vector3(0.08, 0.48, 0.08), dark_metal_material, false)
+	_box(filler, "BathFillerSpout", Vector3(0.0, 1.03, 0.18), Vector3(0.08, 0.08, 0.42), dark_metal_material, false)
+	_box(filler, "BathFillerHandle", Vector3(0.22, 0.82, 0.0), Vector3(0.20, 0.055, 0.055), dark_metal_material, false)
+
+	var stream := MeshInstance3D.new()
+	stream.name = "BathWaterStream"
+	var stream_mesh := CylinderMesh.new()
+	stream_mesh.top_radius = 0.022
+	stream_mesh.bottom_radius = 0.034
+	stream_mesh.height = 0.52
+	stream_mesh.radial_segments = 14
+	stream_mesh.material = water_material
+	stream.mesh = stream_mesh
+	stream.position = Vector3(0.0, 0.73, 0.39)
+	stream.visible = false
+	filler.add_child(stream)
+
+	var interaction := FaucetInteractable.new()
+	interaction.name = "BathFillerInteraction"
+	interaction.object_id = "ensuite_bath_filler"
+	interaction.water_stream = stream
+	interaction.position = Vector3(0.0, 0.90, 0.18)
+	interaction.add_child(_area_shape(Vector3(0.95, 1.25, 0.95)))
+	filler.add_child(interaction)
 
 
 func _build_bed_interaction(parent: Node3D) -> void:
