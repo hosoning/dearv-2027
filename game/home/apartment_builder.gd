@@ -253,6 +253,19 @@ func _build_study_rig() -> void:
 	computer.add_child(_area_shape(Vector3(1.8, 1.4, 1.0)))
 	study.add_child(computer)
 
+	var chair_anchor := Node3D.new()
+	chair_anchor.name = "StudyChairAnchor"
+	chair_anchor.position = Vector3(14.35, 0.02, 4.18)
+	study.add_child(chair_anchor)
+	var chair_seat := SeatInteractable.new()
+	chair_seat.name = "ExecutiveStudyChairSeat"
+	chair_seat.object_id = "executive_study_chair"
+	chair_seat.display_name = "study chair"
+	chair_seat.seat_anchor = chair_anchor
+	chair_seat.position = Vector3(14.35, 0.65, 4.18)
+	chair_seat.add_child(_area_shape(Vector3(0.95, 1.25, 0.95)))
+	study.add_child(chair_seat)
+
 
 func _build_master_suite_assets() -> void:
 	var suite := Node3D.new()
