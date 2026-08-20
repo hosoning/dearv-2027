@@ -71,6 +71,7 @@ func _build_master_bedroom() -> void:
 	_box(root, "HeadboardWallPanel", Vector3(-11.45, 1.72, -8.73), Vector3(6.4, 2.75, 0.08), walnut)
 	for x in [-13.62, -9.28]:
 		_box(root, "BedsideCabinet", Vector3(x, 0.36, -7.85), Vector3(0.82, 0.72, 0.58), walnut)
+		_add_collision_box(root, "BedsideCabinetCollision", Vector3(x, 0.36, -7.85), Vector3(0.82, 0.72, 0.58))
 		_box(root, "BedsideTop", Vector3(x, 0.74, -7.85), Vector3(0.88, 0.045, 0.62), champagne)
 		suite_detail_lights.append(_add_table_lamp(root, Vector3(x, 0.78, -7.85)))
 
@@ -283,6 +284,7 @@ func _build_bathroom_details() -> void:
 	_box(root, "BathroomRunner", Vector3(-11.45, 0.018, 12.32), Vector3(3.85, 0.028, 1.05), cream)
 	_cylinder(root, "SpaStoolTop", Vector3(-13.45, 0.53, 12.12), 0.38, 0.38, 0.12, pale_stone())
 	_cylinder(root, "SpaStoolPedestal", Vector3(-13.45, 0.27, 12.12), 0.18, 0.28, 0.48, champagne)
+	_add_collision_box(root, "SpaStoolCollision", Vector3(-13.45, 0.35, 12.12), Vector3(0.76, 0.70, 0.76))
 	_box(root, "FoldedTowelLower", Vector3(-13.45, 0.64, 12.12), Vector3(0.52, 0.08, 0.36), cream)
 	_box(root, "FoldedTowelUpper", Vector3(-13.43, 0.73, 12.10), Vector3(0.44, 0.07, 0.31), textile)
 	_add_plant(root, Vector3(-15.55, 0.0, 12.55), 0.72)
@@ -299,6 +301,7 @@ func _build_living_details() -> void:
 	# The sculptural oval table and soft planting break up the room's box-heavy silhouette.
 	_cylinder(root, "LowCoffeeTable", Vector3(0.25, 0.35, 6.15), 0.95, 0.95, 0.16, pale_stone(), Vector3(1.22, 1.0, 0.58))
 	_cylinder(root, "CoffeeTablePedestal", Vector3(0.25, 0.18, 6.15), 0.32, 0.46, 0.34, champagne, Vector3(1.15, 1.0, 0.82))
+	_add_collision_box(root, "CoffeeTableCollision", Vector3(0.25, 0.35, 6.15), Vector3(2.35, 0.70, 1.15))
 	_cylinder(root, "CeramicTray", Vector3(0.05, 0.455, 6.1), 0.28, 0.30, 0.045, ceramic, Vector3(1.35, 1.0, 0.72))
 	_sphere(root, "DecorativeStone", Vector3(0.02, 0.54, 6.08), Vector3(0.12, 0.08, 0.10), charcoal)
 	_add_plant(root, Vector3(3.35, 0.0, 5.9), 1.05)
