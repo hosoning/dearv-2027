@@ -67,6 +67,44 @@ func get_inventory(location: String) -> Array[Dictionary]:
 	return result
 
 
+func get_restock_needed(target_count := 2) -> int:
+	var totals: Dictionary = {}
+	for value in AppState.inventory.values():
+		if not value is Dictionary:
+			continue
+		var definition_id := str(value.get("definition_id", ""))
+		totals[definition_id] = int(totals.get(definition_id, 0)) + 1
+	var needed := 0
+	for definition_id in definitions:
+		needed += maxi(target_count - int(totals.get(definition_id, 0)), 0)
+	return needed
+
+
+func restock_essentials(target_count := 2, location := "fridge") -> int:
+	var totals: Dictionary = {}
+	for value in AppState.inventory.values():
+		if not value is Dictionary:
+			continue
+		var definition_id := str(value.get("definition_id", ""))
+		totals[definition_id] = int(totals.get(definition_id, 0)) + 1
+	var added := 0
+	var definition_ids := definitions.keys()
+	definition_ids.sort()
+	for definition_value in definition_ids:
+		var definition_id := str(definition_value)
+		var missing := maxi(target_count - int(totals.get(definition_id, 0)), 0)
+		for _index in range(missing):
+			if not create_food(definition_id, location).is_empty():
+				added += 1
+	if added > 0:
+		AppState.set_interaction_state("last_grocery_delivery", {
+			"item_count": added,
+			"delivered_at": Time.get_datetime_string_from_system(true),
+		})
+		inventory_changed.emit(location)
+	return added
+
+
 func prepare_food(instance_id: String, action: String) -> bool:
 	if not AppState.inventory.has(instance_id):
 		return false
