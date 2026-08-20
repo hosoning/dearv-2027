@@ -179,6 +179,17 @@ func _build_entry_gallery() -> void:
 	_cylinder(root, "EntryCatchall", Vector3(17.10, 1.30, -11.52), 0.18, 0.20, 0.035, ceramic, Vector3(1.0, 1.0, 0.70))
 	_sphere(root, "EntrySculpture", Vector3(17.10, 1.47, -10.78), Vector3(0.14, 0.24, 0.14), pale_stone())
 
+	# A discreet console tablet lets the resident set the home's daylight mood.
+	_box(root, "AtmosphereTablet", Vector3(17.08, 1.30, -11.92), Vector3(0.44, 0.035, 0.30), charcoal)
+	for z in [-12.00, -11.92, -11.84]:
+		_box(root, "AtmospherePresetKey", Vector3(17.08, 1.325, z), Vector3(0.30, 0.012, 0.035), warm_glow)
+	var atmosphere := AtmosphereInteractable.new()
+	atmosphere.name = "AtmosphereInteraction"
+	atmosphere.object_id = "home_atmosphere_control"
+	atmosphere.position = Vector3(17.08, 1.48, -11.92)
+	atmosphere.add_child(_area_shape(Vector3(0.72, 0.70, 0.72)))
+	root.add_child(atmosphere)
+
 	# Upholstered perch and planting soften the solid study wall near the turn into the home.
 	_box(root, "EntryBenchSeat", Vector3(14.55, 0.48, -8.88), Vector3(2.25, 0.28, 0.54), cream)
 	for x in [13.75, 15.35]:
