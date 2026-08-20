@@ -17,6 +17,7 @@ var _gift_pages: Array[String] = []
 var _gift_page_index := 0
 var _gift_previous_button: Button
 var _gift_next_button: Button
+var _control_hint_active := false
 
 
 func _ready() -> void:
@@ -46,6 +47,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_focus_changed(target: Interactable) -> void:
 	_last_focus = target
+	if target:
+		_control_hint_active = false
 	if _comfort_pose_active:
 		return
 	prompt_panel.visible = target != null
@@ -72,6 +75,7 @@ func _open_inspector(payload: Dictionary) -> void:
 	match kind:
 		"gift":
 			_build_gift_page_actions(story, pages)
+			call_deferred("_focus_first_action")
 			return
 		"computer":
 			story = "The in-world computer connects this private 3D home to the DearV portal for letters, memories and account tools."
@@ -83,6 +87,15 @@ func _open_inspector(payload: Dictionary) -> void:
 			story = "Choose a recipe. Ingredients must first be taken from the refrigerator and placed on the counter."
 			_build_appliance_actions(payload)
 	inspector_body.text = story
+	call_deferred("_focus_first_action")
+
+
+func _focus_first_action() -> void:
+	for child in inspector_actions.get_children():
+		if child is Button and not (child as Button).disabled:
+			(child as Button).grab_focus()
+			return
+	close_button.grab_focus()
 
 
 func _close_inspector() -> void:
