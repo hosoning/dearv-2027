@@ -20,6 +20,15 @@ func _ready() -> void:
 	_apply_state(true)
 
 
+func register_light(light: Light3D) -> void:
+	if not light or target_lights.has(light):
+		return
+	target_lights.append(light)
+	_base_energy[light] = light.light_energy
+	if not _is_on:
+		light.light_energy = 0.0
+
+
 func get_prompt() -> String:
 	return "Turn lights off" if _is_on else "Turn lights on"
 
