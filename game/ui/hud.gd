@@ -111,7 +111,7 @@ func _open_inspector(payload: Dictionary) -> void:
 			story = "Bring a finished dish from the stove to the dining table. Served meals remain part of the saved home state."
 			_build_serving_actions(payload)
 		"atmosphere":
-			story = "Choose how the home should feel, and switch to a steady walking camera whenever you prefer less motion."
+			story = "Choose the home atmosphere, walking comfort and private entrance lock from one discreet control panel."
 			_build_atmosphere_actions(payload)
 	inspector_body.text = story
 	call_deferred("_focus_first_action")
@@ -196,6 +196,7 @@ func _open_dearv_portal() -> void:
 func _build_atmosphere_actions(payload: Dictionary) -> void:
 	var target := payload.get("target") as DayNightDirector
 	var player := payload.get("player") as ComfortController
+	var entry_door := payload.get("entry_door") as DoorInteractable
 	if not target:
 		_add_disabled_action("Atmosphere controls are unavailable")
 		return
@@ -211,37 +212,51 @@ func _build_atmosphere_actions(payload: Dictionary) -> void:
 		var button := Button.new()
 		button.text = "%s%s" % [str(option[1]), " · Active" if mode == current_mode else ""]
 		button.disabled = mode == current_mode
-		button.pressed.connect(_set_atmosphere.bind(target, mode, player))
+		button.pressed.connect(_set_atmosphere.bind(target, mode, player, entry_door))
 		inspector_actions.add_child(button)
 	if player:
 		var comfort_button := Button.new()
 		var reduced := player.is_reduced_motion_enabled()
 		comfort_button.text = "Use natural walking motion" if reduced else "Use steady walking camera"
-		comfort_button.pressed.connect(_set_reduced_motion.bind(player, not reduced, target))
+		comfort_button.pressed.connect(_set_reduced_motion.bind(player, not reduced, target, entry_door))
 		inspector_actions.add_child(comfort_button)
+	if entry_door:
+		var lock_button := Button.new()
+		var locked := entry_door.is_locked()
+		lock_button.text = "Unlock private entrance" if locked else "Lock private entrance"
+		lock_button.pressed.connect(_set_entry_lock.bind(entry_door, not locked, target, player))
+		inspector_actions.add_child(lock_button)
 
 
-func _set_atmosphere(target: DayNightDirector, mode: String, player: ComfortController) -> void:
+func _open_home_controls(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
+	_open_inspector({
+		"kind": "atmosphere",
+		"title": "Home controls",
+		"target": target,
+		"mode": target.atmosphere_mode,
+		"player": player,
+		"entry_door": entry_door,
+	})
+
+
+func _set_atmosphere(target: DayNightDirector, mode: String, player: ComfortController, entry_door: DoorInteractable) -> void:
 	target.set_atmosphere(mode)
-	_open_inspector({
-		"kind": "atmosphere",
-		"title": "Home atmosphere",
-		"target": target,
-		"mode": target.atmosphere_mode,
-		"player": player,
-	})
+	_open_home_controls(target, player, entry_door)
 
 
-func _set_reduced_motion(player: ComfortController, enabled: bool, target: DayNightDirector) -> void:
+func _set_reduced_motion(player: ComfortController, enabled: bool, target: DayNightDirector, entry_door: DoorInteractable) -> void:
 	player.set_reduced_motion(enabled)
-	_open_inspector({
-		"kind": "atmosphere",
-		"title": "Home atmosphere",
-		"target": target,
-		"mode": target.atmosphere_mode,
-		"player": player,
-	})
+	_open_home_controls(target, player, entry_door)
 	inspector_body.text = "Steady walking camera is enabled and saved." if enabled else "Natural walking motion is enabled and saved."
+
+
+func _set_entry_lock(entry_door: DoorInteractable, locked: bool, target: DayNightDirector, player: ComfortController) -> void:
+	var changed := entry_door.set_locked(locked)
+	_open_home_controls(target, player, entry_door)
+	if changed:
+		inspector_body.text = "The private entrance is locked and saved." if locked else "The private entrance is unlocked and saved."
+	else:
+		inspector_body.text = "Close the entrance door before locking it."
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
