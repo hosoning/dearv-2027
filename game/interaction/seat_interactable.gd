@@ -3,6 +3,7 @@ extends Interactable
 
 @export var seat_anchor: Node3D
 @export var display_name := "sofa"
+@export_range(0.95, 1.45, 0.01) var camera_height := 1.18
 
 
 func _ready() -> void:
@@ -16,4 +17,4 @@ func can_interact(actor: Node3D) -> bool:
 
 func interact(actor: Node3D) -> void:
 	if actor is ComfortController and seat_anchor:
-		(actor as ComfortController).enter_comfort_pose(seat_anchor)
+		(actor as ComfortController).enter_comfort_pose(seat_anchor, camera_height)
