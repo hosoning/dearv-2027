@@ -12,6 +12,12 @@ var ceramic := StandardMaterial3D.new()
 var leaf_dark := StandardMaterial3D.new()
 var leaf_light := StandardMaterial3D.new()
 
+var living_detail_lights: Array[Light3D] = []
+var kitchen_detail_lights: Array[Light3D] = []
+var study_detail_lights: Array[Light3D] = []
+var suite_detail_lights: Array[Light3D] = []
+var bathroom_detail_lights: Array[Light3D] = []
+
 
 func _ready() -> void:
 	_setup_materials()
@@ -23,6 +29,8 @@ func _ready() -> void:
 	_build_kitchen_details()
 	_build_dining_room()
 	_build_entry_gallery()
+	_build_private_light_switches()
+	call_deferred("_link_shared_zone_lights")
 
 
 func _setup_materials() -> void:
@@ -64,7 +72,7 @@ func _build_master_bedroom() -> void:
 	for x in [-13.62, -9.28]:
 		_box(root, "BedsideCabinet", Vector3(x, 0.36, -7.85), Vector3(0.82, 0.72, 0.58), walnut)
 		_box(root, "BedsideTop", Vector3(x, 0.74, -7.85), Vector3(0.88, 0.045, 0.62), champagne)
-		_add_table_lamp(root, Vector3(x, 0.78, -7.85))
+		suite_detail_lights.append(_add_table_lamp(root, Vector3(x, 0.78, -7.85)))
 
 	# A restrained upholstered bench makes the foot of the bed read as a real hotel-like suite.
 	_box(root, "BedroomBenchSeat", Vector3(-11.45, 0.45, -5.34), Vector3(2.15, 0.34, 0.62), cream)
@@ -78,7 +86,7 @@ func _build_master_bedroom() -> void:
 	# A leafy corner and a soft folded throw keep the suite from reading as a showroom.
 	_add_plant(root, Vector3(-14.30, 0.0, -5.35), 0.84)
 	_box(root, "BenchThrow", Vector3(-11.78, 0.64, -5.34), Vector3(0.74, 0.035, 0.58), textile)
-	_add_warm_spot(root, Vector3(-11.45, 2.95, -6.2), Vector3(-11.45, 0.8, -7.2), 1.55, 5.5)
+	suite_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 2.95, -6.2), Vector3(-11.45, 0.8, -7.2), 1.55, 5.5))
 
 
 func _build_walk_in_wardrobe() -> void:
@@ -109,7 +117,7 @@ func _build_walk_in_wardrobe() -> void:
 	for x in [-11.78, -11.12]:
 		_box(root, "DressingStoolLeg", Vector3(x, 0.24, 5.15), Vector3(0.055, 0.48, 0.42), champagne)
 
-	_add_warm_spot(root, Vector3(-11.45, 3.02, 3.72), Vector3(-11.45, 0.75, 3.85), 1.4, 4.8)
+	suite_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 3.72), Vector3(-11.45, 0.75, 3.85), 1.4, 4.8))
 
 
 func _build_study() -> void:
@@ -137,12 +145,12 @@ func _build_study() -> void:
 	# Desk accessories and a pool of task light make the authored GLB feel inhabited.
 	_box(root, "DeskPad", Vector3(14.35, 0.855, 3.0), Vector3(1.65, 0.025, 0.72), charcoal)
 	_box(root, "PenTray", Vector3(15.43, 0.88, 2.75), Vector3(0.42, 0.05, 0.18), champagne)
-	_add_table_lamp(root, Vector3(13.05, 0.83, 2.62), 0.82)
+	study_detail_lights.append(_add_table_lamp(root, Vector3(13.05, 0.83, 2.62), 0.82))
 	# A restrained desk globe brings a curved silhouette to the executive study.
 	_cylinder(root, "GlobeStand", Vector3(15.18, 1.00, 3.26), 0.09, 0.13, 0.18, champagne)
 	_sphere(root, "DeskGlobe", Vector3(15.18, 1.20, 3.26), Vector3(0.18, 0.18, 0.18), mirror)
 	_sphere(root, "GlobeAxisCap", Vector3(15.18, 1.40, 3.26), Vector3(0.035, 0.035, 0.035), champagne)
-	_add_warm_spot(root, Vector3(14.35, 2.98, 3.15), Vector3(14.35, 0.75, 3.0), 1.35, 5.0)
+	study_detail_lights.append(_add_warm_spot(root, Vector3(14.35, 2.98, 3.15), Vector3(14.35, 0.75, 3.0), 1.35, 5.0))
 
 
 func _build_entry_gallery() -> void:
@@ -174,8 +182,8 @@ func _build_entry_gallery() -> void:
 	_add_seat_interaction(root, "entry_bench_seat", "entry bench", Vector3(14.55, 0.02, -9.18), 0.0, Vector3(2.15, 1.25, 0.82))
 	_add_plant(root, Vector3(16.65, 0.0, -9.35), 0.66)
 
-	_add_warm_spot(root, Vector3(16.85, 3.02, -11.20), Vector3(17.20, 1.15, -11.20), 1.20, 4.0)
-	_add_warm_spot(root, Vector3(14.55, 3.02, -9.40), Vector3(14.55, 0.55, -8.88), 1.05, 4.2)
+	living_detail_lights.append(_add_warm_spot(root, Vector3(16.85, 3.02, -11.20), Vector3(17.20, 1.15, -11.20), 1.20, 4.0))
+	living_detail_lights.append(_add_warm_spot(root, Vector3(14.55, 3.02, -9.40), Vector3(14.55, 0.55, -8.88), 1.05, 4.2))
 
 
 func _build_dining_room() -> void:
@@ -197,8 +205,8 @@ func _build_dining_room() -> void:
 	_add_dining_chair(root, Vector3(7.88, 0.0, -1.15), 90.0, "dining_east")
 
 	# A pair of pendants keeps the dining zone distinct from the adjacent bar.
-	_add_pendant(root, Vector3(5.35, 3.10, -1.15))
-	_add_pendant(root, Vector3(6.95, 3.10, -1.15))
+	living_detail_lights.append(_add_pendant(root, Vector3(5.35, 3.10, -1.15)))
+	living_detail_lights.append(_add_pendant(root, Vector3(6.95, 3.10, -1.15)))
 	_cylinder(root, "DiningCenterpiece", center + Vector3(0.0, 0.91, 0.0), 0.19, 0.24, 0.18, ceramic)
 	_sphere(root, "DiningStem", center + Vector3(0.0, 1.14, 0.0), Vector3(0.035, 0.28, 0.035), leaf_dark)
 	_sphere(root, "DiningLeaf", center + Vector3(-0.12, 1.31, 0.0), Vector3(0.18, 0.07, 0.10), leaf_light)
@@ -250,7 +258,7 @@ func _build_kitchen_details() -> void:
 
 	# Three low pendant pools turn the long bar into the social heart of the home.
 	for x in [-1.55, 0.25, 2.05]:
-		_add_pendant(root, Vector3(x, 3.10, -6.0))
+		kitchen_detail_lights.append(_add_pendant(root, Vector3(x, 3.10, -6.0)))
 
 	# A compact still life adds scale while keeping the working surface clear.
 	_cylinder(root, "BarServingTray", Vector3(1.62, 1.115, -6.02), 0.30, 0.32, 0.035, champagne, Vector3(1.48, 1.0, 0.72))
@@ -276,7 +284,7 @@ func _build_bathroom_details() -> void:
 	_add_plant(root, Vector3(-15.55, 0.0, 12.55), 0.72)
 
 	# A warm wash over the vanity balances the cooler translucent glazing.
-	_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4)
+	bathroom_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4))
 
 
 func _build_living_details() -> void:
@@ -290,7 +298,38 @@ func _build_living_details() -> void:
 	_cylinder(root, "CeramicTray", Vector3(0.05, 0.455, 6.1), 0.28, 0.30, 0.045, ceramic, Vector3(1.35, 1.0, 0.72))
 	_sphere(root, "DecorativeStone", Vector3(0.02, 0.54, 6.08), Vector3(0.12, 0.08, 0.10), charcoal)
 	_add_plant(root, Vector3(3.35, 0.0, 5.9), 1.05)
-	_add_floor_lamp(root, Vector3(-3.4, 0.0, 5.4))
+	living_detail_lights.append(_add_floor_lamp(root, Vector3(-3.4, 0.0, 5.4)))
+
+
+func _build_private_light_switches() -> void:
+	_add_decor_switch("suite_detail_lights", Vector3(-5.13, 1.18, 4.90), Vector3(0.035, 0.24, 0.16), Vector3(0.45, 0.75, 0.65), suite_detail_lights)
+	_add_decor_switch("bathroom_detail_lights", Vector3(-10.85, 1.18, 8.13), Vector3(0.16, 0.24, 0.035), Vector3(0.65, 0.75, 0.45), bathroom_detail_lights)
+
+
+func _add_decor_switch(id: String, position: Vector3, plate_size: Vector3, area_size: Vector3, lights: Array[Light3D]) -> void:
+	_box(self, "%sPlate" % id, position, plate_size, ceramic)
+	var interaction := LightSwitchInteractable.new()
+	interaction.name = "%sSwitch" % id
+	interaction.object_id = id
+	interaction.target_lights = lights
+	interaction.position = position
+	interaction.add_child(_area_shape(area_size))
+	add_child(interaction)
+
+
+func _link_shared_zone_lights() -> void:
+	_register_zone_lights("living_lights", living_detail_lights)
+	_register_zone_lights("kitchen_lights", kitchen_detail_lights)
+	_register_zone_lights("study_lights", study_detail_lights)
+
+
+func _register_zone_lights(switch_id: String, lights: Array[Light3D]) -> void:
+	var interaction := get_node_or_null("../Apartment/%sSwitch" % switch_id) as LightSwitchInteractable
+	if not interaction:
+		push_warning("Decor could not find light switch: %s" % switch_id)
+		return
+	for light in lights:
+		interaction.register_light(light)
 
 
 func _add_plant(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
@@ -309,7 +348,7 @@ func _add_plant(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
 		leaf.rotation_degrees = data[2]
 
 
-func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> void:
+func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> OmniLight3D:
 	_box(parent, "PendantCord", ceiling_origin + Vector3(0.0, -0.42, 0.0), Vector3(0.025, 0.84, 0.025), charcoal)
 	_cylinder(parent, "PendantCanopy", ceiling_origin + Vector3(0.0, -0.02, 0.0), 0.13, 0.13, 0.045, champagne)
 	_cylinder(parent, "PendantShade", ceiling_origin + Vector3(0.0, -0.90, 0.0), 0.16, 0.31, 0.28, charcoal)
@@ -321,9 +360,10 @@ func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> void:
 	light.omni_range = 3.2
 	light.shadow_enabled = true
 	parent.add_child(light)
+	return light
 
 
-func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
+func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> OmniLight3D:
 	_box(parent, "LampStem", origin + Vector3(0.0, 0.22 * scale_factor, 0.0), Vector3(0.045, 0.44, 0.045) * scale_factor, champagne)
 	var shade := MeshInstance3D.new()
 	shade.name = "LampShade"
@@ -344,9 +384,10 @@ func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> vo
 	light.omni_range = 2.7
 	light.shadow_enabled = true
 	parent.add_child(light)
+	return light
 
 
-func _add_floor_lamp(parent: Node3D, origin: Vector3) -> void:
+func _add_floor_lamp(parent: Node3D, origin: Vector3) -> OmniLight3D:
 	_box(parent, "FloorLampStem", origin + Vector3(0.0, 0.82, 0.0), Vector3(0.055, 1.64, 0.055), champagne)
 	var shade := MeshInstance3D.new()
 	shade.name = "FloorLampShade"
@@ -366,9 +407,10 @@ func _add_floor_lamp(parent: Node3D, origin: Vector3) -> void:
 	light.omni_range = 4.2
 	light.shadow_enabled = true
 	parent.add_child(light)
+	return light
 
 
-func _add_warm_spot(parent: Node3D, from: Vector3, target: Vector3, energy: float, light_range: float) -> void:
+func _add_warm_spot(parent: Node3D, from: Vector3, target: Vector3, energy: float, light_range: float) -> SpotLight3D:
 	var light := SpotLight3D.new()
 	light.position = from
 	light.light_color = Color("ffd5a2")
@@ -378,6 +420,7 @@ func _add_warm_spot(parent: Node3D, from: Vector3, target: Vector3, energy: floa
 	light.shadow_enabled = true
 	light.look_at_from_position(from, target, Vector3.UP)
 	parent.add_child(light)
+	return light
 
 
 func _cylinder(parent: Node3D, node_name: String, position: Vector3, top_radius: float, bottom_radius: float, height: float, material: Material, shape_scale := Vector3.ONE) -> MeshInstance3D:
