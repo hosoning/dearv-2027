@@ -78,6 +78,8 @@ func _build_master_bedroom() -> void:
 	_box(root, "BedroomBenchSeat", Vector3(-11.45, 0.45, -5.34), Vector3(2.15, 0.34, 0.62), cream)
 	for x in [-12.28, -10.62]:
 		_box(root, "BedroomBenchLeg", Vector3(x, 0.22, -5.34), Vector3(0.08, 0.44, 0.46), champagne)
+	_add_collision_box(root, "BedroomBenchCollision", Vector3(-11.45, 0.38, -5.34), Vector3(2.15, 0.76, 0.62))
+	_add_seat_interaction(root, "bedroom_bench_seat", "bedroom bench", Vector3(-11.45, 0.02, -4.98), 0.0, Vector3(2.10, 1.25, 0.86))
 
 	# Art is intentionally abstract/system-authored; it does not invent personal copy.
 	_box(root, "BedroomArtFrame", Vector3(-14.55, 1.72, -8.64), Vector3(1.0, 1.28, 0.055), champagne)
@@ -116,6 +118,8 @@ func _build_walk_in_wardrobe() -> void:
 	_box(root, "DressingStoolSeat", Vector3(-11.45, 0.48, 5.15), Vector3(0.92, 0.22, 0.58), cream)
 	for x in [-11.78, -11.12]:
 		_box(root, "DressingStoolLeg", Vector3(x, 0.24, 5.15), Vector3(0.055, 0.48, 0.42), champagne)
+	_add_collision_box(root, "DressingStoolCollision", Vector3(-11.45, 0.38, 5.15), Vector3(0.92, 0.76, 0.58))
+	_add_seat_interaction(root, "dressing_stool_seat", "dressing stool", Vector3(-11.45, 0.02, 5.15), 0.0, Vector3(0.98, 1.15, 0.76))
 
 	suite_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 3.72), Vector3(-11.45, 0.75, 3.85), 1.4, 4.8))
 
