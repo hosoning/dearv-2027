@@ -13,8 +13,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: dearv-pages-publish
-  cancel-in-progress: false
+  group: godot-web-export
+  cancel-in-progress: true
 
 jobs:
   export-web:
