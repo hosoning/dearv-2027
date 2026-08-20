@@ -18,6 +18,7 @@ var water_material: StandardMaterial3D
 func _ready() -> void:
 	_create_materials()
 	_build_shell()
+	_build_entry_corridor()
 	_build_windows()
 	_build_doors()
 	_build_lighting()
@@ -51,7 +52,9 @@ func _build_shell() -> void:
 	_box(self, "Ceiling", Vector3(0.0, CEILING_HEIGHT + 0.08, 0.0), Vector3(36.0, 0.16, 28.0), wall_material, false)
 
 	# Exterior shell: entrance at the back/right, full-height glazing at the front.
-	_wall(Vector3(-9.4, 1.62, -14.0), Vector3(17.2, CEILING_HEIGHT, WALL_THICKNESS))
+	# Keep the exterior wall closed right up to the 1.45 m entrance leaf.
+	# The old 17.2 m segment left an accidental 11 m opening beside the door.
+	_wall(Vector3(-3.8, 1.62, -14.0), Vector3(28.4, CEILING_HEIGHT, WALL_THICKNESS))
 	_wall(Vector3(15.0, 1.62, -14.0), Vector3(6.0, CEILING_HEIGHT, WALL_THICKNESS))
 	_wall(Vector3(-18.0, 1.62, -10.0), Vector3(WALL_THICKNESS, CEILING_HEIGHT, 8.0))
 	_wall(Vector3(-18.0, 1.62, 8.3), Vector3(WALL_THICKNESS, CEILING_HEIGHT, 11.4))
@@ -74,6 +77,40 @@ func _build_shell() -> void:
 	# Concealed linear air-conditioning slots; no wall-mounted AC boxes.
 	for x in [-12.0, -2.0, 7.0, 15.0]:
 		_box(self, "ConcealedACSlot", Vector3(x, CEILING_HEIGHT - 0.015, 11.8), Vector3(3.8, 0.035, 0.18), dark_metal_material, false)
+
+
+func _build_entry_corridor() -> void:
+	# A sheltered high-rise lift lobby outside the front door. Opening the door
+	# must reveal architecture, not the ocean plane or the world background.
+	var lobby := Node3D.new()
+	lobby.name = "ExteriorLiftLobby"
+	add_child(lobby)
+
+	var lobby_stone := _material(Color("bdb8af"), 0.52)
+	var lobby_wall := _material(Color("cbc4ba"), 0.78)
+	var dark_wood := _material(Color("352a24"), 0.58)
+	var brushed_metal := _material(Color("7f817f"), 0.24, 0.72)
+
+	_box(lobby, "LobbyFloor", Vector3(10.55, -0.075, -17.15), Vector3(8.7, 0.15, 6.2), lobby_stone, true)
+	_box(lobby, "LobbyCeiling", Vector3(10.55, CEILING_HEIGHT + 0.075, -17.15), Vector3(8.7, 0.15, 6.2), lobby_wall, false)
+	_box(lobby, "LobbyLeftWall", Vector3(6.2, 1.62, -17.15), Vector3(0.18, CEILING_HEIGHT, 6.2), lobby_wall, true)
+	_box(lobby, "LobbyRightWall", Vector3(14.9, 1.62, -17.15), Vector3(0.18, CEILING_HEIGHT, 6.2), lobby_wall, true)
+	_box(lobby, "LobbyEndWall", Vector3(10.55, 1.62, -20.25), Vector3(8.88, CEILING_HEIGHT, 0.18), lobby_wall, true)
+
+	# Recessed elevator portals and realistic wall breaks at the far end.
+	for x in [8.45, 12.65]:
+		_box(lobby, "ElevatorReveal", Vector3(x, 1.38, -20.14), Vector3(2.25, 2.72, 0.08), dark_wood, false)
+		_box(lobby, "ElevatorDoor", Vector3(x, 1.32, -20.08), Vector3(1.86, 2.58, 0.06), brushed_metal, false)
+		_box(lobby, "ElevatorSplit", Vector3(x, 1.32, -20.035), Vector3(0.025, 2.48, 0.02), dark_metal_material, false)
+		_box(lobby, "ElevatorHeader", Vector3(x, 2.86, -20.03), Vector3(0.74, 0.12, 0.035), dark_metal_material, false)
+
+	# Slim console and artwork make the lobby read as a private residence floor.
+	_box(lobby, "LobbyConsole", Vector3(6.48, 0.72, -17.45), Vector3(0.42, 1.15, 2.35), dark_wood, true)
+	_box(lobby, "LobbyArtwork", Vector3(6.39, 1.95, -17.45), Vector3(0.05, 1.22, 1.55), warm_wood_material, false)
+
+	for position in [Vector3(8.3, 3.02, -16.2), Vector3(12.8, 3.02, -16.2), Vector3(8.3, 3.02, -19.0), Vector3(12.8, 3.02, -19.0)]:
+		var light := _ceiling_light("LobbyDownlight", position, 1.65, 5.2)
+		light.shadow_enabled = false
 
 
 func _build_windows() -> void:
