@@ -187,7 +187,7 @@ func _build_distant_city_view() -> void:
 
 
 func _build_doors() -> void:
-	_create_hinged_door("EntranceDoor", Vector3(10.4, 0.0, -13.9), 1.45, 0.0, -92.0)
+	_create_hinged_door("EntranceDoor", Vector3(10.4, 0.0, -13.9), 1.45, 0.0, -92.0, true)
 	_create_hinged_door("StudyDoor", Vector3(11.0, 0.0, -8.35), 1.45, 90.0, 92.0)
 	_create_hinged_door("MasterSuiteDoor", Vector3(-5.0, 0.0, 6.1), 1.45, 90.0, -92.0)
 	_create_hinged_door("EnsuiteDoor", Vector3(-12.15, 0.0, 8.0), 1.35, 0.0, 92.0)
@@ -563,7 +563,7 @@ func _food(id: String, display_name: String, can_wash: bool, can_chop: bool) -> 
 	return food
 
 
-func _create_hinged_door(id: String, hinge_position: Vector3, width: float, rotation_y: float, open_degrees: float) -> void:
+func _create_hinged_door(id: String, hinge_position: Vector3, width: float, rotation_y: float, open_degrees: float, lockable := false) -> void:
 	var hinge := Node3D.new()
 	hinge.name = "%sLeaf" % id
 	hinge.position = hinge_position
@@ -576,6 +576,7 @@ func _create_hinged_door(id: String, hinge_position: Vector3, width: float, rota
 	interaction.object_id = String(id).to_snake_case()
 	interaction.door_leaf = hinge
 	interaction.open_degrees = open_degrees
+	interaction.lockable = lockable
 	interaction.position = hinge_position + Vector3(0.0, 1.2, 0.0)
 	interaction.add_child(_area_shape(Vector3(2.3, 2.5, 2.3)))
 	add_child(interaction)
