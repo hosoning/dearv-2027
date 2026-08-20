@@ -41,6 +41,9 @@ var _pose_tween: Tween
 var _camera_rest_position := Vector3.ZERO
 var _camera_base_fov := 64.0
 var _bob_phase := 0.0
+var _location_save_timer: Timer
+var _last_saved_position := Vector3.INF
+var _last_saved_yaw := INF
 
 
 func _ready() -> void:
@@ -48,6 +51,57 @@ func _ready() -> void:
 	_camera_base_fov = camera.fov
 	if not DisplayServer.is_touchscreen_available():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	_location_save_timer = Timer.new()
+	_location_save_timer.wait_time = 10.0
+	_location_save_timer.timeout.connect(_save_home_location)
+	add_child(_location_save_timer)
+	_location_save_timer.start()
+	call_deferred("_restore_home_location")
+
+
+func _restore_home_location() -> void:
+	var saved: Variant = AppState.get_interaction_state("player_home_location")
+	if not saved is Dictionary:
+		_last_saved_position = global_position
+		_last_saved_yaw = rotation.y
+		return
+	var location := saved as Dictionary
+	var position_value: Variant = location.get("position", [])
+	if not position_value is Array or position_value.size() < 3:
+		return
+	var restored := Vector3(
+		float(position_value[0]),
+		float(position_value[1]),
+		float(position_value[2])
+	)
+	if absf(restored.x) > 24.0 or restored.y < -0.5 or restored.y > 5.0 or absf(restored.z) > 20.0:
+		return
+	global_position = restored
+	rotation.y = float(location.get("yaw", rotation.y))
+	camera_pivot.rotation.x = clampf(
+		float(location.get("pitch", camera_pivot.rotation.x)),
+		camera_pitch_min,
+		camera_pitch_max
+	)
+	_last_saved_position = global_position
+	_last_saved_yaw = rotation.y
+
+
+func _save_home_location() -> void:
+	if _pose_locked or AppState.is_inspecting:
+		return
+	var moved := _last_saved_position == Vector3.INF or global_position.distance_to(_last_saved_position) > 0.25
+	var turned := is_inf(_last_saved_yaw) or absf(angle_difference(rotation.y, _last_saved_yaw)) > 0.12
+	if not moved and not turned:
+		return
+	AppState.set_interaction_state("player_home_location", {
+		"position": [global_position.x, global_position.y, global_position.z],
+		"yaw": rotation.y,
+		"pitch": camera_pivot.rotation.x,
+		"saved_at": Time.get_datetime_string_from_system(true),
+	})
+	_last_saved_position = global_position
+	_last_saved_yaw = rotation.y
 
 
 func _unhandled_input(event: InputEvent) -> void:
