@@ -53,7 +53,8 @@ func _open_inspector(payload: Dictionary) -> void:
 	var kind := str(payload.get("kind", ""))
 	match kind:
 		"computer":
-			story = "The in-world computer is connected. Apps and playable memories mount here without leaving the room."
+			story = "The in-world computer connects this private 3D home to the DearV portal for letters, memories and account tools."
+			_build_computer_actions()
 		"inventory":
 			story = "Choose an ingredient to place on the kitchen counter. The refrigerator door, light and inventory state are saved together."
 			_build_inventory_actions(payload)
@@ -66,6 +67,26 @@ func _open_inspector(payload: Dictionary) -> void:
 func _close_inspector() -> void:
 	inspector.visible = false
 	_clear_actions()
+
+
+func _build_computer_actions() -> void:
+	var portal_button := Button.new()
+	portal_button.text = "Open DearV letters and memories"
+	portal_button.tooltip_text = "Opens the private DearV portal in a new browser tab"
+	portal_button.pressed.connect(_open_dearv_portal)
+	inspector_actions.add_child(portal_button)
+
+	var resume_button := Button.new()
+	resume_button.text = "Return to the 3D home"
+	resume_button.pressed.connect(AppState.close_inspector)
+	inspector_actions.add_child(resume_button)
+
+
+func _open_dearv_portal() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.open('../', '_blank', 'noopener,noreferrer');")
+	else:
+		OS.shell_open("https://hosoning.github.io/dearv-2027/")
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
