@@ -135,6 +135,58 @@ func _build_windows() -> void:
 		frosted.roughness = 0.72
 		_box(self, "BathroomFrostedPane", Vector3(x, 1.62, 13.94), Vector3(3.82, 3.05, 0.045), frosted, false)
 
+	# Motorized privacy shades keep the home's primary views optional. They start
+	# retracted, can be operated from discreet wall controls and persist state.
+	var shade_material := _material(Color(0.88, 0.84, 0.76, 0.92), 0.94)
+	shade_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	shade_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_add_privacy_shade(
+		"LivingPrivacyShade",
+		"living_privacy_shade",
+		Vector3(5.0, 1.62, 13.76),
+		Vector3(20.1, 3.0, 0.035),
+		Vector3(15.55, 1.18, 13.45),
+		shade_material
+	)
+	_add_privacy_shade(
+		"BedroomPrivacyShade",
+		"bedroom_privacy_shade",
+		Vector3(-17.76, 1.62, -2.0),
+		Vector3(0.035, 3.0, 15.8),
+		Vector3(-17.45, 1.18, 5.25),
+		shade_material
+	)
+
+
+func _add_privacy_shade(
+	shade_name: String,
+	object_id: String,
+	shade_position: Vector3,
+	shade_size: Vector3,
+	control_position: Vector3,
+	material: Material
+) -> void:
+	var moving_part := Node3D.new()
+	moving_part.name = "%sPanel" % shade_name
+	add_child(moving_part)
+	_box(moving_part, "Fabric", shade_position, shade_size, material, false)
+
+	var control := OpenableInteractable.new()
+	control.name = "%sControl" % shade_name
+	control.object_id = object_id
+	control.display_name = shade_name.capitalize()
+	control.moving_part = moving_part
+	control.motion_type = OpenableInteractable.MotionType.SLIDE
+	control.open_offset = Vector3(0.0, 3.15, 0.0)
+	control.open_rotation_degrees = Vector3.ZERO
+	control.motion_seconds = 1.1
+	control.starts_open = true
+	control.open_label = "Raise privacy shade"
+	control.close_label = "Lower privacy shade"
+	control.position = control_position
+	control.add_child(_area_shape(Vector3(0.65, 1.1, 0.65)))
+	add_child(control)
+
 
 func _build_distant_city_view() -> void:
 	# Procedural coastal geometry gives the high-rise windows a real layered view:
