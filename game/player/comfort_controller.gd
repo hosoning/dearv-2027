@@ -29,6 +29,8 @@ var _look_drag_distance := 0.0
 var _focused: Interactable
 var _pose_locked := false
 var _standing_transform := Transform3D.IDENTITY
+var _standing_camera_position := Vector3.ZERO
+var _pose_tween: Tween
 
 
 func _ready() -> void:
@@ -157,13 +159,15 @@ func _raycast_interactable() -> Interactable:
 	return hit.collider as Interactable
 
 
-func enter_comfort_pose(anchor: Node3D) -> void:
+func enter_comfort_pose(anchor: Node3D, camera_height := 1.18) -> void:
 	if _pose_locked or not anchor:
 		return
 	_standing_transform = global_transform
+	_standing_camera_position = camera_pivot.position
 	global_position = anchor.global_position
 	rotation.y = anchor.global_rotation.y
 	_pose_locked = true
+	_animate_camera_position(Vector3(_standing_camera_position.x, camera_height, _standing_camera_position.z))
 
 
 func exit_comfort_pose() -> void:
@@ -171,3 +175,13 @@ func exit_comfort_pose() -> void:
 		return
 	global_transform = _standing_transform
 	_pose_locked = false
+	_animate_camera_position(_standing_camera_position)
+
+
+func _animate_camera_position(target: Vector3) -> void:
+	if _pose_tween and _pose_tween.is_valid():
+		_pose_tween.kill()
+	_pose_tween = create_tween()
+	_pose_tween.set_trans(Tween.TRANS_SINE)
+	_pose_tween.set_ease(Tween.EASE_IN_OUT)
+	_pose_tween.tween_property(camera_pivot, "position", target, 0.28)
