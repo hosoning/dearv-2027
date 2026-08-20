@@ -240,7 +240,10 @@ func _build_serving_actions(payload: Dictionary) -> void:
 			inspector_actions.add_child(button)
 			cooked_count += 1
 		elif stage == Kitchen.STAGE_PLATED and str(item.get("location", "")) == serving_location:
-			_add_disabled_action("%s is served" % display_name)
+			var enjoy_button := Button.new()
+			enjoy_button.text = "Enjoy %s" % display_name
+			enjoy_button.pressed.connect(_enjoy_prepared_food.bind(str(item.get("instance_id", "")), serving_location))
+			inspector_actions.add_child(enjoy_button)
 			plated_count += 1
 	if cooked_count == 0 and plated_count == 0:
 		_add_disabled_action("Cook a meal at the induction stove first")
@@ -256,6 +259,19 @@ func _serve_prepared_food(instance_id: String, serving_location: String) -> void
 		"serving_location": serving_location,
 		"items": Kitchen.get_prepared_food(),
 	})
+
+
+func _enjoy_prepared_food(instance_id: String, serving_location: String) -> void:
+	if not Kitchen.enjoy_prepared_food(instance_id):
+		inspector_body.text = "That meal is no longer on the table."
+		return
+	_open_inspector({
+		"kind": "serving",
+		"title": "Dining table",
+		"serving_location": serving_location,
+		"items": Kitchen.get_prepared_food(),
+	})
+	inspector_body.text = "The meal was enjoyed. This dining moment is saved to your home."
 
 
 func _build_prep_actions(payload: Dictionary) -> void:
