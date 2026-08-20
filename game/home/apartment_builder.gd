@@ -276,6 +276,7 @@ func _build_master_suite_assets() -> void:
 		_collision_box(suite, "MasterBedCollision", Vector3(-11.45, 0.42, -7.2), Vector3(2.45, 0.84, 2.55))
 	else:
 		_build_bed_fallback(suite)
+	_build_bed_interaction(suite)
 
 	if _instantiate_hero_asset(suite, "walk_in_wardrobe.glb", Vector3(-11.45, 0.0, 3.45), 0.0):
 		_collision_box(suite, "WardrobeBackCollision", Vector3(-11.45, 1.32, 1.50), Vector3(5.85, 2.64, 0.48))
@@ -292,6 +293,24 @@ func _build_master_suite_assets() -> void:
 		_collision_box(suite, "ShowerCollision", Vector3(-7.80, 1.20, 10.90), Vector3(1.78, 2.40, 1.60))
 	else:
 		_build_bathroom_fallback(suite)
+
+
+func _build_bed_interaction(parent: Node3D) -> void:
+	var anchor := Node3D.new()
+	anchor.name = "MasterBedSeatAnchor"
+	anchor.position = Vector3(-11.45, 0.02, -6.02)
+	anchor.rotation_degrees.y = 180.0
+	parent.add_child(anchor)
+
+	var seat := SeatInteractable.new()
+	seat.name = "MasterBedSeat"
+	seat.object_id = "master_bed_seat"
+	seat.display_name = "bed edge"
+	seat.camera_height = 1.08
+	seat.seat_anchor = anchor
+	seat.position = Vector3(-11.45, 0.72, -6.05)
+	seat.add_child(_area_shape(Vector3(2.18, 1.35, 1.05)))
+	parent.add_child(seat)
 
 
 func _build_bed_fallback(parent: Node3D) -> void:
