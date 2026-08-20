@@ -279,15 +279,25 @@ func _start_recipe(appliance: ApplianceInteractable, recipe_id: String) -> void:
 		return
 	var counter_items := Kitchen.get_inventory("counter")
 	var selected: Array[String] = []
-	for required_id in recipe.required_ingredients:
+	for index in range(recipe.required_ingredients.size()):
+		var required_id := recipe.required_ingredients[index]
+		var required_stage := recipe.required_stages[index] if index < recipe.required_stages.size() else ""
 		var match_id := ""
+		var has_unprepared_match := false
 		for item in counter_items:
 			var instance_id := str(item.get("instance_id", ""))
-			if str(item.get("definition_id", "")) == required_id and not selected.has(instance_id):
+			if str(item.get("definition_id", "")) != required_id or selected.has(instance_id):
+				continue
+			var stage := str(item.get("stage", Kitchen.STAGE_RAW))
+			if required_stage.is_empty() or stage == required_stage:
 				match_id = instance_id
 				break
+			has_unprepared_match = true
 		if match_id.is_empty():
-			inspector_body.text = "Missing %s. Take it from the refrigerator first." % _food_display_name(required_id)
+			if has_unprepared_match:
+				inspector_body.text = "%s must be %s at the preparation counter." % [_food_display_name(required_id), required_stage]
+			else:
+				inspector_body.text = "Missing %s. Take it from the refrigerator first." % _food_display_name(required_id)
 			return
 		selected.append(match_id)
 	inspector_body.text = "Cooking %s…" % recipe.display_name
