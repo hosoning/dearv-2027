@@ -37,6 +37,24 @@ func bind_player(player: ComfortController) -> void:
 		$SafeArea.add_child(touch_overlay)
 		touch_overlay.move_to_front()
 	touch_overlay.bind_player(player)
+	call_deferred("_show_control_hint")
+
+
+func _show_control_hint() -> void:
+	if inspector.visible or _last_focus or _comfort_pose_active:
+		return
+	_control_hint_active = true
+	prompt_panel.visible = true
+	if DisplayServer.is_touchscreen_available():
+		prompt_label.text = "Move with the left pad · look with the right pad · tap to interact"
+	elif Input.get_connected_joypads().is_empty():
+		prompt_label.text = "Move with WASD · look with the mouse · press E or click to interact"
+	else:
+		prompt_label.text = "Move and look with the sticks · press A to interact"
+	await get_tree().create_timer(6.0).timeout
+	if _control_hint_active and not _last_focus and not _comfort_pose_active:
+		_control_hint_active = false
+		prompt_panel.visible = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -92,9 +110,11 @@ func _open_inspector(payload: Dictionary) -> void:
 
 func _focus_first_action() -> void:
 	for child in inspector_actions.get_children():
-		if child is Button and not (child as Button).disabled:
-			(child as Button).grab_focus()
-			return
+		if child is Button:
+			var button := child as Button
+			if not button.disabled:
+				button.grab_focus()
+				return
 	close_button.grab_focus()
 
 
