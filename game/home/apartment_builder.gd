@@ -536,6 +536,7 @@ func _register_food_and_recipes() -> void:
 	tomato_egg.id = "tomato_egg"
 	tomato_egg.display_name = "Tomato and egg"
 	tomato_egg.required_ingredients = ["tomato", "egg"]
+	tomato_egg.required_stages = [Kitchen.STAGE_CHOPPED, Kitchen.STAGE_RAW]
 	tomato_egg.appliance = "induction_stove"
 	tomato_egg.cook_seconds = 6.0
 	Kitchen.register_recipe(tomato_egg)
@@ -543,6 +544,7 @@ func _register_food_and_recipes() -> void:
 	salmon.id = "seared_salmon"
 	salmon.display_name = "Pan-seared salmon"
 	salmon.required_ingredients = ["salmon"]
+	salmon.required_stages = [Kitchen.STAGE_WASHED]
 	salmon.appliance = "induction_stove"
 	salmon.cook_seconds = 8.0
 	Kitchen.register_recipe(salmon)
