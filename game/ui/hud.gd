@@ -110,6 +110,9 @@ func _open_inspector(payload: Dictionary) -> void:
 		"serving":
 			story = "Bring a finished dish from the stove to the dining table. Served meals remain part of the saved home state."
 			_build_serving_actions(payload)
+		"atmosphere":
+			story = "Choose how the home should feel. Follow local time automatically, or hold a favourite light setting until you change it."
+			_build_atmosphere_actions(payload)
 	inspector_body.text = story
 	call_deferred("_focus_first_action")
 
@@ -188,6 +191,37 @@ func _open_dearv_portal() -> void:
 		JavaScriptBridge.eval("window.open('../', '_blank', 'noopener,noreferrer');")
 	else:
 		OS.shell_open("https://hosoning.github.io/dearv-2027/")
+
+
+func _build_atmosphere_actions(payload: Dictionary) -> void:
+	var target := payload.get("target") as DayNightDirector
+	if not target:
+		_add_disabled_action("Atmosphere controls are unavailable")
+		return
+	var current_mode := str(payload.get("mode", "system"))
+	var options := [
+		["system", "Follow local time"],
+		["morning", "Soft morning"],
+		["sunset", "Golden sunset"],
+		["night", "Calm night"],
+	]
+	for option in options:
+		var mode := str(option[0])
+		var button := Button.new()
+		button.text = "%s%s" % [str(option[1]), " · Active" if mode == current_mode else ""]
+		button.disabled = mode == current_mode
+		button.pressed.connect(_set_atmosphere.bind(target, mode))
+		inspector_actions.add_child(button)
+
+
+func _set_atmosphere(target: DayNightDirector, mode: String) -> void:
+	target.set_atmosphere(mode)
+	_open_inspector({
+		"kind": "atmosphere",
+		"title": "Home atmosphere",
+		"target": target,
+		"mode": target.atmosphere_mode,
+	})
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
