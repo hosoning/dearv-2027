@@ -10,6 +10,8 @@ signal touch_look_changed(origin: Vector2, current: Vector2, active: bool)
 @export var deceleration := 16.0
 @export var look_sensitivity := 0.0022
 @export var touch_look_sensitivity := 0.003
+@export_range(0.5, 5.0, 0.1) var gamepad_look_speed := 2.4
+@export_range(0.05, 0.45, 0.01) var gamepad_look_deadzone := 0.16
 @export var touch_move_radius := 92.0
 @export var interaction_distance := 2.7
 @export var camera_pitch_min := deg_to_rad(-48.0)
@@ -111,6 +113,7 @@ func _handle_screen_drag(event: InputEventScreenDrag) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_update_gamepad_look(delta)
 	if _pose_locked:
 		velocity = Vector3.ZERO
 		_update_camera_motion(delta, 0.0)
@@ -137,6 +140,22 @@ func _physics_process(delta: float) -> void:
 	_update_focus()
 	if Input.is_action_just_pressed("interact"):
 		_try_interact()
+
+
+func _update_gamepad_look(delta: float) -> void:
+	var joypads := Input.get_connected_joypads()
+	if joypads.is_empty():
+		return
+	var device_id: int = int(joypads[0])
+	var stick := Vector2(
+		Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_X),
+		Input.get_joy_axis(device_id, JOY_AXIS_RIGHT_Y)
+	)
+	var strength := stick.length()
+	if strength <= gamepad_look_deadzone:
+		return
+	var scaled_strength := clampf((strength - gamepad_look_deadzone) / (1.0 - gamepad_look_deadzone), 0.0, 1.0)
+	_apply_look(stick.normalized() * scaled_strength * gamepad_look_speed * delta)
 
 
 func _update_camera_motion(delta: float, horizontal_speed: float) -> void:
