@@ -120,16 +120,35 @@ func stop_appliance(appliance_id: String) -> void:
 func _validate_recipe(recipe: RecipeDefinition, ingredient_ids: Array[String]) -> Dictionary:
 	if ingredient_ids.size() != recipe.required_ingredients.size():
 		return {"ok": false, "reason": "Wrong number of ingredients"}
-	var remaining := recipe.required_ingredients.duplicate()
+	var remaining: Array[Dictionary] = []
+	for index in range(recipe.required_ingredients.size()):
+		remaining.append({
+			"definition_id": recipe.required_ingredients[index],
+			"stage": recipe.required_stages[index] if index < recipe.required_stages.size() else "",
+		})
 	for instance_id in ingredient_ids:
 		if not AppState.inventory.has(instance_id):
 			return {"ok": false, "reason": "Ingredient is missing"}
 		var item: Dictionary = AppState.inventory[instance_id]
 		var definition_id := str(item.get("definition_id", ""))
-		var index := remaining.find(definition_id)
-		if index < 0:
+		var stage := str(item.get("stage", STAGE_RAW))
+		var definition_match := -1
+		var exact_match := -1
+		for index in range(remaining.size()):
+			if str(remaining[index].get("definition_id", "")) != definition_id:
+				continue
+			definition_match = index
+			var required_stage := str(remaining[index].get("stage", ""))
+			if required_stage.is_empty() or required_stage == stage:
+				exact_match = index
+				break
+		if exact_match >= 0:
+			remaining.remove_at(exact_match)
+		elif definition_match >= 0:
+			var required_stage := str(remaining[definition_match].get("stage", "prepared"))
+			return {"ok": false, "reason": "%s must be %s first" % [definition_id.capitalize(), required_stage]}
+		else:
 			return {"ok": false, "reason": "Ingredients do not match this recipe"}
-		remaining.remove_at(index)
 	return {"ok": true, "reason": ""}
 
 
