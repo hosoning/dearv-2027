@@ -8,6 +8,9 @@ var textile := StandardMaterial3D.new()
 var charcoal := StandardMaterial3D.new()
 var mirror := StandardMaterial3D.new()
 var warm_glow := StandardMaterial3D.new()
+var ceramic := StandardMaterial3D.new()
+var leaf_dark := StandardMaterial3D.new()
+var leaf_light := StandardMaterial3D.new()
 
 
 func _ready() -> void:
@@ -38,6 +41,12 @@ func _setup_materials() -> void:
 	warm_glow.emission_enabled = true
 	warm_glow.emission = Color("ffc67e")
 	warm_glow.emission_energy_multiplier = 2.25
+	ceramic.albedo_color = Color("d9cfc0")
+	ceramic.roughness = 0.38
+	leaf_dark.albedo_color = Color("25463b")
+	leaf_dark.roughness = 0.78
+	leaf_light.albedo_color = Color("4f725c")
+	leaf_light.roughness = 0.82
 
 
 func _build_master_bedroom() -> void:
@@ -124,10 +133,29 @@ func _build_living_details() -> void:
 	root.name = "LivingRoomLayer"
 	add_child(root)
 	_box(root, "LivingRug", Vector3(0.15, 0.018, 4.15), Vector3(6.65, 0.025, 4.4), cream)
-	_box(root, "LowCoffeeTable", Vector3(0.25, 0.34, 6.15), Vector3(2.25, 0.18, 0.92), pale_stone())
-	for x in [-0.55, 1.05]:
-		_box(root, "CoffeeTableLeg", Vector3(x, 0.17, 6.15), Vector3(0.08, 0.34, 0.64), champagne)
+	# The sculptural oval table and soft planting break up the room's box-heavy silhouette.
+	_cylinder(root, "LowCoffeeTable", Vector3(0.25, 0.35, 6.15), 0.95, 0.95, 0.16, pale_stone(), Vector3(1.22, 1.0, 0.58))
+	_cylinder(root, "CoffeeTablePedestal", Vector3(0.25, 0.18, 6.15), 0.32, 0.46, 0.34, champagne, Vector3(1.15, 1.0, 0.82))
+	_cylinder(root, "CeramicTray", Vector3(0.05, 0.455, 6.1), 0.28, 0.30, 0.045, ceramic, Vector3(1.35, 1.0, 0.72))
+	_sphere(root, "DecorativeStone", Vector3(0.02, 0.54, 6.08), Vector3(0.12, 0.08, 0.10), charcoal)
+	_add_plant(root, Vector3(3.35, 0.0, 5.9), 1.05)
 	_add_floor_lamp(root, Vector3(-3.4, 0.0, 5.4))
+
+
+func _add_plant(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
+	_cylinder(parent, "Planter", origin + Vector3(0.0, 0.30, 0.0) * scale_factor, 0.30 * scale_factor, 0.24 * scale_factor, 0.60 * scale_factor, ceramic)
+	_cylinder(parent, "PlantStem", origin + Vector3(0.0, 0.94, 0.0) * scale_factor, 0.025 * scale_factor, 0.035 * scale_factor, 0.82 * scale_factor, leaf_dark)
+	var leaves := [
+		[Vector3(-0.22, 1.03, 0.02), Vector3(0.34, 0.12, 0.18), Vector3(0, 0, -24)],
+		[Vector3(0.20, 1.20, -0.06), Vector3(0.30, 0.11, 0.17), Vector3(0, 0, 28)],
+		[Vector3(-0.12, 1.39, 0.08), Vector3(0.28, 0.10, 0.16), Vector3(8, 0, -18)],
+		[Vector3(0.14, 1.54, 0.02), Vector3(0.25, 0.09, 0.14), Vector3(-6, 0, 24)],
+		[Vector3(0.02, 1.70, -0.04), Vector3(0.20, 0.08, 0.12), Vector3(0, 0, 4)]
+	]
+	for index in range(leaves.size()):
+		var data: Array = leaves[index]
+		var leaf := _sphere(parent, "PlantLeaf", origin + data[0] * scale_factor, data[1] * scale_factor, leaf_dark if index % 2 == 0 else leaf_light)
+		leaf.rotation_degrees = data[2]
 
 
 func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
@@ -185,6 +213,38 @@ func _add_warm_spot(parent: Node3D, from: Vector3, target: Vector3, energy: floa
 	light.shadow_enabled = true
 	light.look_at_from_position(from, target, Vector3.UP)
 	parent.add_child(light)
+
+
+func _cylinder(parent: Node3D, node_name: String, position: Vector3, top_radius: float, bottom_radius: float, height: float, material: Material, shape_scale := Vector3.ONE) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = node_name
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = top_radius
+	mesh.bottom_radius = bottom_radius
+	mesh.height = height
+	mesh.radial_segments = 48
+	mesh.material = material
+	node.mesh = mesh
+	node.position = position
+	node.scale = shape_scale
+	parent.add_child(node)
+	return node
+
+
+func _sphere(parent: Node3D, node_name: String, position: Vector3, shape_scale: Vector3, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = node_name
+	var mesh := SphereMesh.new()
+	mesh.radius = 1.0
+	mesh.height = 2.0
+	mesh.radial_segments = 32
+	mesh.rings = 16
+	mesh.material = material
+	node.mesh = mesh
+	node.position = position
+	node.scale = shape_scale
+	parent.add_child(node)
+	return node
 
 
 func _box(parent: Node3D, node_name: String, position: Vector3, size: Vector3, material: Material) -> MeshInstance3D:
