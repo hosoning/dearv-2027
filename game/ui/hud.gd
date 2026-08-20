@@ -10,6 +10,8 @@ extends CanvasLayer
 @onready var close_button: Button = $Inspector/Card/Content/Close
 
 var touch_overlay: TouchControlsOverlay
+var _comfort_pose_active := false
+var _last_focus: Interactable
 
 
 func _ready() -> void:
@@ -22,6 +24,7 @@ func _ready() -> void:
 
 func bind_player(player: ComfortController) -> void:
 	player.focus_changed.connect(_on_focus_changed)
+	player.comfort_pose_changed.connect(_on_comfort_pose_changed)
 	if not touch_overlay:
 		touch_overlay = TouchControlsOverlay.new()
 		touch_overlay.name = "TouchControlsOverlay"
@@ -37,9 +40,21 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_focus_changed(target: Interactable) -> void:
+	_last_focus = target
+	if _comfort_pose_active:
+		return
 	prompt_panel.visible = target != null
 	if target:
 		prompt_label.text = target.get_prompt()
+
+
+func _on_comfort_pose_changed(active: bool) -> void:
+	_comfort_pose_active = active
+	if active:
+		prompt_panel.visible = true
+		prompt_label.text = "Tap, click or press Interact to stand"
+	else:
+		_on_focus_changed(_last_focus)
 
 
 func _open_inspector(payload: Dictionary) -> void:
