@@ -107,6 +107,9 @@ func _open_inspector(payload: Dictionary) -> void:
 		"prep":
 			story = "Wash or chop ingredients on the counter before cooking. Preparation state is saved automatically."
 			_build_prep_actions(payload)
+		"serving":
+			story = "Bring a finished dish from the stove to the dining table. Served meals remain part of the saved home state."
+			_build_serving_actions(payload)
 	inspector_body.text = story
 	call_deferred("_focus_first_action")
 
@@ -217,6 +220,42 @@ func _build_appliance_actions(payload: Dictionary) -> void:
 		button.text = "Cook %s" % recipe.display_name
 		button.pressed.connect(_start_recipe.bind(target, recipe_id))
 		inspector_actions.add_child(button)
+
+
+func _build_serving_actions(payload: Dictionary) -> void:
+	var items: Array = payload.get("items", [])
+	var serving_location := str(payload.get("serving_location", "dining_table"))
+	var cooked_count := 0
+	var plated_count := 0
+	for value in items:
+		if not value is Dictionary:
+			continue
+		var item := value as Dictionary
+		var stage := str(item.get("stage", ""))
+		var display_name := str(item.get("display_name", "Meal"))
+		if stage == Kitchen.STAGE_COOKED:
+			var button := Button.new()
+			button.text = "Serve %s" % display_name
+			button.pressed.connect(_serve_prepared_food.bind(str(item.get("instance_id", "")), serving_location))
+			inspector_actions.add_child(button)
+			cooked_count += 1
+		elif stage == Kitchen.STAGE_PLATED and str(item.get("location", "")) == serving_location:
+			_add_disabled_action("%s is served" % display_name)
+			plated_count += 1
+	if cooked_count == 0 and plated_count == 0:
+		_add_disabled_action("Cook a meal at the induction stove first")
+
+
+func _serve_prepared_food(instance_id: String, serving_location: String) -> void:
+	if not Kitchen.plate_prepared_food(instance_id, serving_location):
+		inspector_body.text = "That meal is no longer ready to serve."
+		return
+	_open_inspector({
+		"kind": "serving",
+		"title": "Dining table",
+		"serving_location": serving_location,
+		"items": Kitchen.get_prepared_food(),
+	})
 
 
 func _build_prep_actions(payload: Dictionary) -> void:
