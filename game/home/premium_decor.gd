@@ -285,7 +285,16 @@ func _build_bathroom_details() -> void:
 	_cylinder(root, "SpaStoolTop", Vector3(-13.45, 0.53, 12.12), 0.38, 0.38, 0.12, pale_stone())
 	_cylinder(root, "SpaStoolPedestal", Vector3(-13.45, 0.27, 12.12), 0.18, 0.28, 0.48, champagne)
 	_add_collision_box(root, "SpaStoolCollision", Vector3(-13.45, 0.35, 12.12), Vector3(0.76, 0.70, 0.76))
-	_add_seat_interaction(root, "bathroom_spa_stool_seat", "spa stool", Vector3(-13.45, 0.02, 12.12), 90.0, Vector3(0.88, 1.15, 0.88))
+	var stool_anchor := Vector3(-13.45, 0.02, 12.12)
+	var stool_area := Vector3(0.88, 1.15, 0.88)
+	_add_seat_interaction(
+		root,
+		"bathroom_spa_stool_seat",
+		"spa stool",
+		stool_anchor,
+		90.0,
+		stool_area
+	)
 	_box(root, "FoldedTowelLower", Vector3(-13.45, 0.64, 12.12), Vector3(0.52, 0.08, 0.36), cream)
 	_box(root, "FoldedTowelUpper", Vector3(-13.43, 0.73, 12.10), Vector3(0.44, 0.07, 0.31), textile)
 	_add_plant(root, Vector3(-15.55, 0.0, 12.55), 0.72)
