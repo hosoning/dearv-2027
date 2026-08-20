@@ -115,7 +115,17 @@ jobs:
 
       - name: Publish Web build back to branch
         run: |
-          git checkout -- game/export_presets.cfg
+          # Keep the freshly exported bundle outside the checkout while syncing.
+          # This avoids rebase conflicts when the Pages workflow commits first.
+          rm -rf /tmp/dearv-public-native /tmp/dearv-site-native
+          mv public/native /tmp/dearv-public-native
+          mv site/native /tmp/dearv-site-native
+          git restore game/export_presets.cfg public/native site/native
+          git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
+          rm -rf public/native site/native
+          mv /tmp/dearv-public-native public/native
+          mv /tmp/dearv-site-native site/native
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f public/native site/native
@@ -123,6 +133,5 @@ jobs:
             echo "No Godot Web changes"
           else
             git commit -m "Publish Godot Web home"
-            git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
