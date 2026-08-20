@@ -20,6 +20,7 @@ func _ready() -> void:
 	_build_shell()
 	_build_entry_corridor()
 	_build_windows()
+	_build_distant_city_view()
 	_build_doors()
 	_build_lighting()
 	_build_master_suite_assets()
@@ -133,6 +134,54 @@ func _build_windows() -> void:
 		frosted.albedo_color = Color(0.72, 0.79, 0.8, 0.58)
 		frosted.roughness = 0.72
 		_box(self, "BathroomFrostedPane", Vector3(x, 1.62, 13.94), Vector3(3.82, 3.05, 0.045), frosted, false)
+
+
+func _build_distant_city_view() -> void:
+	# Procedural coastal geometry gives the high-rise windows a real layered view:
+	# water, shore, towers and illuminated facade bands instead of a scenic photograph.
+	var city := Node3D.new()
+	city.name = "DistantCoastalCity"
+	add_child(city)
+
+	var shore_mat := _material(Color("3b4144"), 0.82)
+	var facade_dark := _material(Color("303941"), 0.58, 0.18)
+	var facade_blue := _material(Color("455663"), 0.50, 0.22)
+	var facade_stone := _material(Color("6b675f"), 0.62)
+	var crown_mat := _material(Color("292d31"), 0.38, 0.42)
+	var city_glow := _material(Color("d6b37b"), 0.24)
+	city_glow.emission_enabled = true
+	city_glow.emission = Color("ffc77d")
+	city_glow.emission_energy_multiplier = 2.15
+
+	_box(city, "CoastalShore", Vector3(0.0, -57.45, 91.0), Vector3(230.0, 1.1, 27.0), shore_mat, false)
+	_box(city, "WaterfrontPromenade", Vector3(0.0, -56.72, 77.8), Vector3(230.0, 0.38, 2.8), pale_stone_material, false)
+
+	var towers := [
+		Vector4(-101.0, 99.0, 9.0, 48.0), Vector4(-90.0, 108.0, 7.5, 66.0),
+		Vector4(-79.0, 94.0, 10.0, 58.0), Vector4(-66.0, 113.0, 8.5, 82.0),
+		Vector4(-53.0, 97.0, 11.0, 72.0), Vector4(-39.0, 118.0, 7.0, 94.0),
+		Vector4(-28.0, 101.0, 9.5, 61.0), Vector4(-15.0, 110.0, 12.0, 79.0),
+		Vector4(0.0, 96.0, 8.0, 57.0), Vector4(12.0, 115.0, 9.0, 88.0),
+		Vector4(24.0, 100.0, 11.5, 69.0), Vector4(39.0, 121.0, 7.0, 102.0),
+		Vector4(50.0, 103.0, 9.0, 64.0), Vector4(63.0, 111.0, 11.0, 84.0),
+		Vector4(78.0, 96.0, 8.0, 55.0), Vector4(89.0, 116.0, 9.5, 76.0),
+		Vector4(102.0, 101.0, 10.0, 62.0)
+	]
+	var facade_materials := [facade_dark, facade_blue, facade_stone]
+	for index in range(towers.size()):
+		var data: Vector4 = towers[index]
+		var depth := 7.0 + float(index % 3) * 1.8
+		var body_position := Vector3(data.x, -57.0 + data.w * 0.5, data.y)
+		_box(city, "CoastalTower", body_position, Vector3(data.z, data.w, depth), facade_materials[index % facade_materials.size()], false)
+		_box(city, "TowerCrown", Vector3(data.x, -56.65 + data.w, data.y), Vector3(data.z * 0.72, 0.70, depth * 0.72), crown_mat, false)
+		for floor_index in range(2, int(data.w / 6.0), 3):
+			var band_y := -56.0 + float(floor_index) * 5.4
+			_box(city, "LitFacadeBand", Vector3(data.x, band_y, data.y - depth * 0.5 - 0.03), Vector3(data.z * 0.72, 0.48, 0.04), city_glow, false)
+
+	# Low waterfront pavilions establish depth before the main skyline.
+	for x in [-92.0, -66.0, -40.0, -14.0, 12.0, 38.0, 64.0, 90.0]:
+		_box(city, "WaterfrontPavilion", Vector3(x, -53.6, 79.5), Vector3(15.0, 6.8, 7.0), facade_stone, false)
+		_box(city, "PavilionGlow", Vector3(x, -52.8, 75.96), Vector3(11.5, 1.15, 0.05), city_glow, false)
 
 
 func _build_doors() -> void:
