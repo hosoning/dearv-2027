@@ -35,8 +35,10 @@ func _ready() -> void:
 func _build_display_zone() -> void:
 	# A true gallery wall: walnut backdrop, floating stone console, framed vitrines and focused warm light.
 	_add_box("GalleryBackdrop", Vector3(-2.85, 1.58, 6.62), Vector3(6.65, 3.05, 0.16), walnut)
+	_add_collision_box("GalleryBackdropCollision", Vector3(-2.85, 1.58, 6.62), Vector3(6.65, 3.05, 0.16))
 	_add_box("GalleryInset", Vector3(-2.85, 1.62, 6.51), Vector3(6.05, 2.52, 0.045), velvet)
 	_add_box("MemoryConsole", Vector3(-2.85, 0.34, 6.0), Vector3(5.75, 0.68, 1.22), stone)
+	_add_collision_box("MemoryConsoleCollision", Vector3(-2.85, 0.34, 6.0), Vector3(5.75, 0.68, 1.22))
 	_add_box("ConsoleShadowGap", Vector3(-2.85, 0.13, 6.0), Vector3(5.28, 0.16, 0.92), velvet)
 	_add_trim(Vector3(-2.85, 0.705, 6.0), Vector3(5.84, 0.045, 1.30))
 
@@ -89,6 +91,7 @@ func _build_vitrine(node_name: String, center: Vector3, size: Vector3) -> void:
 	_add_box("%sGlassLeft" % node_name, Vector3(center.x - half_x, glass_y, center.z), Vector3(0.025, glass_h, size.z), glass)
 	_add_box("%sGlassRight" % node_name, Vector3(center.x + half_x, glass_y, center.z), Vector3(0.025, glass_h, size.z), glass)
 	_add_box("%sGlassTop" % node_name, Vector3(center.x, 2.34, center.z), Vector3(size.x, 0.025, size.z), glass)
+	_add_collision_box("%sCollision" % node_name, Vector3(center.x, 1.56, center.z), Vector3(size.x, 1.60, size.z))
 
 
 func _add_spot(from: Vector3, target: Vector3, energy := 1.15) -> void:
@@ -125,6 +128,18 @@ func _load_model(filename: String, world_position: Vector3, rotation_y: float) -
 	model.rotation_degrees.y = rotation_y
 	add_child(model)
 	return model
+
+
+func _add_collision_box(node_name: String, position: Vector3, size: Vector3) -> void:
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.position = position
+	var shape_node := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	shape_node.shape = shape
+	body.add_child(shape_node)
+	add_child(body)
 
 
 func _add_trim(position: Vector3, size: Vector3) -> void:
