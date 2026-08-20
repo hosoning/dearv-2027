@@ -19,6 +19,7 @@ func _ready() -> void:
 	_build_walk_in_wardrobe()
 	_build_study()
 	_build_living_details()
+	_build_bathroom_details()
 
 
 func _setup_materials() -> void:
@@ -139,6 +140,23 @@ func _build_study() -> void:
 	_sphere(root, "DeskGlobe", Vector3(15.18, 1.20, 3.26), Vector3(0.18, 0.18, 0.18), mirror)
 	_sphere(root, "GlobeAxisCap", Vector3(15.18, 1.40, 3.26), Vector3(0.035, 0.035, 0.035), champagne)
 	_add_warm_spot(root, Vector3(14.35, 2.98, 3.15), Vector3(14.35, 0.75, 3.0), 1.35, 5.0)
+
+
+func _build_bathroom_details() -> void:
+	var root := Node3D.new()
+	root.name = "BathroomDetailLayer"
+	add_child(root)
+
+	# A quiet spa layer complements the authored bathroom suite without hiding it.
+	_box(root, "BathroomRunner", Vector3(-11.45, 0.018, 12.32), Vector3(3.85, 0.028, 1.05), cream)
+	_cylinder(root, "SpaStoolTop", Vector3(-13.45, 0.53, 12.12), 0.38, 0.38, 0.12, pale_stone())
+	_cylinder(root, "SpaStoolPedestal", Vector3(-13.45, 0.27, 12.12), 0.18, 0.28, 0.48, champagne)
+	_box(root, "FoldedTowelLower", Vector3(-13.45, 0.64, 12.12), Vector3(0.52, 0.08, 0.36), cream)
+	_box(root, "FoldedTowelUpper", Vector3(-13.43, 0.73, 12.10), Vector3(0.44, 0.07, 0.31), textile)
+	_add_plant(root, Vector3(-15.55, 0.0, 12.55), 0.72)
+
+	# A warm wash over the vanity balances the cooler translucent glazing.
+	_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4)
 
 
 func _build_living_details() -> void:
