@@ -171,6 +171,7 @@ func _build_entry_gallery() -> void:
 	for x in [13.75, 15.35]:
 		_box(root, "EntryBenchLeg", Vector3(x, 0.23, -8.88), Vector3(0.07, 0.46, 0.42), champagne)
 	_add_collision_box(root, "EntryBenchCollision", Vector3(14.55, 0.38, -8.88), Vector3(2.25, 0.76, 0.54))
+	_add_seat_interaction(root, "entry_bench_seat", "entry bench", Vector3(14.55, 0.02, -9.18), 0.0, Vector3(2.15, 1.25, 0.82))
 	_add_plant(root, Vector3(16.65, 0.0, -9.35), 0.66)
 
 	_add_warm_spot(root, Vector3(16.85, 3.02, -11.20), Vector3(17.20, 1.15, -11.20), 1.20, 4.0)
@@ -188,11 +189,12 @@ func _build_dining_room() -> void:
 	_cylinder(root, "DiningPedestal", center + Vector3(0.0, 0.39, 0.0), 0.34, 0.52, 0.78, walnut, Vector3(1.15, 1.0, 0.82))
 	_add_collision_box(root, "DiningTableCollision", center + Vector3(0.0, 0.44, 0.0), Vector3(3.05, 0.88, 1.28))
 
-	for x in [5.25, 7.05]:
-		_add_dining_chair(root, Vector3(x, 0.0, -0.16), 180.0)
-		_add_dining_chair(root, Vector3(x, 0.0, -2.14), 0.0)
-	_add_dining_chair(root, Vector3(4.42, 0.0, -1.15), -90.0)
-	_add_dining_chair(root, Vector3(7.88, 0.0, -1.15), 90.0)
+	_add_dining_chair(root, Vector3(5.25, 0.0, -0.16), 0.0, "dining_north_west")
+	_add_dining_chair(root, Vector3(7.05, 0.0, -0.16), 0.0, "dining_north_east")
+	_add_dining_chair(root, Vector3(5.25, 0.0, -2.14), 180.0, "dining_south_west")
+	_add_dining_chair(root, Vector3(7.05, 0.0, -2.14), 180.0, "dining_south_east")
+	_add_dining_chair(root, Vector3(4.42, 0.0, -1.15), -90.0, "dining_west")
+	_add_dining_chair(root, Vector3(7.88, 0.0, -1.15), 90.0, "dining_east")
 
 	# A pair of pendants keeps the dining zone distinct from the adjacent bar.
 	_add_pendant(root, Vector3(5.35, 3.10, -1.15))
@@ -203,7 +205,7 @@ func _build_dining_room() -> void:
 	_sphere(root, "DiningLeaf", center + Vector3(0.13, 1.40, 0.02), Vector3(0.16, 0.06, 0.09), leaf_dark)
 
 
-func _add_dining_chair(parent: Node3D, origin: Vector3, rotation_y: float) -> void:
+func _add_dining_chair(parent: Node3D, origin: Vector3, rotation_y: float, seat_id: String) -> void:
 	var chair := Node3D.new()
 	chair.name = "DiningChair"
 	chair.position = origin
@@ -213,6 +215,32 @@ func _add_dining_chair(parent: Node3D, origin: Vector3, rotation_y: float) -> vo
 	_cylinder(chair, "ChairStem", Vector3(0.0, 0.39, 0.0), 0.045, 0.055, 0.36, champagne)
 	_cylinder(chair, "ChairSeat", Vector3(0.0, 0.59, 0.0), 0.35, 0.35, 0.12, cream, Vector3(1.0, 1.0, 0.88))
 	_box(chair, "ChairBack", Vector3(0.0, 0.94, 0.28), Vector3(0.68, 0.58, 0.12), cream)
+	_add_collision_box(chair, "DiningChairCollision", Vector3(0.0, 0.48, 0.08), Vector3(0.72, 0.96, 0.64))
+	_add_seat_interaction(chair, seat_id, "dining chair", Vector3(0.0, 0.02, -0.03), 0.0, Vector3(0.80, 1.25, 0.82))
+
+
+func _add_seat_interaction(parent: Node3D, seat_id: String, display_name: String, anchor_position: Vector3, rotation_y: float, area_size: Vector3) -> void:
+	var anchor := Node3D.new()
+	anchor.name = "%sAnchor" % seat_id.to_pascal_case()
+	anchor.position = anchor_position
+	anchor.rotation_degrees.y = rotation_y
+	parent.add_child(anchor)
+	var seat := SeatInteractable.new()
+	seat.name = seat_id.to_pascal_case()
+	seat.object_id = seat_id
+	seat.display_name = display_name
+	seat.seat_anchor = anchor
+	seat.position = anchor_position + Vector3(0.0, 0.63, 0.0)
+	seat.add_child(_area_shape(area_size))
+	parent.add_child(seat)
+
+
+func _area_shape(size: Vector3) -> CollisionShape3D:
+	var node := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	node.shape = shape
+	return node
 
 
 func _build_kitchen_details() -> void:
