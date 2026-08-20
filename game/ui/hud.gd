@@ -99,7 +99,7 @@ func _open_inspector(payload: Dictionary) -> void:
 			story = "The in-world computer connects this private 3D home to the DearV portal for letters, memories and account tools."
 			_build_computer_actions()
 		"inventory":
-			story = "Choose an ingredient to place on the kitchen counter. The refrigerator door, light and inventory state are saved together."
+			story = "Choose an ingredient to place on the kitchen counter, or restock household essentials. Refrigerator and delivery state are saved together."
 			_build_inventory_actions(payload)
 		"appliance":
 			story = "Choose a recipe. Ingredients must first be taken from the refrigerator and placed on the counter."
@@ -194,15 +194,24 @@ func _build_inventory_actions(payload: Dictionary) -> void:
 	var items: Array = payload.get("items", [])
 	if items.is_empty():
 		_add_disabled_action("The refrigerator is empty")
-		return
-	for value in items:
-		if not value is Dictionary:
-			continue
-		var item := value as Dictionary
-		var button := Button.new()
-		button.text = "Take %s to counter" % _food_display_name(str(item.get("definition_id", "")))
-		button.pressed.connect(_move_food_to_counter.bind(str(item.get("instance_id", ""))))
-		inspector_actions.add_child(button)
+	else:
+		for value in items:
+			if not value is Dictionary:
+				continue
+			var item := value as Dictionary
+			var button := Button.new()
+			button.text = "Take %s to counter" % _food_display_name(str(item.get("definition_id", "")))
+			button.pressed.connect(_move_food_to_counter.bind(str(item.get("instance_id", ""))))
+			inspector_actions.add_child(button)
+
+	var restock_needed := Kitchen.get_restock_needed()
+	if restock_needed > 0:
+		var restock_button := Button.new()
+		restock_button.text = "Restock %d kitchen essentials" % restock_needed
+		restock_button.pressed.connect(_restock_refrigerator)
+		inspector_actions.add_child(restock_button)
+	else:
+		_add_disabled_action("Kitchen essentials are fully stocked")
 
 
 func _build_appliance_actions(payload: Dictionary) -> void:
@@ -326,6 +335,16 @@ func _move_food_to_counter(instance_id: String) -> void:
 		"title": "Refrigerator",
 		"items": Kitchen.get_inventory("fridge"),
 	})
+
+
+func _restock_refrigerator() -> void:
+	var added := Kitchen.restock_essentials()
+	_open_inspector({
+		"kind": "inventory",
+		"title": "Refrigerator",
+		"items": Kitchen.get_inventory("fridge"),
+	})
+	inspector_body.text = "%d kitchen essentials arrived and were saved." % added if added > 0 else "Kitchen essentials are already fully stocked."
 
 
 func _start_recipe(appliance: ApplianceInteractable, recipe_id: String) -> void:
