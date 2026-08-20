@@ -10,8 +10,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: legacy-pages-build
-  cancel-in-progress: true
+  group: dearv-pages-publish
+  cancel-in-progress: false
 
 jobs:
   build-site:
@@ -38,16 +38,21 @@ jobs:
           NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
       - name: Publish exported files without clobbering Godot native build
         run: |
-          rm -rf /tmp/dearv-native
-          if [ -d site/native ]; then
-            cp -R site/native /tmp/dearv-native
-          fi
+          # Keep the freshly built PWA outside the checkout while syncing.
+          # The native exporter uses the same repository-wide concurrency group,
+          # so the pull below always observes the latest complete Godot bundle.
+          rm -rf /tmp/dearv-site-out /tmp/dearv-native
+          mv out /tmp/dearv-site-out
+          git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
 
+          if [ -d site/native ]; then
+            mv site/native /tmp/dearv-native
+          fi
           rm -rf site
           mkdir -p site
-          cp -R out/. site/
+          cp -R /tmp/dearv-site-out/. site/
           if [ -d /tmp/dearv-native ]; then
-            cp -R /tmp/dearv-native site/native
+            mv /tmp/dearv-native site/native
           fi
           touch .nojekyll
 
@@ -58,7 +63,5 @@ jobs:
             echo "No generated site changes"
           else
             git commit -m "Publish generated Pages site"
-            git fetch origin claude/memory-house-3d-handoff-a0d0e1
-            git rebase origin/claude/memory-house-3d-handoff-a0d0e1
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
