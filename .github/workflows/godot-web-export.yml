@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: godot-web-export
@@ -135,3 +136,8 @@ jobs:
             git commit -m "Publish Godot Web home"
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
+
+      - name: Rebuild Pages from the final exported home
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref claude/memory-house-3d-handoff-a0d0e1
