@@ -10,8 +10,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: dearv-pages-publish
-  cancel-in-progress: false
+  group: legacy-pages-build
+  cancel-in-progress: true
 
 jobs:
   build-site:
