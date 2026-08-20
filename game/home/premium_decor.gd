@@ -20,6 +20,7 @@ func _ready() -> void:
 	_build_study()
 	_build_living_details()
 	_build_bathroom_details()
+	_build_kitchen_details()
 
 
 func _setup_materials() -> void:
@@ -142,6 +143,25 @@ func _build_study() -> void:
 	_add_warm_spot(root, Vector3(14.35, 2.98, 3.15), Vector3(14.35, 0.75, 3.0), 1.35, 5.0)
 
 
+func _build_kitchen_details() -> void:
+	var root := Node3D.new()
+	root.name = "KitchenDetailLayer"
+	add_child(root)
+
+	# Three low pendant pools turn the long bar into the social heart of the home.
+	for x in [-1.55, 0.25, 2.05]:
+		_add_pendant(root, Vector3(x, 3.10, -6.0))
+
+	# A compact still life adds scale while keeping the working surface clear.
+	_cylinder(root, "BarServingTray", Vector3(1.62, 1.115, -6.02), 0.30, 0.32, 0.035, champagne, Vector3(1.48, 1.0, 0.72))
+	_sphere(root, "BarFruit", Vector3(1.47, 1.21, -6.02), Vector3(0.095, 0.095, 0.095), ceramic)
+	_sphere(root, "BarFruit", Vector3(1.67, 1.20, -5.97), Vector3(0.085, 0.085, 0.085), leaf_light)
+	_sphere(root, "BarFruit", Vector3(1.82, 1.19, -6.05), Vector3(0.075, 0.075, 0.075), walnut)
+
+	# A small herb planter softens the full-height cabinetry beside the sink.
+	_add_plant(root, Vector3(-3.55, 0.98, -12.48), 0.34)
+
+
 func _build_bathroom_details() -> void:
 	var root := Node3D.new()
 	root.name = "BathroomDetailLayer"
@@ -187,6 +207,20 @@ func _add_plant(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
 		var data: Array = leaves[index]
 		var leaf := _sphere(parent, "PlantLeaf", origin + data[0] * scale_factor, data[1] * scale_factor, leaf_dark if index % 2 == 0 else leaf_light)
 		leaf.rotation_degrees = data[2]
+
+
+func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> void:
+	_box(parent, "PendantCord", ceiling_origin + Vector3(0.0, -0.42, 0.0), Vector3(0.025, 0.84, 0.025), charcoal)
+	_cylinder(parent, "PendantCanopy", ceiling_origin + Vector3(0.0, -0.02, 0.0), 0.13, 0.13, 0.045, champagne)
+	_cylinder(parent, "PendantShade", ceiling_origin + Vector3(0.0, -0.90, 0.0), 0.16, 0.31, 0.28, charcoal)
+	var light := OmniLight3D.new()
+	light.name = "PendantGlow"
+	light.position = ceiling_origin + Vector3(0.0, -1.08, 0.0)
+	light.light_color = Color("ffd4a0")
+	light.light_energy = 0.58
+	light.omni_range = 3.2
+	light.shadow_enabled = true
+	parent.add_child(light)
 
 
 func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
