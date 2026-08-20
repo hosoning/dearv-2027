@@ -32,8 +32,14 @@ func _bind_visual_nodes() -> void:
 		return
 	if animation_mode == "reveal":
 		var reveal := visual_root.find_child(reveal_node_name, true, false) as Node3D
+		var lid := visual_root.find_child(lid_node_name, true, false) as Node3D
+		var saved := AppState.get_interaction_state(object_id, {})
+		_opened = saved is Dictionary and bool((saved as Dictionary).get("opened", false))
 		if reveal:
-			reveal.visible = false
+			reveal.visible = _opened
+		if lid and _opened:
+			lid.position = Vector3(-0.72, 0.42, -0.18)
+			lid.rotation = Vector3(0.0, 0.0, deg_to_rad(-16.0))
 	elif animation_mode == "lantern":
 		_snow = visual_root.find_child(snow_node_name, true, false) as Node3D
 		_light = OmniLight3D.new()
@@ -44,6 +50,14 @@ func _bind_visual_nodes() -> void:
 		_light.position = Vector3(0.0, 1.1, 0.0)
 		visual_root.add_child(_light)
 		_setup_music_box()
+		var saved := AppState.get_interaction_state(object_id, {})
+		_opened = saved is Dictionary and bool((saved as Dictionary).get("playing", false))
+		if _opened:
+			_light.light_energy = 2.2
+			_music_sample_index = 0
+			_music_player.play()
+			_music_playback = _music_player.get_stream_playback() as AudioStreamGeneratorPlayback
+			_fill_music_buffer()
 
 
 func _setup_music_box() -> void:
