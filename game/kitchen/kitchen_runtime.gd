@@ -5,6 +5,7 @@ signal food_stage_changed(instance_id: String, stage: String)
 signal cooking_started(appliance_id: String, recipe_id: String)
 signal cooking_completed(appliance_id: String, result: Dictionary)
 signal cooking_failed(appliance_id: String, reason: String)
+signal prepared_food_changed(location: String)
 
 const STAGE_RAW := "raw"
 const STAGE_WASHED := "washed"
@@ -115,6 +116,25 @@ func plate_prepared_food(instance_id: String, target_location := "dining_table")
 	item["location"] = target_location
 	AppState.prepared_food[instance_id] = item
 	SaveRepository.queue_save()
+	prepared_food_changed.emit(target_location)
+	return true
+
+
+func enjoy_prepared_food(instance_id: String) -> bool:
+	if not AppState.prepared_food.has(instance_id):
+		return false
+	var item: Dictionary = AppState.prepared_food[instance_id]
+	if str(item.get("stage", "")) != STAGE_PLATED:
+		return false
+	var location := str(item.get("location", ""))
+	AppState.prepared_food.erase(instance_id)
+	AppState.set_interaction_state("last_dining_moment", {
+		"recipe_id": str(item.get("recipe_id", "")),
+		"display_name": str(item.get("display_name", "Meal")),
+		"enjoyed_at": Time.get_datetime_string_from_system(true),
+	})
+	SaveRepository.queue_save()
+	prepared_food_changed.emit(location)
 	return true
 
 
@@ -189,4 +209,5 @@ func _complete_recipe(recipe: RecipeDefinition, ingredient_ids: Array[String], a
 	}
 	AppState.prepared_food[result_id] = result
 	SaveRepository.queue_save()
+	prepared_food_changed.emit(appliance_id)
 	return result
