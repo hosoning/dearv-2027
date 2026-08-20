@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build-site:
-    if: github.actor != 'github-actions[bot]'
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]' || github.event.head_commit.message == 'Publish Godot Web home'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
