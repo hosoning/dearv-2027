@@ -8,14 +8,34 @@ extends Node
 @export var world_environment: WorldEnvironment
 
 var _clock_refresh := 0.0
+var atmosphere_mode := "system"
 
 
 func _ready() -> void:
-	if sync_to_system_clock:
-		_sync_clock()
-	_apply_time()
+	add_to_group("day_night_director")
+	var saved_mode := str(AppState.get_interaction_state("home_atmosphere", "system"))
+	set_atmosphere(saved_mode, false)
 	# Apartment geometry is created by a later sibling in the scene tree.
 	call_deferred("_apply_time")
+
+
+func set_atmosphere(mode: String, persist := true) -> void:
+	if not mode in ["system", "morning", "sunset", "night"]:
+		mode = "system"
+	atmosphere_mode = mode
+	sync_to_system_clock = mode == "system"
+	match mode:
+		"system":
+			_sync_clock()
+		"morning":
+			time_of_day = 8.25
+		"sunset":
+			time_of_day = 18.35
+		"night":
+			time_of_day = 22.0
+	_apply_time()
+	if persist:
+		AppState.set_interaction_state("home_atmosphere", atmosphere_mode)
 
 
 func _process(delta: float) -> void:
