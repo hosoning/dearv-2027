@@ -38,22 +38,11 @@ jobs:
           NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
       - name: Publish exported files without clobbering Godot native build
         run: |
-          # Keep the freshly built PWA outside the checkout while syncing.
-          # The native exporter uses the same repository-wide concurrency group,
-          # so the pull below always observes the latest complete Godot bundle.
-          rm -rf /tmp/dearv-site-out /tmp/dearv-native
-          mv out /tmp/dearv-site-out
-          git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
-
-          if [ -d site/native ]; then
-            mv site/native /tmp/dearv-native
-          fi
-          rm -rf site
+          # Replace only PWA-owned files. The Godot exporter exclusively owns
+          # site/native, so a concurrent PWA build can never restore a stale bundle.
           mkdir -p site
-          cp -R /tmp/dearv-site-out/. site/
-          if [ -d /tmp/dearv-native ]; then
-            mv /tmp/dearv-native site/native
-          fi
+          find site -mindepth 1 -maxdepth 1 ! -name native -exec rm -rf {} +
+          cp -R out/. site/
           touch .nojekyll
 
           git config user.name "github-actions[bot]"
@@ -63,5 +52,7 @@ jobs:
             echo "No generated site changes"
           else
             git commit -m "Publish generated Pages site"
+            git fetch origin claude/memory-house-3d-handoff-a0d0e1
+            git rebase origin/claude/memory-house-3d-handoff-a0d0e1
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
