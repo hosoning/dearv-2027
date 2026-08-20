@@ -226,6 +226,7 @@ func _build_kitchen() -> void:
 	_create_refrigerator(kitchen, Vector3(4.05, 0.0, -12.15))
 	_create_sink(kitchen, Vector3(-2.2, 0.0, -12.55))
 	_create_stove(kitchen, Vector3(1.0, 0.0, -12.55))
+	_create_prep_station(kitchen, Vector3(-4.42, 0.0, -9.65))
 
 
 func _build_study_rig() -> void:
@@ -402,6 +403,24 @@ func _build_sofa_interaction() -> void:
 	seat.position = Vector3(0.1, 0.65, 4.1)
 	seat.add_child(_area_shape(Vector3(4.8, 1.3, 2.0)))
 	add_child(seat)
+
+
+func _create_prep_station(parent: Node3D, origin: Vector3) -> void:
+	var board := Node3D.new()
+	board.name = "PreparationBoard"
+	board.position = origin
+	parent.add_child(board)
+	_box(board, "CuttingBoard", Vector3(0.0, 1.04, 0.0), Vector3(1.05, 0.055, 0.58), warm_wood_material, false)
+	_box(board, "KnifeBlade", Vector3(0.24, 1.09, 0.08), Vector3(0.52, 0.025, 0.08), appliance_material, false)
+	_box(board, "KnifeHandle", Vector3(0.58, 1.09, 0.08), Vector3(0.22, 0.055, 0.11), dark_metal_material, false)
+
+	var station := PrepStationInteractable.new()
+	station.name = "PreparationCounterInteraction"
+	station.object_id = "kitchen_preparation_counter"
+	station.display_name = "Preparation counter"
+	station.position = origin + Vector3(0.0, 1.18, 0.0)
+	station.add_child(_area_shape(Vector3(1.55, 0.85, 1.05)))
+	parent.add_child(station)
 
 
 func _create_refrigerator(parent: Node3D, origin: Vector3) -> void:
