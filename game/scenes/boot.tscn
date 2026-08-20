@@ -77,7 +77,7 @@ sun = NodePath("../Sun")
 world_environment = NodePath("../WorldEnvironment")
 
 [node name="OceanWorld" type="Node3D" parent="."]
-position = Vector3(0, -58, -170)
+position = Vector3(0, -58, 170)
 
 [node name="Ocean" type="MeshInstance3D" parent="OceanWorld"]
 mesh = SubResource("PlaneMesh_ocean")
