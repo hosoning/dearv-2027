@@ -78,14 +78,40 @@ jobs:
           test -s public/native/index.pck
           touch public/native/.nojekyll
 
+      - name: Version large runtime files to prevent stale mobile caches
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          root = Path("public/native")
+          tag = os.environ["GITHUB_SHA"][:12]
+          for extension in ("js", "wasm", "pck"):
+              source = root / f"index.{extension}"
+              target = root / f"index-{tag}.{extension}"
+              source.rename(target)
+
+          html_path = root / "index.html"
+          html = html_path.read_text()
+          html = html.replace('src="index.js"', f'src="index-{tag}.js"')
+          html = html.replace('"executable":"index"', f'"executable":"index-{tag}"')
+          html = html.replace('"index.pck":', f'"index-{tag}.pck":')
+          html = html.replace('"index.wasm":', f'"index-{tag}.wasm":')
+          html_path.write_text(html)
+          PY
+          grep -F "index-${GITHUB_SHA:0:12}" public/native/index.html
+          test -s "public/native/index-${GITHUB_SHA:0:12}.js"
+          test -s "public/native/index-${GITHUB_SHA:0:12}.wasm"
+          test -s "public/native/index-${GITHUB_SHA:0:12}.pck"
+
       - name: Mirror native build into the legacy Pages source
         run: |
           rm -rf site/native
           mkdir -p site/native
           cp -R public/native/. site/native/
           test -s site/native/index.html
-          test -s site/native/index.wasm
-          test -s site/native/index.pck
+          test -s "site/native/index-${GITHUB_SHA:0:12}.wasm"
+          test -s "site/native/index-${GITHUB_SHA:0:12}.pck"
 
       - name: Publish Web build back to branch
         run: |
