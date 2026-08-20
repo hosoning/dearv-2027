@@ -71,6 +71,9 @@ func _build_master_bedroom() -> void:
 	_box(root, "BedroomArtFrame", Vector3(-14.55, 1.72, -8.64), Vector3(1.0, 1.28, 0.055), champagne)
 	_box(root, "BedroomArtCanvas", Vector3(-14.55, 1.72, -8.59), Vector3(0.86, 1.14, 0.03), cream)
 
+	# A leafy corner and a soft folded throw keep the suite from reading as a showroom.
+	_add_plant(root, Vector3(-14.30, 0.0, -5.35), 0.84)
+	_box(root, "BenchThrow", Vector3(-11.78, 0.64, -5.34), Vector3(0.74, 0.035, 0.58), textile)
 	_add_warm_spot(root, Vector3(-11.45, 2.95, -6.2), Vector3(-11.45, 0.8, -7.2), 1.55, 5.5)
 
 
@@ -90,6 +93,12 @@ func _build_walk_in_wardrobe() -> void:
 	for y in [0.45, 1.1, 1.75, 2.4]:
 		_box(root, "MirrorGlow", Vector3(-8.40, y, 4.60), Vector3(0.03, 0.035, 0.16), warm_glow)
 		_box(root, "MirrorGlow", Vector3(-8.40, y, 5.90), Vector3(0.03, 0.035, 0.16), warm_glow)
+
+	# A small perfume grouping adds human scale without inventing personal belongings.
+	_cylinder(root, "PerfumeBottleTall", Vector3(-11.72, 1.18, 3.72), 0.055, 0.065, 0.22, mirror)
+	_sphere(root, "PerfumeCapTall", Vector3(-11.72, 1.32, 3.72), Vector3(0.045, 0.045, 0.045), champagne)
+	_cylinder(root, "PerfumeBottleRound", Vector3(-11.50, 1.16, 3.78), 0.085, 0.095, 0.16, ceramic)
+	_sphere(root, "PerfumeCapRound", Vector3(-11.50, 1.27, 3.78), Vector3(0.042, 0.042, 0.042), champagne)
 
 	# Small dressing stool rather than another large block.
 	_box(root, "DressingStoolSeat", Vector3(-11.45, 0.48, 5.15), Vector3(0.92, 0.22, 0.58), cream)
@@ -125,6 +134,10 @@ func _build_study() -> void:
 	_box(root, "DeskPad", Vector3(14.35, 0.855, 3.0), Vector3(1.65, 0.025, 0.72), charcoal)
 	_box(root, "PenTray", Vector3(15.43, 0.88, 2.75), Vector3(0.42, 0.05, 0.18), champagne)
 	_add_table_lamp(root, Vector3(13.05, 0.83, 2.62), 0.82)
+	# A restrained desk globe brings a curved silhouette to the executive study.
+	_cylinder(root, "GlobeStand", Vector3(15.18, 1.00, 3.26), 0.09, 0.13, 0.18, champagne)
+	_sphere(root, "DeskGlobe", Vector3(15.18, 1.20, 3.26), Vector3(0.18, 0.18, 0.18), mirror)
+	_sphere(root, "GlobeAxisCap", Vector3(15.18, 1.40, 3.26), Vector3(0.035, 0.035, 0.035), champagne)
 	_add_warm_spot(root, Vector3(14.35, 2.98, 3.15), Vector3(14.35, 0.75, 3.0), 1.35, 5.0)
 
 
