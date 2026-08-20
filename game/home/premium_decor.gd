@@ -22,6 +22,7 @@ func _ready() -> void:
 	_build_bathroom_details()
 	_build_kitchen_details()
 	_build_dining_room()
+	_build_entry_gallery()
 
 
 func _setup_materials() -> void:
@@ -142,6 +143,38 @@ func _build_study() -> void:
 	_sphere(root, "DeskGlobe", Vector3(15.18, 1.20, 3.26), Vector3(0.18, 0.18, 0.18), mirror)
 	_sphere(root, "GlobeAxisCap", Vector3(15.18, 1.40, 3.26), Vector3(0.035, 0.035, 0.035), champagne)
 	_add_warm_spot(root, Vector3(14.35, 2.98, 3.15), Vector3(14.35, 0.75, 3.0), 1.35, 5.0)
+
+
+func _build_entry_gallery() -> void:
+	var root := Node3D.new()
+	root.name = "EntryGalleryLayer"
+	add_child(root)
+
+	# A calm arrival sequence bridges the private lift lobby and the open-plan home.
+	_box(root, "EntryRunner", Vector3(11.15, 0.042, -11.45), Vector3(3.55, 0.035, 2.20), textile)
+
+	# Slim console and circular mirror form the first focal point without narrowing the route.
+	_box(root, "EntryConsole", Vector3(17.48, 0.63, -11.20), Vector3(0.52, 1.18, 2.35), walnut)
+	_box(root, "EntryConsoleTop", Vector3(17.45, 1.24, -11.20), Vector3(0.62, 0.055, 2.48), champagne)
+	_add_collision_box(root, "EntryConsoleCollision", Vector3(17.48, 0.63, -11.20), Vector3(0.52, 1.18, 2.35))
+	var mirror_frame := _cylinder(root, "EntryMirrorFrame", Vector3(17.70, 2.10, -11.20), 0.70, 0.70, 0.07, champagne)
+	mirror_frame.rotation_degrees.z = 90.0
+	var mirror_face := _cylinder(root, "EntryMirror", Vector3(17.65, 2.10, -11.20), 0.61, 0.61, 0.035, mirror)
+	mirror_face.rotation_degrees.z = 90.0
+
+	# Small objects make the console useful while remaining intentionally impersonal.
+	_cylinder(root, "EntryCatchall", Vector3(17.10, 1.30, -11.52), 0.18, 0.20, 0.035, ceramic, Vector3(1.0, 1.0, 0.70))
+	_sphere(root, "EntrySculpture", Vector3(17.10, 1.47, -10.78), Vector3(0.14, 0.24, 0.14), pale_stone())
+
+	# Upholstered perch and planting soften the solid study wall near the turn into the home.
+	_box(root, "EntryBenchSeat", Vector3(14.55, 0.48, -8.88), Vector3(2.25, 0.28, 0.54), cream)
+	for x in [13.75, 15.35]:
+		_box(root, "EntryBenchLeg", Vector3(x, 0.23, -8.88), Vector3(0.07, 0.46, 0.42), champagne)
+	_add_collision_box(root, "EntryBenchCollision", Vector3(14.55, 0.38, -8.88), Vector3(2.25, 0.76, 0.54))
+	_add_plant(root, Vector3(16.65, 0.0, -9.35), 0.66)
+
+	_add_warm_spot(root, Vector3(16.85, 3.02, -11.20), Vector3(17.20, 1.15, -11.20), 1.20, 4.0)
+	_add_warm_spot(root, Vector3(14.55, 3.02, -9.40), Vector3(14.55, 0.55, -8.88), 1.05, 4.2)
 
 
 func _build_dining_room() -> void:
