@@ -12,6 +12,11 @@ extends CanvasLayer
 var touch_overlay: TouchControlsOverlay
 var _comfort_pose_active := false
 var _last_focus: Interactable
+var _gift_story := ""
+var _gift_pages: Array[String] = []
+var _gift_page_index := 0
+var _gift_previous_button: Button
+var _gift_next_button: Button
 
 
 func _ready() -> void:
@@ -63,10 +68,11 @@ func _open_inspector(payload: Dictionary) -> void:
 	_clear_actions()
 	var story := str(payload.get("story", ""))
 	var pages: Array = payload.get("pages", [])
-	if not pages.is_empty():
-		story += "\n\n" + "\n\n".join(PackedStringArray(pages))
 	var kind := str(payload.get("kind", ""))
 	match kind:
+		"gift":
+			_build_gift_page_actions(story, pages)
+			return
 		"computer":
 			story = "The in-world computer connects this private 3D home to the DearV portal for letters, memories and account tools."
 			_build_computer_actions()
@@ -82,6 +88,47 @@ func _open_inspector(payload: Dictionary) -> void:
 func _close_inspector() -> void:
 	inspector.visible = false
 	_clear_actions()
+
+
+func _build_gift_page_actions(story: String, pages: Array) -> void:
+	_gift_story = story
+	_gift_pages.clear()
+	for page in pages:
+		_gift_pages.append(str(page))
+	_gift_page_index = 0
+	if _gift_pages.is_empty():
+		inspector_body.text = _gift_story
+		return
+
+	_gift_previous_button = Button.new()
+	_gift_previous_button.text = "Previous page"
+	_gift_previous_button.pressed.connect(_change_gift_page.bind(-1))
+	inspector_actions.add_child(_gift_previous_button)
+
+	_gift_next_button = Button.new()
+	_gift_next_button.text = "Next page"
+	_gift_next_button.pressed.connect(_change_gift_page.bind(1))
+	inspector_actions.add_child(_gift_next_button)
+	_show_gift_page()
+
+
+func _change_gift_page(direction: int) -> void:
+	if _gift_pages.is_empty():
+		return
+	_gift_page_index = clampi(_gift_page_index + direction, 0, _gift_pages.size() - 1)
+	_show_gift_page()
+
+
+func _show_gift_page() -> void:
+	if _gift_pages.is_empty():
+		inspector_body.text = _gift_story
+		return
+	var page_header := "Page %d of %d" % [_gift_page_index + 1, _gift_pages.size()]
+	inspector_body.text = "%s\n\n%s\n\n%s" % [_gift_story, page_header, _gift_pages[_gift_page_index]]
+	if _gift_previous_button:
+		_gift_previous_button.disabled = _gift_page_index == 0
+	if _gift_next_button:
+		_gift_next_button.disabled = _gift_page_index == _gift_pages.size() - 1
 
 
 func _build_computer_actions() -> void:
@@ -191,5 +238,8 @@ func _set_actions_disabled(disabled: bool) -> void:
 
 
 func _clear_actions() -> void:
+	_gift_previous_button = null
+	_gift_next_button = null
+	_gift_pages.clear()
 	for child in inspector_actions.get_children():
 		child.queue_free()
