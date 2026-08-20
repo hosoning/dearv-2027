@@ -118,10 +118,11 @@ func _fill_music_buffer() -> void:
 		var note_index := int(floor(beat_position)) % CHIME_NOTES.size()
 		var local_time := fmod(time_seconds, CHIME_BEAT_SECONDS)
 		var frequency: float = CHIME_NOTES[note_index]
-		# Fast attack, bell-like decay and a very quiet octave harmonic.
-		var attack := clamp(local_time / 0.018, 0.0, 1.0)
-		var envelope := attack * exp(-local_time * 5.3)
-		var phase := TAU * frequency * time_seconds
-		var sample := (sin(phase) * 0.72 + sin(phase * 2.0) * 0.20 + sin(phase * 3.01) * 0.08) * envelope * 0.22
+		# Explicit float annotations keep Godot 4.7's stricter web parser from
+		# treating math built-ins as Variant-valued expressions.
+		var attack: float = clampf(local_time / 0.018, 0.0, 1.0)
+		var envelope: float = attack * exp(-local_time * 5.3)
+		var phase: float = TAU * frequency * time_seconds
+		var sample: float = (sin(phase) * 0.72 + sin(phase * 2.0) * 0.20 + sin(phase * 3.01) * 0.08) * envelope * 0.22
 		_music_playback.push_frame(Vector2(sample, sample))
 		_music_sample_index += 1
