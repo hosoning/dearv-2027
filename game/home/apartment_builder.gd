@@ -176,12 +176,14 @@ func _build_distant_city_view() -> void:
 		_box(city, "TowerCrown", Vector3(data.x, -56.65 + data.w, data.y), Vector3(data.z * 0.72, 0.70, depth * 0.72), crown_mat, false)
 		for floor_index in range(2, int(data.w / 6.0), 3):
 			var band_y := -56.0 + float(floor_index) * 5.4
-			_box(city, "LitFacadeBand", Vector3(data.x, band_y, data.y - depth * 0.5 - 0.03), Vector3(data.z * 0.72, 0.48, 0.04), city_glow, false)
+			var band := _box(city, "LitFacadeBand", Vector3(data.x, band_y, data.y - depth * 0.5 - 0.03), Vector3(data.z * 0.72, 0.48, 0.04), city_glow, false)
+			band.add_to_group("city_night_emissive")
 
 	# Low waterfront pavilions establish depth before the main skyline.
 	for x in [-92.0, -66.0, -40.0, -14.0, 12.0, 38.0, 64.0, 90.0]:
 		_box(city, "WaterfrontPavilion", Vector3(x, -53.6, 79.5), Vector3(15.0, 6.8, 7.0), facade_stone, false)
-		_box(city, "PavilionGlow", Vector3(x, -52.8, 75.96), Vector3(11.5, 1.15, 0.05), city_glow, false)
+		var pavilion_glow := _box(city, "PavilionGlow", Vector3(x, -52.8, 75.96), Vector3(11.5, 1.15, 0.05), city_glow, false)
+		pavilion_glow.add_to_group("city_night_emissive")
 
 
 func _build_doors() -> void:
