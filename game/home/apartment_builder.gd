@@ -285,6 +285,7 @@ func _build_master_suite_assets() -> void:
 		_collision_box(suite, "DressingIslandCollision", Vector3(-11.45, 0.52, 3.85), Vector3(2.08, 1.04, 0.95))
 	else:
 		_build_wardrobe_fallback(suite)
+	_build_wardrobe_interaction(suite)
 
 	if _instantiate_hero_asset(suite, "bathroom_suite.glb", Vector3(-11.45, 0.0, 11.0), 0.0):
 		_collision_box(suite, "BathCollision", Vector3(-15.17, 0.48, 10.75), Vector3(2.55, 0.96, 1.45))
@@ -317,6 +318,29 @@ func _build_bed_fallback(parent: Node3D) -> void:
 	_box(parent, "BedFrameFallback", Vector3(-11.45, 0.32, -7.2), Vector3(2.35, 0.48, 2.45), dark_metal_material, true)
 	_box(parent, "BedMattressFallback", Vector3(-11.45, 0.67, -7.2), Vector3(2.10, 0.32, 2.22), wall_material, true)
 	_box(parent, "BedHeadboardFallback", Vector3(-11.45, 1.28, -8.32), Vector3(2.72, 1.72, 0.20), dark_metal_material, true)
+
+
+func _build_wardrobe_interaction(parent: Node3D) -> void:
+	var drawer_part := Node3D.new()
+	drawer_part.name = "DressingIslandDrawer"
+	drawer_part.position = Vector3(-11.45, 0.67, 3.34)
+	parent.add_child(drawer_part)
+	_box(drawer_part, "DrawerFront", Vector3.ZERO, Vector3(1.52, 0.34, 0.08), warm_wood_material, false)
+	_box(drawer_part, "DrawerHandle", Vector3(0.0, 0.0, -0.065), Vector3(0.48, 0.035, 0.035), dark_metal_material, false)
+
+	var drawer := OpenableInteractable.new()
+	drawer.name = "DressingDrawerInteraction"
+	drawer.object_id = "master_wardrobe_dressing_drawer"
+	drawer.moving_part = drawer_part
+	drawer.motion_type = OpenableInteractable.MotionType.DRAWER
+	drawer.open_offset = Vector3(0.0, 0.0, -0.46)
+	drawer.open_rotation_degrees = Vector3.ZERO
+	drawer.motion_seconds = 0.55
+	drawer.open_label = "Open dressing drawer"
+	drawer.close_label = "Close dressing drawer"
+	drawer.position = Vector3(-11.45, 0.68, 3.12)
+	drawer.add_child(_area_shape(Vector3(1.95, 0.92, 0.85)))
+	parent.add_child(drawer)
 
 
 func _build_wardrobe_fallback(parent: Node3D) -> void:
