@@ -111,7 +111,7 @@ func _open_inspector(payload: Dictionary) -> void:
 			story = "Bring a finished dish from the stove to the dining table. Served meals remain part of the saved home state."
 			_build_serving_actions(payload)
 		"atmosphere":
-			story = "Choose how the home should feel. Follow local time automatically, or hold a favourite light setting until you change it."
+			story = "Choose how the home should feel, and switch to a steady walking camera whenever you prefer less motion."
 			_build_atmosphere_actions(payload)
 	inspector_body.text = story
 	call_deferred("_focus_first_action")
@@ -195,6 +195,7 @@ func _open_dearv_portal() -> void:
 
 func _build_atmosphere_actions(payload: Dictionary) -> void:
 	var target := payload.get("target") as DayNightDirector
+	var player := payload.get("player") as ComfortController
 	if not target:
 		_add_disabled_action("Atmosphere controls are unavailable")
 		return
@@ -210,18 +211,37 @@ func _build_atmosphere_actions(payload: Dictionary) -> void:
 		var button := Button.new()
 		button.text = "%s%s" % [str(option[1]), " · Active" if mode == current_mode else ""]
 		button.disabled = mode == current_mode
-		button.pressed.connect(_set_atmosphere.bind(target, mode))
+		button.pressed.connect(_set_atmosphere.bind(target, mode, player))
 		inspector_actions.add_child(button)
+	if player:
+		var comfort_button := Button.new()
+		var reduced := player.is_reduced_motion_enabled()
+		comfort_button.text = "Use natural walking motion" if reduced else "Use steady walking camera"
+		comfort_button.pressed.connect(_set_reduced_motion.bind(player, not reduced, target))
+		inspector_actions.add_child(comfort_button)
 
 
-func _set_atmosphere(target: DayNightDirector, mode: String) -> void:
+func _set_atmosphere(target: DayNightDirector, mode: String, player: ComfortController) -> void:
 	target.set_atmosphere(mode)
 	_open_inspector({
 		"kind": "atmosphere",
 		"title": "Home atmosphere",
 		"target": target,
 		"mode": target.atmosphere_mode,
+		"player": player,
 	})
+
+
+func _set_reduced_motion(player: ComfortController, enabled: bool, target: DayNightDirector) -> void:
+	player.set_reduced_motion(enabled)
+	_open_inspector({
+		"kind": "atmosphere",
+		"title": "Home atmosphere",
+		"target": target,
+		"mode": target.atmosphere_mode,
+		"player": player,
+	})
+	inspector_body.text = "Steady walking camera is enabled and saved." if enabled else "Natural walking motion is enabled and saved."
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
