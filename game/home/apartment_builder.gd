@@ -724,6 +724,27 @@ func _create_stove(parent: Node3D, origin: Vector3) -> void:
 			ring.mesh = ring_mesh
 			ring.position = Vector3(x, 1.035, z)
 			stove.add_child(ring)
+
+	# Deep pan storage below the induction surface keeps the kitchen practical.
+	var pan_drawer_part := Node3D.new()
+	pan_drawer_part.name = "InductionPanDrawer"
+	stove.add_child(pan_drawer_part)
+	_box(pan_drawer_part, "PanDrawerFront", Vector3(0.0, 0.56, 0.34), Vector3(1.25, 0.42, 0.055), appliance_material, false)
+	_box(pan_drawer_part, "PanDrawerPull", Vector3(0.0, 0.69, 0.385), Vector3(0.62, 0.035, 0.035), dark_metal_material, false)
+	var pan_drawer := OpenableInteractable.new()
+	pan_drawer.name = "InductionPanDrawerInteraction"
+	pan_drawer.object_id = "kitchen_induction_pan_drawer"
+	pan_drawer.moving_part = pan_drawer_part
+	pan_drawer.motion_type = OpenableInteractable.MotionType.DRAWER
+	pan_drawer.open_offset = Vector3(0.0, 0.0, 0.46)
+	pan_drawer.open_rotation_degrees = Vector3.ZERO
+	pan_drawer.motion_seconds = 0.52
+	pan_drawer.open_label = "Open pan drawer"
+	pan_drawer.close_label = "Close pan drawer"
+	pan_drawer.position = Vector3(0.0, 0.56, 0.50)
+	pan_drawer.add_child(_area_shape(Vector3(1.55, 0.72, 0.72)))
+	stove.add_child(pan_drawer)
+
 	var appliance := ApplianceInteractable.new()
 	appliance.name = "StoveInteraction"
 	appliance.object_id = "kitchen_stove"
