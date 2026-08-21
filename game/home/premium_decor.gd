@@ -170,6 +170,28 @@ func _build_entry_gallery() -> void:
 	_box(root, "EntryConsole", Vector3(17.48, 0.63, -11.20), Vector3(0.52, 1.18, 2.35), walnut)
 	_box(root, "EntryConsoleTop", Vector3(17.45, 1.24, -11.20), Vector3(0.62, 0.055, 2.48), champagne)
 	_add_collision_box(root, "EntryConsoleCollision", Vector3(17.48, 0.63, -11.20), Vector3(0.52, 1.18, 2.35))
+
+	# A shallow valet drawer keeps keys and small private items out of sight.
+	var valet_drawer_part := Node3D.new()
+	valet_drawer_part.name = "EntryValetDrawer"
+	root.add_child(valet_drawer_part)
+	_box(valet_drawer_part, "ValetDrawerFront", Vector3(17.18, 0.82, -11.20), Vector3(0.055, 0.30, 1.62), walnut)
+	_box(valet_drawer_part, "ValetDrawerPull", Vector3(17.13, 0.82, -11.20), Vector3(0.028, 0.035, 0.48), champagne)
+
+	var valet_drawer := OpenableInteractable.new()
+	valet_drawer.name = "EntryValetDrawerInteraction"
+	valet_drawer.object_id = "entry_valet_drawer"
+	valet_drawer.moving_part = valet_drawer_part
+	valet_drawer.motion_type = OpenableInteractable.MotionType.DRAWER
+	valet_drawer.open_offset = Vector3(-0.42, 0.0, 0.0)
+	valet_drawer.open_rotation_degrees = Vector3.ZERO
+	valet_drawer.motion_seconds = 0.5
+	valet_drawer.open_label = "Open entry valet drawer"
+	valet_drawer.close_label = "Close entry valet drawer"
+	valet_drawer.position = Vector3(16.92, 0.82, -11.20)
+	valet_drawer.add_child(_area_shape(Vector3(0.65, 0.72, 1.82)))
+	root.add_child(valet_drawer)
+
 	var mirror_frame := _cylinder(root, "EntryMirrorFrame", Vector3(17.70, 2.10, -11.20), 0.70, 0.70, 0.07, champagne)
 	mirror_frame.rotation_degrees.z = 90.0
 	var mirror_face := _cylinder(root, "EntryMirror", Vector3(17.65, 2.10, -11.20), 0.61, 0.61, 0.035, mirror)
