@@ -423,8 +423,8 @@ func _build_bedside_tables(parent: Node3D) -> void:
 		var lamp_switch := LightSwitchInteractable.new()
 		lamp_switch.name = "%sBedsideLampSwitch" % side_key.capitalize()
 		lamp_switch.object_id = "master_bedside_%s_lamp" % side_key
-		lamp_switch.target_lights = [lamp]
-		lamp_switch.emissive_meshes = [shade]
+		lamp_switch.target_lights.append(lamp)
+		lamp_switch.emissive_meshes.append(shade)
 		lamp_switch.position = lamp_button_position
 		lamp_switch.add_child(_area_shape(Vector3(0.55, 0.45, 0.55)))
 		table.add_child(lamp_switch)
