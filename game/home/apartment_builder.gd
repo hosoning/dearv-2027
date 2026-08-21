@@ -380,6 +380,55 @@ func _build_bathroom_water_interaction(parent: Node3D) -> void:
 	interaction.add_child(_area_shape(Vector3(0.95, 1.25, 0.95)))
 	filler.add_child(interaction)
 
+	# The walk-in shower has a separate saved rainfall control. A cluster of
+	# translucent streams gives clear feedback without expensive particles.
+	var shower := Node3D.new()
+	shower.name = "RainfallShowerRig"
+	shower.position = Vector3(-7.80, 0.0, 10.90)
+	parent.add_child(shower)
+	_box(shower, "ShowerCeilingStem", Vector3(0.0, 2.82, 0.0), Vector3(0.08, 0.48, 0.08), dark_metal_material, false)
+
+	var shower_head := MeshInstance3D.new()
+	shower_head.name = "RainfallShowerHead"
+	var head_mesh := CylinderMesh.new()
+	head_mesh.top_radius = 0.38
+	head_mesh.bottom_radius = 0.38
+	head_mesh.height = 0.07
+	head_mesh.radial_segments = 28
+	head_mesh.material = dark_metal_material
+	shower_head.mesh = head_mesh
+	shower_head.position = Vector3(0.0, 2.56, 0.0)
+	shower.add_child(shower_head)
+
+	var rain_streams := Node3D.new()
+	rain_streams.name = "RainfallWater"
+	rain_streams.visible = false
+	shower.add_child(rain_streams)
+	for offset in [
+		Vector2(-0.20, -0.20), Vector2(0.0, -0.22), Vector2(0.20, -0.20),
+		Vector2(-0.22, 0.0), Vector2.ZERO, Vector2(0.22, 0.0),
+		Vector2(-0.20, 0.20), Vector2(0.0, 0.22), Vector2(0.20, 0.20),
+	]:
+		var rain := MeshInstance3D.new()
+		rain.name = "RainStream"
+		var rain_mesh := CylinderMesh.new()
+		rain_mesh.top_radius = 0.008
+		rain_mesh.bottom_radius = 0.015
+		rain_mesh.height = 1.75
+		rain_mesh.radial_segments = 8
+		rain_mesh.material = water_material
+		rain.mesh = rain_mesh
+		rain.position = Vector3(offset.x, 1.64, offset.y)
+		rain_streams.add_child(rain)
+
+	var shower_control := FaucetInteractable.new()
+	shower_control.name = "RainfallShowerControl"
+	shower_control.object_id = "ensuite_rainfall_shower"
+	shower_control.water_stream = rain_streams
+	shower_control.position = Vector3(0.72, 1.12, -0.48)
+	shower_control.add_child(_area_shape(Vector3(0.72, 1.20, 0.72)))
+	shower.add_child(shower_control)
+
 
 func _build_bed_interaction(parent: Node3D) -> void:
 	var anchor := Node3D.new()
