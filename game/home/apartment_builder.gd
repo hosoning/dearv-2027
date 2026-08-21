@@ -255,9 +255,21 @@ func _build_lighting() -> void:
 	var study_lights: Array[Light3D] = []
 	for position in [Vector3(14.5, 3.02, -3.0), Vector3(14.5, 3.02, 4.0), Vector3(14.5, 3.02, 10.0)]:
 		study_lights.append(_ceiling_light("StudyDownlight", position, 2.1, 8.0))
+	var bedroom_lights: Array[Light3D] = []
+	for position in [Vector3(-14.2, 3.02, -6.4), Vector3(-8.6, 3.02, -6.4), Vector3(-14.2, 3.02, -1.3), Vector3(-8.6, 3.02, -1.3)]:
+		bedroom_lights.append(_ceiling_light("BedroomDownlight", position, 1.85, 7.0))
+	var dressing_lights: Array[Light3D] = []
+	for position in [Vector3(-14.0, 3.02, 3.4), Vector3(-9.0, 3.02, 3.4)]:
+		dressing_lights.append(_ceiling_light("DressingDownlight", position, 1.75, 6.0))
+	var bathroom_lights: Array[Light3D] = []
+	for position in [Vector3(-15.0, 3.02, 10.7), Vector3(-11.2, 3.02, 10.7), Vector3(-7.6, 3.02, 11.7)]:
+		bathroom_lights.append(_ceiling_light("BathroomDownlight", position, 1.65, 5.5))
 	_add_light_switch("living_lights", Vector3(7.2, 1.18, -8.36), living_lights)
 	_add_light_switch("kitchen_lights", Vector3(5.7, 1.18, -8.36), kitchen_lights)
 	_add_light_switch("study_lights", Vector3(11.12, 1.18, -7.3), study_lights)
+	_add_light_switch("bedroom_lights", Vector3(-5.12, 1.18, 5.15), bedroom_lights)
+	_add_light_switch("dressing_lights", Vector3(-8.15, 1.18, 7.86), dressing_lights)
+	_add_light_switch("bathroom_lights", Vector3(-12.85, 1.18, 8.14), bathroom_lights)
 
 
 func _build_kitchen() -> void:
