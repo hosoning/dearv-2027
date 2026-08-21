@@ -342,6 +342,7 @@ func _build_master_suite_assets() -> void:
 	else:
 		_build_bed_fallback(suite)
 	_build_bed_interaction(suite)
+	_build_bedside_tables(suite)
 
 	if _instantiate_hero_asset(suite, "walk_in_wardrobe.glb", Vector3(-11.45, 0.0, 3.45), 0.0):
 		_collision_box(suite, "WardrobeBackCollision", Vector3(-11.45, 1.32, 1.50), Vector3(5.85, 2.64, 0.48))
@@ -360,6 +361,73 @@ func _build_master_suite_assets() -> void:
 	else:
 		_build_bathroom_fallback(suite)
 	_build_bathroom_water_interaction(suite)
+
+
+func _build_bedside_tables(parent: Node3D) -> void:
+	for table_data in [
+		["left", Vector3(-13.45, 0.0, -7.72)],
+		["right", Vector3(-9.45, 0.0, -7.72)],
+	]:
+		var side_key := str(table_data[0])
+		var table_position: Vector3 = table_data[1]
+		var table := Node3D.new()
+		table.name = "%sBedsideTable" % side_key.capitalize()
+		parent.add_child(table)
+		_box(table, "Cabinet", table_position + Vector3(0.0, 0.34, 0.0), Vector3(0.76, 0.68, 0.66), warm_wood_material, true)
+		_box(table, "StoneTop", table_position + Vector3(0.0, 0.71, 0.0), Vector3(0.82, 0.07, 0.72), pale_stone_material, true)
+
+		var drawer_part := Node3D.new()
+		drawer_part.name = "BedsideDrawer"
+		table.add_child(drawer_part)
+		_box(drawer_part, "DrawerFront", table_position + Vector3(0.0, 0.43, 0.345), Vector3(0.58, 0.23, 0.055), warm_wood_material, false)
+		_box(drawer_part, "DrawerPull", table_position + Vector3(0.0, 0.43, 0.385), Vector3(0.22, 0.025, 0.025), dark_metal_material, false)
+
+		var drawer := OpenableInteractable.new()
+		drawer.name = "%sBedsideDrawerInteraction" % side_key.capitalize()
+		drawer.object_id = "master_bedside_%s_drawer" % side_key
+		drawer.moving_part = drawer_part
+		drawer.motion_type = OpenableInteractable.MotionType.DRAWER
+		drawer.open_offset = Vector3(0.0, 0.0, 0.36)
+		drawer.open_rotation_degrees = Vector3.ZERO
+		drawer.motion_seconds = 0.48
+		drawer.open_label = "Open bedside drawer"
+		drawer.close_label = "Close bedside drawer"
+		drawer.position = table_position + Vector3(0.0, 0.46, 0.48)
+		drawer.add_child(_area_shape(Vector3(0.78, 0.62, 0.65)))
+		table.add_child(drawer)
+
+		_box(table, "LampStem", table_position + Vector3(0.0, 0.96, 0.0), Vector3(0.045, 0.44, 0.045), dark_metal_material, false)
+		var shade := MeshInstance3D.new()
+		shade.name = "BedsideLampShade"
+		var shade_mesh := CylinderMesh.new()
+		shade_mesh.top_radius = 0.16
+		shade_mesh.bottom_radius = 0.27
+		shade_mesh.height = 0.32
+		shade_mesh.radial_segments = 24
+		shade_mesh.material = warm_light_material
+		shade.mesh = shade_mesh
+		shade.position = table_position + Vector3(0.0, 1.21, 0.0)
+		table.add_child(shade)
+
+		var lamp := OmniLight3D.new()
+		lamp.name = "BedsideReadingLight"
+		lamp.position = table_position + Vector3(0.0, 1.18, 0.12)
+		lamp.light_color = Color("ffd09b")
+		lamp.light_energy = 0.85
+		lamp.omni_range = 3.6
+		lamp.shadow_enabled = false
+		table.add_child(lamp)
+
+		var lamp_button_position := table_position + Vector3(0.25, 0.77, 0.18)
+		_box(table, "LampButton", lamp_button_position, Vector3(0.10, 0.045, 0.10), dark_metal_material, false)
+		var lamp_switch := LightSwitchInteractable.new()
+		lamp_switch.name = "%sBedsideLampSwitch" % side_key.capitalize()
+		lamp_switch.object_id = "master_bedside_%s_lamp" % side_key
+		lamp_switch.target_lights = [lamp]
+		lamp_switch.emissive_meshes = [shade]
+		lamp_switch.position = lamp_button_position
+		lamp_switch.add_child(_area_shape(Vector3(0.55, 0.45, 0.55)))
+		table.add_child(lamp_switch)
 
 
 func _build_bathroom_water_interaction(parent: Node3D) -> void:
