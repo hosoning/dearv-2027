@@ -509,6 +509,37 @@ func _build_bathroom_water_interaction(parent: Node3D) -> void:
 	shower_control.add_child(_area_shape(Vector3(0.72, 1.20, 0.72)))
 	shower.add_child(shower_control)
 
+	# A hinged soft-close lid adds a small but tangible bathroom interaction.
+	var toilet_lid_pivot := Node3D.new()
+	toilet_lid_pivot.name = "ToiletLidPivot"
+	toilet_lid_pivot.position = Vector3(-9.20, 0.86, 10.78)
+	parent.add_child(toilet_lid_pivot)
+	var toilet_lid := MeshInstance3D.new()
+	toilet_lid.name = "ToiletLid"
+	var lid_mesh := CylinderMesh.new()
+	lid_mesh.top_radius = 0.36
+	lid_mesh.bottom_radius = 0.36
+	lid_mesh.height = 0.055
+	lid_mesh.radial_segments = 28
+	lid_mesh.material = wall_material
+	toilet_lid.mesh = lid_mesh
+	toilet_lid.position = Vector3(0.0, 0.0, -0.34)
+	toilet_lid.scale = Vector3(1.0, 1.0, 1.22)
+	toilet_lid_pivot.add_child(toilet_lid)
+
+	var toilet_lid_control := OpenableInteractable.new()
+	toilet_lid_control.name = "ToiletLidInteraction"
+	toilet_lid_control.object_id = "ensuite_toilet_lid"
+	toilet_lid_control.moving_part = toilet_lid_pivot
+	toilet_lid_control.motion_type = OpenableInteractable.MotionType.HINGE
+	toilet_lid_control.open_rotation_degrees = Vector3(-102.0, 0.0, 0.0)
+	toilet_lid_control.motion_seconds = 0.72
+	toilet_lid_control.open_label = "Raise toilet lid"
+	toilet_lid_control.close_label = "Lower toilet lid"
+	toilet_lid_control.position = Vector3(-9.20, 0.92, 10.36)
+	toilet_lid_control.add_child(_area_shape(Vector3(0.88, 0.72, 1.05)))
+	parent.add_child(toilet_lid_control)
+
 
 func _build_bed_interaction(parent: Node3D) -> void:
 	var anchor := Node3D.new()
