@@ -13,6 +13,7 @@ var _base_energy: Dictionary = {}
 
 func _ready() -> void:
 	super._ready()
+	add_to_group("home_light_switch")
 	for light in target_lights:
 		if light:
 			_base_energy[light] = light.light_energy
@@ -34,9 +35,20 @@ func get_prompt() -> String:
 
 
 func interact(_actor: Node3D) -> void:
-	_is_on = not _is_on
-	_apply_state(false)
+	set_on(not _is_on)
+
+
+func set_on(value: bool, immediate := false) -> bool:
+	if value == _is_on:
+		return true
+	_is_on = value
+	_apply_state(immediate)
 	persist(_is_on)
+	return true
+
+
+func is_on() -> bool:
+	return _is_on
 
 
 func _apply_state(immediate: bool) -> void:
