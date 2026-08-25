@@ -7,7 +7,7 @@ const HERO_MODEL_ROOT := "res://assets/models/"
 
 var wall_material: ShaderMaterial
 var floor_material: ShaderMaterial
-var warm_wood_material: StandardMaterial3D
+var warm_wood_material: ShaderMaterial
 var pale_stone_material: ShaderMaterial
 var dark_metal_material: StandardMaterial3D
 var glass_material: StandardMaterial3D
@@ -35,7 +35,7 @@ func _ready() -> void:
 func _create_materials() -> void:
 	wall_material = _create_plaster_material()
 	floor_material = _create_plank_floor_material()
-	warm_wood_material = _material(Color("7d573c"), 0.5)
+	warm_wood_material = _create_walnut_material()
 	pale_stone_material = _create_limestone_material()
 	dark_metal_material = _material(Color("292825"), 0.22, 0.72)
 	appliance_material = _material(Color("b9b8b3"), 0.2, 0.8)
@@ -81,6 +81,36 @@ func _build_shell() -> void:
 	# Concealed linear air-conditioning slots; no wall-mounted AC boxes.
 	for x in [-12.0, -2.0, 7.0, 15.0]:
 		_box(self, "ConcealedACSlot", Vector3(x, CEILING_HEIGHT - 0.015, 11.8), Vector3(3.8, 0.035, 0.18), dark_metal_material, false)
+
+
+func _create_walnut_material() -> ShaderMaterial:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float grain_axis = world_position.y * 0.82 + world_position.x * 0.14 + world_position.z * 0.09;
+	float broad_grain = sin(grain_axis * 24.0 + sin(world_position.x * 2.7 + world_position.z * 2.1) * 2.6) * 0.5 + 0.5;
+	float fine_grain = sin(grain_axis * 142.0 + sin(world_position.x * 8.0 - world_position.z * 5.0) * 0.75) * 0.5 + 0.5;
+	float pore = sin((world_position.x + world_position.z) * 93.0 + world_position.y * 37.0) * 0.5 + 0.5;
+	float grain = broad_grain * 0.52 + fine_grain * 0.34 + pore * 0.14;
+	vec3 dark_walnut = vec3(0.225, 0.120, 0.070);
+	vec3 honey_walnut = vec3(0.425, 0.255, 0.145);
+	ALBEDO = mix(dark_walnut, honey_walnut, grain);
+	ROUGHNESS = mix(0.40, 0.56, fine_grain * 0.62 + pore * 0.38);
+	SPECULAR = 0.34;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	return material
 
 
 func _create_plaster_material() -> ShaderMaterial:
