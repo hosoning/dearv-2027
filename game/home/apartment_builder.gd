@@ -238,6 +238,56 @@ func _build_distant_city_view() -> void:
 		var pavilion_glow := _box(city, "PavilionGlow", Vector3(x, -52.8, 75.96), Vector3(11.5, 1.15, 0.05), city_glow, false)
 		pavilion_glow.add_to_group("city_night_emissive")
 
+	# Mid- and foreground neighbours sit at genuinely different distances.
+	# Their side faces, balcony slabs and roof equipment create visible parallax
+	# while walking along the glazing, so the view cannot read as a flat backdrop.
+	var foreground_towers := [
+		Vector4(-31.0, 47.0, 15.0, 52.0),
+		Vector4(-10.0, 61.0, 12.0, 69.0),
+		Vector4(18.0, 43.0, 13.0, 47.0),
+		Vector4(38.0, 58.0, 16.0, 73.0)
+	]
+	for index in range(foreground_towers.size()):
+		var tower: Vector4 = foreground_towers[index]
+		var tower_depth := 12.0 + float(index % 2) * 3.0
+		var tower_base_y := -57.2
+		var tower_center := Vector3(tower.x, tower_base_y + tower.w * 0.5, tower.y)
+		var tower_material: Material = facade_materials[(index + 1) % facade_materials.size()]
+		_box(city, "NeighbourTowerBody", tower_center, Vector3(tower.z, tower.w, tower_depth), tower_material, false)
+
+		# Deep balcony plates and projecting fins catch changing light from the
+		# player camera instead of presenting one uninterrupted rectangle.
+		for level in range(5, int(tower.w / 3.2), 3):
+			var balcony_y := tower_base_y + float(level) * 3.0
+			_box(city, "NeighbourBalcony", Vector3(tower.x, balcony_y, tower.y - tower_depth * 0.5 - 0.55), Vector3(tower.z + 0.9, 0.16, 1.15), crown_mat, false)
+		for side in [-1.0, 1.0]:
+			_box(city, "FacadeFin", Vector3(tower.x + side * tower.z * 0.36, tower_base_y + tower.w * 0.52, tower.y - tower_depth * 0.5 - 0.30), Vector3(0.20, tower.w * 0.86, 0.72), crown_mat, false)
+
+		# Individual window columns break the mass into readable floors at night.
+		for column in [-0.30, 0.0, 0.30]:
+			for floor_index in range(4, int(tower.w / 3.1), 2):
+				if (floor_index + index + int((column + 0.3) * 10.0)) % 3 == 0:
+					continue
+				var window_x := tower.x + column * tower.z
+				var window_y := tower_base_y + float(floor_index) * 3.0
+				var window_panel := _box(city, "NeighbourWindow", Vector3(window_x, window_y, tower.y - tower_depth * 0.5 - 0.61), Vector3(tower.z * 0.18, 1.35, 0.06), city_glow, false)
+				window_panel.add_to_group("city_night_emissive")
+
+		# Rooftop setbacks, plant rooms and antenna masts silhouette each tower.
+		_box(city, "RoofSetback", Vector3(tower.x, tower_base_y + tower.w + 0.75, tower.y), Vector3(tower.z * 0.68, 1.5, tower_depth * 0.70), crown_mat, false)
+		_box(city, "RoofPlantRoom", Vector3(tower.x - tower.z * 0.15, tower_base_y + tower.w + 2.15, tower.y), Vector3(tower.z * 0.26, 1.3, tower_depth * 0.28), facade_stone, false)
+		_box(city, "RoofAntenna", Vector3(tower.x + tower.z * 0.16, tower_base_y + tower.w + 4.2, tower.y), Vector3(0.12, 5.0, 0.12), dark_metal_material, false)
+
+	# Small moving-scale cues are modeled as geometry on the water. Even while
+	# static, their separated distances strengthen perspective through the glass.
+	var boat_material := _material(Color("e7e0d2"), 0.48)
+	var wake_material := _material(Color(0.72, 0.84, 0.88, 0.48), 0.18)
+	wake_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	for boat_data in [Vector3(-24.0, -57.55, 70.0), Vector3(9.0, -57.55, 87.0), Vector3(47.0, -57.55, 73.0)]:
+		_box(city, "HarbourBoatHull", boat_data, Vector3(2.6, 0.55, 0.72), boat_material, false)
+		_box(city, "HarbourBoatCabin", boat_data + Vector3(-0.28, 0.54, 0.0), Vector3(0.95, 0.54, 0.55), glass_material, false)
+		_box(city, "HarbourWake", boat_data + Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
+
 
 func _build_doors() -> void:
 	_create_hinged_door("EntranceDoor", Vector3(10.4, 0.0, -13.9), 1.45, 0.0, -92.0, true)
