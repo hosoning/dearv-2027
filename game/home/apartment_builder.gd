@@ -511,6 +511,54 @@ func _build_distant_city_view() -> void:
 		var pavilion_glow := _box(city, "PavilionGlow", Vector3(x, -52.8, 75.96), Vector3(11.5, 1.15, 0.05), city_glow, false)
 		pavilion_glow.add_to_group("city_night_emissive")
 
+	# A modeled marina, promenade trees and street lamps create a readable
+	# intermediate scale between the ocean and tower wall.
+	var marina_deck := _material(Color("766d60"), 0.68)
+	var marina_metal := _material(Color("4e565a"), 0.25, 0.62)
+	var tree_trunk := _material(Color("4a3628"), 0.78)
+	var tree_leaf := _material(Color("284c3e"), 0.82)
+	for pier_x in [-48.0, -24.0, 0.0, 24.0, 48.0]:
+		_box(city, "MarinaPier", Vector3(pier_x, -57.05, 69.8), Vector3(1.15, 0.24, 14.8), marina_deck, false)
+		_box(city, "MarinaPierCap", Vector3(pier_x, -56.86, 62.5), Vector3(3.8, 0.16, 0.8), marina_deck, false)
+		for finger_z in [66.0, 70.0, 74.0]:
+			_box(city, "MarinaFinger", Vector3(pier_x + 2.35, -57.04, finger_z), Vector3(4.7, 0.20, 0.62), marina_deck, false)
+			_box(city, "MarinaRail", Vector3(pier_x + 2.35, -56.72, finger_z + 0.34), Vector3(4.7, 0.035, 0.035), marina_metal, false)
+		for yacht_data in [
+			Vector3(pier_x - 2.25, -57.12, 67.8),
+			Vector3(pier_x + 4.35, -57.12, 72.3)
+		]:
+			_ellipsoid(city, "MarinaYachtHull", yacht_data, Vector3(1.85, 0.30, 0.46), pale_stone_material)
+			_ellipsoid(city, "MarinaYachtCabin", yacht_data + Vector3(-0.28, 0.48, 0.0), Vector3(0.62, 0.32, 0.34), glass_material)
+
+	# Evenly spaced greenery and lights make the promenade read as inhabitable.
+	for promenade_x in [-84.0, -66.0, -48.0, -30.0, -12.0, 6.0, 24.0, 42.0, 60.0, 78.0]:
+		var trunk := MeshInstance3D.new()
+		trunk.name = "PromenadeTreeTrunk"
+		var trunk_mesh := CylinderMesh.new()
+		trunk_mesh.top_radius = 0.20
+		trunk_mesh.bottom_radius = 0.30
+		trunk_mesh.height = 3.2
+		trunk_mesh.radial_segments = 16
+		trunk_mesh.material = tree_trunk
+		trunk.mesh = trunk_mesh
+		trunk.position = Vector3(promenade_x, -54.92, 78.0)
+		city.add_child(trunk)
+		_ellipsoid(city, "PromenadeTreeCanopy", Vector3(promenade_x, -52.80, 78.0), Vector3(1.35, 1.05, 1.05), tree_leaf)
+
+		var lamp_post := MeshInstance3D.new()
+		lamp_post.name = "PromenadeLampPost"
+		var post_mesh := CylinderMesh.new()
+		post_mesh.top_radius = 0.065
+		post_mesh.bottom_radius = 0.085
+		post_mesh.height = 3.0
+		post_mesh.radial_segments = 14
+		post_mesh.material = marina_metal
+		lamp_post.mesh = post_mesh
+		lamp_post.position = Vector3(promenade_x + 4.2, -55.05, 77.2)
+		city.add_child(lamp_post)
+		var lamp_globe := _ellipsoid(city, "PromenadeLampGlow", Vector3(promenade_x + 4.2, -53.46, 77.2), Vector3(0.22, 0.16, 0.22), city_glow)
+		lamp_globe.add_to_group("city_night_emissive")
+
 	# Mid- and foreground neighbours sit at genuinely different distances.
 	# Their side faces, balcony slabs and roof equipment create visible parallax
 	# while walking along the glazing, so the view cannot read as a flat backdrop.
@@ -557,8 +605,8 @@ func _build_distant_city_view() -> void:
 	var wake_material := _material(Color(0.72, 0.84, 0.88, 0.48), 0.18)
 	wake_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	for boat_data in [Vector3(-24.0, -57.55, 70.0), Vector3(9.0, -57.55, 87.0), Vector3(47.0, -57.55, 73.0)]:
-		_box(city, "HarbourBoatHull", boat_data, Vector3(2.6, 0.55, 0.72), boat_material, false)
-		_box(city, "HarbourBoatCabin", boat_data + Vector3(-0.28, 0.54, 0.0), Vector3(0.95, 0.54, 0.55), glass_material, false)
+		_ellipsoid(city, "HarbourBoatHull", boat_data, Vector3(1.30, 0.275, 0.36), boat_material)
+		_ellipsoid(city, "HarbourBoatCabin", boat_data + Vector3(-0.28, 0.54, 0.0), Vector3(0.48, 0.27, 0.28), glass_material)
 		_box(city, "HarbourWake", boat_data + Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
 
 
@@ -1397,6 +1445,22 @@ func _collision_box(parent: Node3D, node_name: String, position: Vector3, size: 
 	body.add_child(shape_node)
 	parent.add_child(body)
 	return body
+
+
+func _ellipsoid(parent: Node3D, node_name: String, position: Vector3, shape_scale: Vector3, material: Material) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	var mesh := SphereMesh.new()
+	mesh.radius = 1.0
+	mesh.height = 2.0
+	mesh.radial_segments = 28
+	mesh.rings = 14
+	mesh.material = material
+	instance.mesh = mesh
+	instance.position = position
+	instance.scale = shape_scale
+	parent.add_child(instance)
+	return instance
 
 
 func _box(parent: Node3D, node_name: String, position: Vector3, size: Vector3, material: Material, collision: bool) -> MeshInstance3D:
