@@ -237,6 +237,17 @@ func _build_atmosphere_actions(payload: Dictionary) -> void:
 		privacy_button.text = "Raise all privacy shades" if all_lowered else "Lower all privacy shades"
 		privacy_button.pressed.connect(_set_privacy_shades.bind(all_lowered, target, player, entry_door))
 		inspector_actions.add_child(privacy_button)
+	var light_switches := get_tree().get_nodes_in_group("home_light_switch")
+	if not light_switches.is_empty():
+		var any_light_on := false
+		for node in light_switches:
+			if node is LightSwitchInteractable and (node as LightSwitchInteractable).is_on():
+				any_light_on = true
+				break
+		var all_lights_button := Button.new()
+		all_lights_button.text = "Turn all home lights off" if any_light_on else "Turn all home lights on"
+		all_lights_button.pressed.connect(_set_all_home_lights.bind(not any_light_on, target, player, entry_door))
+		inspector_actions.add_child(all_lights_button)
 
 
 func _open_home_controls(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
@@ -283,6 +294,21 @@ func _set_privacy_shades(open: bool, target: DayNightDirector, player: ComfortCo
 		inspector_body.text = "All privacy shades are rising and will be saved." if open else "All privacy shades are lowering and will be saved."
 	else:
 		inspector_body.text = "The privacy shades are already in that position."
+
+
+func _set_all_home_lights(enabled: bool, target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
+	var changed := 0
+	for node in get_tree().get_nodes_in_group("home_light_switch"):
+		if not node is LightSwitchInteractable:
+			continue
+		var light_switch := node as LightSwitchInteractable
+		if light_switch.is_on() != enabled and light_switch.set_on(enabled):
+			changed += 1
+	_open_home_controls(target, player, entry_door)
+	if changed > 0:
+		inspector_body.text = "All home lights are on and saved." if enabled else "All home lights are off and saved."
+	else:
+		inspector_body.text = "The home lights are already in that state."
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
