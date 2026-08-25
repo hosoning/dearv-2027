@@ -189,11 +189,25 @@ func _build_study() -> void:
 
 	_box(root, "StudyRug", Vector3(14.25, 0.018, 3.25), Vector3(5.35, 0.028, 4.25), charcoal)
 
-	# Tall walnut library wall, broken into bays so it reads as cabinetry rather than one primitive slab.
+	# Tall walnut library wall, assembled as recessed joinery: back panels,
+	# structural stiles, shelf nosing, under-shelf light and closed base storage.
 	for z in [-2.5, 0.3, 6.0, 8.8]:
 		_box(root, "LibraryBay", Vector3(17.55, 1.42, z), Vector3(0.58, 2.84, 2.28), walnut)
-		for y in [0.52, 1.15, 1.78, 2.41]:
-			_box(root, "LibraryShelf", Vector3(17.20, y, z), Vector3(0.12, 0.055, 2.05), champagne)
+		_box(root, "LibraryRecessBack", Vector3(17.235, 1.62, z), Vector3(0.045, 2.34, 2.00), charcoal)
+		for side in [-1.0, 1.0]:
+			_box(root, "LibraryStile", Vector3(17.15, 1.54, z + side * 1.045), Vector3(0.14, 2.65, 0.09), walnut)
+		for y in [0.58, 1.18, 1.78, 2.38]:
+			_box(root, "LibraryShelf", Vector3(17.15, y, z), Vector3(0.17, 0.065, 2.04), walnut)
+			_box(root, "LibraryShelfNosing", Vector3(17.055, y, z), Vector3(0.035, 0.095, 2.06), champagne)
+			if y > 0.60:
+				_box(root, "LibraryShelfGlow", Vector3(17.035, y - 0.075, z), Vector3(0.025, 0.025, 1.88), warm_glow)
+		_box(root, "LibraryToeKick", Vector3(17.16, 0.085, z), Vector3(0.15, 0.15, 1.92), charcoal)
+		for door_z in [-0.49, 0.49]:
+			_box(root, "LibraryLowerDoor", Vector3(17.075, 0.34, z + door_z), Vector3(0.055, 0.46, 0.91), walnut)
+			_box(root, "LibraryLowerReveal", Vector3(17.042, 0.34, z + door_z), Vector3(0.018, 0.40, 0.018), charcoal)
+			_box(root, "LibraryLowerPull", Vector3(17.028, 0.43, z + door_z * 0.22), Vector3(0.025, 0.025, 0.24), champagne)
+		_box(root, "LibraryCrown", Vector3(17.14, 2.87, z), Vector3(0.16, 0.11, 2.12), walnut)
+
 	# Abstract book spines with restrained palette.
 	var book_colors := [Color("7e6655"), Color("c2b09a"), Color("36312d"), Color("9a7a5d")]
 	var index := 0
