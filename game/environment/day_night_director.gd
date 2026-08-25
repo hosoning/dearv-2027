@@ -9,14 +9,28 @@ extends Node
 
 var _clock_refresh := 0.0
 var atmosphere_mode := "system"
+var procedural_sky: ProceduralSkyMaterial
 
 
 func _ready() -> void:
 	add_to_group("day_night_director")
+	_ensure_procedural_sky()
 	var saved_mode := str(AppState.get_interaction_state("home_atmosphere", "system"))
 	set_atmosphere(saved_mode, false)
 	# Apartment geometry is created by a later sibling in the scene tree.
 	call_deferred("_apply_time")
+
+
+func _ensure_procedural_sky() -> void:
+	if not world_environment or not world_environment.environment:
+		return
+	procedural_sky = ProceduralSkyMaterial.new()
+	procedural_sky.sun_angle_max = 7.5
+	procedural_sky.sun_curve = 0.055
+	var sky := Sky.new()
+	sky.sky_material = procedural_sky
+	world_environment.environment.sky = sky
+	world_environment.environment.background_mode = Environment.BG_SKY
 
 
 func set_atmosphere(mode: String, persist := true) -> void:
@@ -60,6 +74,8 @@ func _sync_clock() -> void:
 func _apply_time() -> void:
 	var day_amount := smoothstep(-0.15, 0.25, sin((time_of_day - 6.0) / 24.0 * TAU))
 	var night_amount := 1.0 - day_amount
+	var dusk_distance := min(abs(time_of_day - 18.35), abs(time_of_day - 6.35))
+	var dusk_amount := exp(-pow(dusk_distance / 1.18, 2.0))
 	if sun:
 		sun.rotation_degrees.x = remap(time_of_day, 0.0, 24.0, -90.0, 270.0)
 		sun.light_energy = lerp(0.025, 1.05, day_amount)
@@ -69,6 +85,24 @@ func _apply_time() -> void:
 		environment.ambient_light_energy = lerp(0.10, 0.72, day_amount)
 		environment.ambient_light_color = Color("465477").lerp(Color("c5d5e3"), day_amount)
 		environment.background_color = Color("080d1d").lerp(Color("7598b3"), day_amount)
+		if procedural_sky:
+			var night_top := Color("020610")
+			var day_top := Color("4f83ad")
+			var night_horizon := Color("17243b")
+			var day_horizon := Color("bfd3dd")
+			var sunset_top := Color("49698a")
+			var sunset_horizon := Color("f2a56f")
+			var top_color := night_top.lerp(day_top, day_amount).lerp(sunset_top, dusk_amount * 0.58)
+			var horizon_color := night_horizon.lerp(day_horizon, day_amount).lerp(sunset_horizon, dusk_amount * 0.92)
+			procedural_sky.sky_top_color = top_color
+			procedural_sky.sky_horizon_color = horizon_color
+			procedural_sky.ground_horizon_color = horizon_color.darkened(0.12)
+			procedural_sky.ground_bottom_color = Color("02040a").lerp(Color("253b46"), day_amount)
+			procedural_sky.sky_curve = lerp(0.20, 0.08, day_amount)
+			procedural_sky.ground_curve = 0.11
+			procedural_sky.sky_energy_multiplier = lerp(0.22, 1.0, day_amount)
+			procedural_sky.ground_energy_multiplier = lerp(0.12, 0.56, day_amount)
+			procedural_sky.sun_energy_multiplier = lerp(0.03, 1.65, day_amount) + dusk_amount * 0.35
 
 	# Distant windows share one material, so updating each unique instance is cheap
 	# and lets the skyline wake naturally as the owner's local evening arrives.
