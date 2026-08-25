@@ -1229,24 +1229,58 @@ func _create_stove(parent: Node3D, origin: Vector3) -> void:
 	stove.name = "InductionStove"
 	stove.position = origin
 	parent.add_child(stove)
-	var cooktop := _box(stove, "Cooktop", Vector3(0.0, 1.01, 0.0), Vector3(1.45, 0.035, 0.62), dark_metal_material, false)
+
+	var hob_glass := _material(Color("101416"), 0.08, 0.08)
+	var etched_ring := _material(Color("777b78"), 0.34, 0.25)
+	var control_glow := _material(Color("dbe9e5"), 0.18)
+	control_glow.emission_enabled = true
+	control_glow.emission = Color("b9dad5")
+	control_glow.emission_energy_multiplier = 1.2
+	var cast_iron := _material(Color("171817"), 0.62, 0.45)
+
+	# A layered glass slab, recessed shadow line and etched zones give the hob
+	# the thin, flush-mounted construction of a real induction surface.
+	_box(stove, "CooktopShadow", Vector3(0.0, 0.992, 0.0), Vector3(1.50, 0.025, 0.67), dark_metal_material, false)
+	var cooktop := _box(stove, "Cooktop", Vector3(0.0, 1.018, 0.0), Vector3(1.45, 0.028, 0.62), hob_glass, false)
+	_box(stove, "CooktopFrontBevel", Vector3(0.0, 1.024, 0.316), Vector3(1.40, 0.018, 0.018), appliance_material, false)
 	for x in [-0.42, 0.42]:
 		for z in [-0.17, 0.17]:
 			var ring := MeshInstance3D.new()
+			ring.name = "EtchedCookingZone"
 			var ring_mesh := TorusMesh.new()
-			ring_mesh.inner_radius = 0.16
-			ring_mesh.outer_radius = 0.185
-			ring_mesh.material = warm_light_material.duplicate()
+			ring_mesh.inner_radius = 0.145
+			ring_mesh.outer_radius = 0.158
+			ring_mesh.rings = 24
+			ring_mesh.ring_segments = 10
+			ring_mesh.material = etched_ring
 			ring.mesh = ring_mesh
-			ring.position = Vector3(x, 1.035, z)
+			ring.position = Vector3(x, 1.037, z)
 			stove.add_child(ring)
 
-	# Deep pan storage below the induction surface keeps the kitchen practical.
+	# Touch slider, power glyph and discrete status lamps sit beneath the glass.
+	_box(stove, "TouchControlRail", Vector3(0.0, 1.041, 0.255), Vector3(0.48, 0.008, 0.018), etched_ring, false)
+	for x in [-0.19, -0.095, 0.0, 0.095, 0.19]:
+		_cylinder(stove, "TouchLevelDot", Vector3(x, 1.047, 0.255), 0.012, 0.006, control_glow)
+	_cylinder(stove, "PowerTouchRing", Vector3(-0.58, 1.047, 0.255), 0.025, 0.006, etched_ring)
+	_box(stove, "VentShadow", Vector3(0.0, 0.91, 0.33), Vector3(1.30, 0.055, 0.025), dark_metal_material, false)
+	for x in [-0.52, -0.39, -0.26, -0.13, 0.0, 0.13, 0.26, 0.39, 0.52]:
+		_box(stove, "VentSlot", Vector3(x, 0.91, 0.349), Vector3(0.07, 0.018, 0.012), appliance_material, false)
+
+	# Deep, fully modeled pan storage: the drawer box, dividers and cookware
+	# travel together so opening it reveals useful depth instead of a flat panel.
 	var pan_drawer_part := Node3D.new()
 	pan_drawer_part.name = "InductionPanDrawer"
 	stove.add_child(pan_drawer_part)
+	_box(pan_drawer_part, "PanDrawerBox", Vector3(0.0, 0.46, 0.05), Vector3(1.18, 0.32, 0.62), dark_metal_material, false)
 	_box(pan_drawer_part, "PanDrawerFront", Vector3(0.0, 0.56, 0.34), Vector3(1.25, 0.42, 0.055), appliance_material, false)
-	_box(pan_drawer_part, "PanDrawerPull", Vector3(0.0, 0.69, 0.385), Vector3(0.62, 0.035, 0.035), dark_metal_material, false)
+	_box(pan_drawer_part, "PanDrawerTopReveal", Vector3(0.0, 0.785, 0.37), Vector3(1.18, 0.025, 0.025), dark_metal_material, false)
+	_cylinder(pan_drawer_part, "PanDrawerPull", Vector3(0.0, 0.69, 0.405), 0.022, 0.66, dark_metal_material, Vector3(0.0, 0.0, 90.0))
+	_box(pan_drawer_part, "DrawerDivider", Vector3(0.0, 0.56, 0.04), Vector3(0.035, 0.22, 0.52), appliance_material, false)
+	_cylinder(pan_drawer_part, "LargeSautePan", Vector3(-0.29, 0.64, 0.06), 0.23, 0.055, cast_iron)
+	_box(pan_drawer_part, "LargePanHandle", Vector3(-0.29, 0.67, 0.33), Vector3(0.10, 0.055, 0.42), cast_iron, false)
+	_cylinder(pan_drawer_part, "SmallSaucepan", Vector3(0.30, 0.62, 0.03), 0.18, 0.09, cast_iron)
+	_box(pan_drawer_part, "SmallPanHandle", Vector3(0.30, 0.67, 0.29), Vector3(0.08, 0.05, 0.34), cast_iron, false)
+
 	var pan_drawer := OpenableInteractable.new()
 	pan_drawer.name = "InductionPanDrawerInteraction"
 	pan_drawer.object_id = "kitchen_induction_pan_drawer"
