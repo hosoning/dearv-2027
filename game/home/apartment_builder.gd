@@ -1098,9 +1098,74 @@ func _create_sink(parent: Node3D, origin: Vector3) -> void:
 	sink.name = "InteractiveSink"
 	sink.position = origin
 	parent.add_child(sink)
-	_box(sink, "SinkBasin", Vector3(0.0, 0.98, 0.0), Vector3(1.3, 0.08, 0.52), dark_metal_material, false)
-	_box(sink, "FaucetStem", Vector3(0.0, 1.28, -0.18), Vector3(0.06, 0.58, 0.06), dark_metal_material, false)
-	_box(sink, "FaucetSpout", Vector3(0.0, 1.55, 0.02), Vector3(0.06, 0.06, 0.42), dark_metal_material, false)
+
+	# A lowered basin with separate rim, floor and waste reads as an inset sink
+	# instead of a dark rectangle laid on top of the counter.
+	_box(sink, "SinkBasinFloor", Vector3(0.0, 0.91, 0.0), Vector3(1.08, 0.035, 0.34), dark_metal_material, false)
+	_box(sink, "SinkBasinFrontWall", Vector3(0.0, 0.965, 0.25), Vector3(1.20, 0.14, 0.035), dark_metal_material, false)
+	_box(sink, "SinkBasinBackWall", Vector3(0.0, 0.965, -0.25), Vector3(1.20, 0.14, 0.035), dark_metal_material, false)
+	_box(sink, "SinkBasinLeftWall", Vector3(-0.585, 0.965, 0.0), Vector3(0.035, 0.14, 0.48), dark_metal_material, false)
+	_box(sink, "SinkBasinRightWall", Vector3(0.585, 0.965, 0.0), Vector3(0.035, 0.14, 0.48), dark_metal_material, false)
+	for rim_data in [
+		[Vector3(0.0, 1.035, 0.285), Vector3(1.32, 0.025, 0.055)],
+		[Vector3(0.0, 1.035, -0.285), Vector3(1.32, 0.025, 0.055)],
+		[Vector3(-0.635, 1.035, 0.0), Vector3(0.055, 0.025, 0.52)],
+		[Vector3(0.635, 1.035, 0.0), Vector3(0.055, 0.025, 0.52)]
+	]:
+		_box(sink, "SinkRolledRim", rim_data[0], rim_data[1], appliance_material, false)
+
+	var waste := MeshInstance3D.new()
+	waste.name = "SinkWaste"
+	var waste_mesh := CylinderMesh.new()
+	waste_mesh.top_radius = 0.075
+	waste_mesh.bottom_radius = 0.075
+	waste_mesh.height = 0.018
+	waste_mesh.radial_segments = 24
+	waste_mesh.material = appliance_material
+	waste.mesh = waste_mesh
+	waste.position = Vector3(0.0, 0.925, 0.02)
+	sink.add_child(waste)
+
+	# Round brushed-metal riser, horizontal spout, aerator and side lever form
+	# one coherent mixer rather than two box primitives.
+	var faucet_stem := MeshInstance3D.new()
+	faucet_stem.name = "FaucetStem"
+	var stem_mesh := CylinderMesh.new()
+	stem_mesh.top_radius = 0.032
+	stem_mesh.bottom_radius = 0.044
+	stem_mesh.height = 0.54
+	stem_mesh.radial_segments = 24
+	stem_mesh.material = appliance_material
+	faucet_stem.mesh = stem_mesh
+	faucet_stem.position = Vector3(0.0, 1.29, -0.20)
+	sink.add_child(faucet_stem)
+
+	var faucet_spout := MeshInstance3D.new()
+	faucet_spout.name = "FaucetSpout"
+	var spout_mesh := CylinderMesh.new()
+	spout_mesh.top_radius = 0.032
+	spout_mesh.bottom_radius = 0.032
+	spout_mesh.height = 0.42
+	spout_mesh.radial_segments = 24
+	spout_mesh.material = appliance_material
+	faucet_spout.mesh = spout_mesh
+	faucet_spout.position = Vector3(0.0, 1.54, 0.0)
+	faucet_spout.rotation_degrees.x = 90.0
+	sink.add_child(faucet_spout)
+
+	var aerator := MeshInstance3D.new()
+	aerator.name = "FaucetAerator"
+	var aerator_mesh := CylinderMesh.new()
+	aerator_mesh.top_radius = 0.040
+	aerator_mesh.bottom_radius = 0.040
+	aerator_mesh.height = 0.075
+	aerator_mesh.radial_segments = 20
+	aerator_mesh.material = dark_metal_material
+	aerator.mesh = aerator_mesh
+	aerator.position = Vector3(0.0, 1.505, 0.21)
+	sink.add_child(aerator)
+	_box(sink, "FaucetLever", Vector3(0.12, 1.37, -0.20), Vector3(0.18, 0.025, 0.025), appliance_material, false)
+
 	var stream := MeshInstance3D.new()
 	stream.name = "WaterStream"
 	var stream_mesh := CylinderMesh.new()
