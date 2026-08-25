@@ -368,6 +368,45 @@ func _build_bathroom_details() -> void:
 	_box(root, "FoldedTowelUpper", Vector3(-13.43, 0.73, 12.10), Vector3(0.44, 0.07, 0.31), textile)
 	_add_plant(root, Vector3(-15.55, 0.0, 12.55), 0.72)
 
+	# Linear drain, recessed niche and slim glass channels give the shower a
+	# constructed wet-room floor instead of a plain tray.
+	_box(root, "ShowerLinearDrain", Vector3(-7.80, 0.185, 11.48), Vector3(1.18, 0.028, 0.13), charcoal)
+	for x in [-8.28, -8.04, -7.80, -7.56, -7.32]:
+		_box(root, "ShowerDrainSlot", Vector3(x, 0.205, 11.48), Vector3(0.035, 0.012, 0.10), champagne)
+	_box(root, "ShowerGlassFloorChannel", Vector3(-7.80, 0.16, 10.16), Vector3(1.78, 0.055, 0.055), champagne)
+	_box(root, "ShowerGlassWallChannel", Vector3(-6.91, 1.20, 10.90), Vector3(0.055, 2.38, 1.48), champagne)
+
+	# A dark-backed wall niche with a stone shelf adds real storage depth.
+	_box(root, "ShowerNicheBack", Vector3(-5.10, 1.42, 11.18), Vector3(0.035, 0.92, 1.18), charcoal)
+	_box(root, "ShowerNicheTop", Vector3(-5.16, 1.90, 11.18), Vector3(0.12, 0.07, 1.30), pale_stone())
+	_box(root, "ShowerNicheBottom", Vector3(-5.16, 0.94, 11.18), Vector3(0.12, 0.07, 1.30), pale_stone())
+	_box(root, "ShowerNicheLeft", Vector3(-5.16, 1.42, 10.56), Vector3(0.12, 0.92, 0.07), pale_stone())
+	_box(root, "ShowerNicheRight", Vector3(-5.16, 1.42, 11.80), Vector3(0.12, 0.92, 0.07), pale_stone())
+	_cylinder(root, "ShowerBottle", Vector3(-5.25, 1.09, 10.98), 0.055, 0.065, 0.26, ceramic)
+	_cylinder(root, "ShowerBottlePump", Vector3(-5.25, 1.25, 10.98), 0.025, 0.025, 0.06, champagne)
+
+	# A removable timber bath caddy, candle and folded washcloth bring human
+	# scale to the smooth freestanding tub.
+	_box(root, "BathCaddy", Vector3(-15.17, 0.83, 11.06), Vector3(1.62, 0.055, 0.34), walnut)
+	for x in [-15.82, -14.52]:
+		_box(root, "BathCaddyEnd", Vector3(x, 0.79, 11.06), Vector3(0.08, 0.12, 0.38), walnut)
+	_cylinder(root, "BathCandleCup", Vector3(-15.58, 0.93, 11.06), 0.085, 0.09, 0.16, ceramic)
+	_sphere(root, "BathCandleFlame", Vector3(-15.58, 1.04, 11.06), Vector3(0.025, 0.055, 0.025), warm_glow)
+	_box(root, "BathWashcloth", Vector3(-14.88, 0.89, 11.06), Vector3(0.38, 0.035, 0.27), cream)
+
+	# Twin mirror halos and a wall-mounted towel rail layer warm practical detail
+	# over the authored sanitary fittings.
+	for mirror_x in [-12.35, -10.55]:
+		_box(root, "VanityMirrorHaloTop", Vector3(mirror_x, 2.79, 12.09), Vector3(1.30, 0.035, 0.025), warm_glow)
+		_box(root, "VanityMirrorHaloBottom", Vector3(mirror_x, 1.25, 12.09), Vector3(1.30, 0.035, 0.025), warm_glow)
+		_box(root, "VanityMirrorHaloLeft", Vector3(mirror_x - 0.66, 2.02, 12.09), Vector3(0.035, 1.55, 0.025), warm_glow)
+		_box(root, "VanityMirrorHaloRight", Vector3(mirror_x + 0.66, 2.02, 12.09), Vector3(0.035, 1.55, 0.025), warm_glow)
+	_box(root, "TowelRail", Vector3(-15.45, 1.42, 8.14), Vector3(1.08, 0.045, 0.045), champagne)
+	for x in [-15.95, -14.95]:
+		_box(root, "TowelRailMount", Vector3(x, 1.42, 8.10), Vector3(0.055, 0.12, 0.09), champagne)
+	_box(root, "HangingBathTowel", Vector3(-15.45, 1.02, 8.18), Vector3(0.88, 0.74, 0.035), cream)
+	_box(root, "HangingTowelFold", Vector3(-15.45, 1.02, 8.155), Vector3(0.035, 0.72, 0.018), textile)
+
 	# A warm wash over the vanity balances the cooler translucent glazing.
 	bathroom_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4))
 
