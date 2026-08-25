@@ -257,6 +257,10 @@ func _build_atmosphere_actions(payload: Dictionary) -> void:
 		secure_button.text = "Run secure-home scene"
 		secure_button.pressed.connect(_run_secure_home_scene.bind(target, player, entry_door))
 		inspector_actions.add_child(secure_button)
+		var wind_down_button := Button.new()
+		wind_down_button.text = "Run wind-down scene"
+		wind_down_button.pressed.connect(_run_wind_down_scene.bind(target, player, entry_door))
+		inspector_actions.add_child(wind_down_button)
 
 
 func _open_home_controls(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
@@ -345,6 +349,21 @@ func _run_secure_home_scene(target: DayNightDirector, player: ComfortController,
 			(node as LightSwitchInteractable).set_on(false)
 	_open_home_controls(target, player, entry_door)
 	inspector_body.text = "Home secured: the entrance is locked, privacy shades are lowering and the lights are off. The scene is saved."
+
+
+func _run_wind_down_scene(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
+	target.set_atmosphere("night")
+	for node in get_tree().get_nodes_in_group("privacy_shade"):
+		if node is OpenableInteractable:
+			(node as OpenableInteractable).set_open(false)
+	for node in get_tree().get_nodes_in_group("home_light_switch"):
+		if not node is LightSwitchInteractable:
+			continue
+		var light_switch := node as LightSwitchInteractable
+		var is_bedside_lamp := light_switch.object_id.begins_with("master_bedside_") and light_switch.object_id.ends_with("_lamp")
+		light_switch.set_on(is_bedside_lamp)
+	_open_home_controls(target, player, entry_door)
+	inspector_body.text = "Wind-down scene: calm night, lowered privacy shades and only the bedside reading lights remain on. The scene is saved."
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
