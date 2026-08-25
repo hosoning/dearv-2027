@@ -6,6 +6,7 @@ const WALL_THICKNESS := 0.16
 const HERO_MODEL_ROOT := "res://assets/models/"
 
 var wall_material: StandardMaterial3D
+var floor_material: ShaderMaterial
 var warm_wood_material: StandardMaterial3D
 var pale_stone_material: StandardMaterial3D
 var dark_metal_material: StandardMaterial3D
@@ -18,6 +19,7 @@ var water_material: StandardMaterial3D
 func _ready() -> void:
 	_create_materials()
 	_build_shell()
+	_build_architectural_finish()
 	_build_entry_corridor()
 	_build_windows()
 	_build_distant_city_view()
@@ -32,6 +34,7 @@ func _ready() -> void:
 
 func _create_materials() -> void:
 	wall_material = _material(Color("e8e1d7"), 0.82)
+	floor_material = _create_plank_floor_material()
 	warm_wood_material = _material(Color("7d573c"), 0.5)
 	pale_stone_material = _material(Color("d9d2c6"), 0.32)
 	dark_metal_material = _material(Color("292825"), 0.22, 0.72)
@@ -49,7 +52,7 @@ func _create_materials() -> void:
 
 func _build_shell() -> void:
 	# 36 m x 28 m great-room apartment. Windows face the high-rise ocean view (+Z).
-	_box(self, "Floor", Vector3(0.0, -0.09, 0.0), Vector3(36.0, 0.18, 28.0), warm_wood_material, true)
+	_box(self, "Floor", Vector3(0.0, -0.09, 0.0), Vector3(36.0, 0.18, 28.0), floor_material, true)
 	_box(self, "Ceiling", Vector3(0.0, CEILING_HEIGHT + 0.08, 0.0), Vector3(36.0, 0.16, 28.0), wall_material, false)
 
 	# Exterior shell: entrance at the back/right, full-height glazing at the front.
@@ -78,6 +81,81 @@ func _build_shell() -> void:
 	# Concealed linear air-conditioning slots; no wall-mounted AC boxes.
 	for x in [-12.0, -2.0, 7.0, 15.0]:
 		_box(self, "ConcealedACSlot", Vector3(x, CEILING_HEIGHT - 0.015, 11.8), Vector3(3.8, 0.035, 0.18), dark_metal_material, false)
+
+
+func _create_plank_floor_material() -> ShaderMaterial:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+float hash(vec2 point) {
+	return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+void fragment() {
+	vec2 board_grid = UV * vec2(18.0, 34.0);
+	float row = floor(board_grid.y);
+	board_grid.x += mod(row, 2.0) * 0.5;
+	vec2 board_uv = fract(board_grid);
+	float edge_distance = min(min(board_uv.x, 1.0 - board_uv.x), min(board_uv.y, 1.0 - board_uv.y));
+	float joint = smoothstep(0.025, 0.055, edge_distance);
+	float board_tone = hash(floor(board_grid));
+	float grain = sin((UV.x * 110.0 + UV.y * 7.0) + sin(UV.y * 73.0) * 1.8) * 0.5 + 0.5;
+	vec3 walnut_dark = vec3(0.235, 0.125, 0.070);
+	vec3 walnut_light = vec3(0.405, 0.245, 0.145);
+	vec3 wood = mix(walnut_dark, walnut_light, board_tone * 0.58 + grain * 0.20);
+	ALBEDO = mix(wood * 0.36, wood, joint);
+	ROUGHNESS = mix(0.34, 0.55, grain * 0.42);
+	SPECULAR = 0.36;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	return material
+
+
+func _build_architectural_finish() -> void:
+	# Fine architectural layers keep the shell from reading as a set of raw boxes.
+	var skirting := _material(Color("6a4a35"), 0.46)
+	var shadow_gap := _material(Color("232220"), 0.34, 0.35)
+	var brass_inlay := _material(Color("a98555"), 0.24, 0.76)
+
+	# Solid-wall skirting follows the apartment perimeter and the two principal
+	# partitions. The glazing remains clean, with its own sill detail.
+	var skirting_runs := [
+		[Vector3(-3.8, 0.075, -13.87), Vector3(28.4, 0.15, 0.055)],
+		[Vector3(15.0, 0.075, -13.87), Vector3(6.0, 0.15, 0.055)],
+		[Vector3(-17.87, 0.075, -10.0), Vector3(0.055, 0.15, 8.0)],
+		[Vector3(-17.87, 0.075, 8.3), Vector3(0.055, 0.15, 11.4)],
+		[Vector3(17.87, 0.075, 0.0), Vector3(0.055, 0.15, 28.0)],
+		[Vector3(10.87, 0.075, 5.0), Vector3(0.055, 0.15, 18.0)],
+		[Vector3(-4.87, 0.075, 0.8), Vector3(0.055, 0.15, 10.4)],
+		[Vector3(-4.87, 0.075, 10.8), Vector3(0.055, 0.15, 6.4)]
+	]
+	for run in skirting_runs:
+		_box(self, "TimberSkirting", run[0], run[1], skirting, false)
+
+	# A recessed ceiling shadow line and warm inner cove give the open living
+	# space a layered ceiling without lowering the perceived height.
+	for data in [
+		[Vector3(0.0, CEILING_HEIGHT - 0.035, -13.72), Vector3(35.4, 0.035, 0.045)],
+		[Vector3(-17.72, CEILING_HEIGHT - 0.035, 0.0), Vector3(0.045, 0.035, 27.4)],
+		[Vector3(17.72, CEILING_HEIGHT - 0.035, 0.0), Vector3(0.045, 0.035, 27.4)]
+	]:
+		_box(self, "CeilingShadowGap", data[0], data[1], shadow_gap, false)
+	for data in [
+		[Vector3(3.0, CEILING_HEIGHT - 0.055, 10.9), Vector3(15.8, 0.028, 0.055)],
+		[Vector3(-4.9, CEILING_HEIGHT - 0.055, 5.2), Vector3(0.055, 0.028, 11.4)],
+		[Vector3(10.9, CEILING_HEIGHT - 0.055, 5.2), Vector3(0.055, 0.028, 11.4)]
+	]:
+		_box(self, "LivingCoveGlow", data[0], data[1], warm_light_material, false)
+
+	# Flush metal inlay outlines the stone foyer transition instead of ending
+	# the material with a hard, game-like rectangle.
+	_box(self, "FoyerInlayNorth", Vector3(11.8, 0.042, -8.56), Vector3(12.25, 0.018, 0.035), brass_inlay, false)
+	_box(self, "FoyerInlaySouth", Vector3(11.8, 0.042, -13.94), Vector3(12.25, 0.018, 0.035), brass_inlay, false)
+	_box(self, "FoyerInlayWest", Vector3(5.68, 0.042, -11.25), Vector3(0.035, 0.018, 5.35), brass_inlay, false)
 
 
 func _build_entry_corridor() -> void:
