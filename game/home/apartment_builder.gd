@@ -194,17 +194,45 @@ func _build_entry_corridor() -> void:
 
 func _build_windows() -> void:
 	# Main living glazing, set back from the L sofa to preserve a walkable window promenade.
+	# Layered aluminium caps, rubber gaskets, reveal linings and a recessed shade
+	# pocket give the curtain wall actual construction depth.
+	var frame_cap := _material(Color("393a38"), 0.20, 0.78)
+	var gasket_material := _material(Color("111312"), 0.64, 0.08)
+	var sill_material := _material(Color("b9b2a7"), 0.34)
 	for x in [-3.0, 1.0, 5.0, 9.0, 13.0]:
 		_box(self, "WindowPane", Vector3(x, 1.62, 13.94), Vector3(3.82, 3.05, 0.045), glass_material, false)
+		_box(self, "WindowTopGasket", Vector3(x, 3.105, 13.875), Vector3(3.76, 0.025, 0.065), gasket_material, false)
+		_box(self, "WindowBottomGasket", Vector3(x, 0.135, 13.875), Vector3(3.76, 0.025, 0.065), gasket_material, false)
 	for x in [-5.0, -1.0, 3.0, 7.0, 11.0, 15.0]:
 		_box(self, "WindowMullion", Vector3(x, 1.62, 13.91), Vector3(0.075, 3.25, 0.09), dark_metal_material, true)
+		_box(self, "WindowMullionCap", Vector3(x, 1.62, 13.805), Vector3(0.115, 3.12, 0.12), frame_cap, false)
+		_box(self, "WindowMullionGasket", Vector3(x, 1.62, 13.865), Vector3(0.022, 3.04, 0.035), gasket_material, false)
 	_box(self, "WindowHead", Vector3(5.0, 3.18, 13.91), Vector3(20.2, 0.12, 0.09), dark_metal_material, true)
+	_box(self, "WindowHeadCap", Vector3(5.0, 3.135, 13.79), Vector3(20.15, 0.10, 0.16), frame_cap, false)
 	_box(self, "WindowSill", Vector3(5.0, 0.06, 13.91), Vector3(20.2, 0.12, 0.09), dark_metal_material, true)
+	_box(self, "InteriorStoneSill", Vector3(5.0, 0.105, 13.66), Vector3(20.25, 0.07, 0.48), sill_material, false)
+	_box(self, "LivingWindowLeftReveal", Vector3(-5.12, 1.62, 13.72), Vector3(0.18, 3.25, 0.40), wall_material, false)
+	_box(self, "LivingWindowRightReveal", Vector3(15.12, 1.62, 13.72), Vector3(0.18, 3.25, 0.40), wall_material, false)
+	_box(self, "LivingShadePocket", Vector3(5.0, 3.16, 13.48), Vector3(20.35, 0.13, 0.26), gasket_material, false)
+	_box(self, "LivingShadeTrack", Vector3(5.0, 3.085, 13.48), Vector3(20.0, 0.025, 0.055), frame_cap, false)
+
+	# A slim flush trench convector below the glass adds believable servicing
+	# detail and breaks up the otherwise uninterrupted sill line.
+	for x in [-3.0, 1.0, 5.0, 9.0, 13.0]:
+		_box(self, "WindowConvectorRecess", Vector3(x, 0.045, 13.26), Vector3(3.25, 0.025, 0.32), gasket_material, false)
+		for grille_x in [-1.35, -0.90, -0.45, 0.0, 0.45, 0.90, 1.35]:
+			_box(self, "WindowConvectorGrille", Vector3(x + grille_x, 0.064, 13.26), Vector3(0.035, 0.018, 0.28), frame_cap, false)
 
 	# Master bedroom has its own side window, looking along the coast.
 	for z in [-8.0, -4.0, 0.0, 4.0]:
 		_box(self, "BedroomWindow", Vector3(-17.94, 1.62, z), Vector3(0.045, 3.05, 3.82), glass_material, false)
 		_box(self, "BedroomMullion", Vector3(-17.91, 1.62, z + 2.0), Vector3(0.09, 3.25, 0.075), dark_metal_material, true)
+		_box(self, "BedroomMullionCap", Vector3(-17.80, 1.62, z + 2.0), Vector3(0.12, 3.12, 0.115), frame_cap, false)
+		_box(self, "BedroomTopGasket", Vector3(-17.875, 3.105, z), Vector3(0.065, 0.025, 3.76), gasket_material, false)
+		_box(self, "BedroomBottomGasket", Vector3(-17.875, 0.135, z), Vector3(0.065, 0.025, 3.76), gasket_material, false)
+	_box(self, "BedroomWindowHead", Vector3(-17.80, 3.16, -2.0), Vector3(0.34, 0.13, 16.25), frame_cap, false)
+	_box(self, "BedroomStoneSill", Vector3(-17.72, 0.105, -2.0), Vector3(0.48, 0.07, 16.25), sill_material, false)
+	_box(self, "BedroomShadePocket", Vector3(-17.50, 3.16, -2.0), Vector3(0.26, 0.13, 16.35), gasket_material, false)
 
 	# Bathroom glazing is translucent rather than a scenic picture.
 	for x in [-16.0, -12.0, -8.0]:
@@ -212,6 +240,10 @@ func _build_windows() -> void:
 		frosted.albedo_color = Color(0.72, 0.79, 0.8, 0.58)
 		frosted.roughness = 0.72
 		_box(self, "BathroomFrostedPane", Vector3(x, 1.62, 13.94), Vector3(3.82, 3.05, 0.045), frosted, false)
+	for x in [-18.0, -14.0, -10.0, -6.0]:
+		_box(self, "BathroomWindowMullion", Vector3(x, 1.62, 13.84), Vector3(0.11, 3.18, 0.16), frame_cap, false)
+	_box(self, "BathroomWindowHead", Vector3(-12.0, 3.16, 13.84), Vector3(12.15, 0.13, 0.16), frame_cap, false)
+	_box(self, "BathroomStoneSill", Vector3(-12.0, 0.105, 13.68), Vector3(12.15, 0.07, 0.44), sill_material, false)
 
 	# Motorized privacy shades keep the home's primary views optional. They start
 	# retracted, can be operated from discreet wall controls and persist state.
