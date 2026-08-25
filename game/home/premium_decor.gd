@@ -179,10 +179,15 @@ func _build_master_bedroom() -> void:
 	for x in [-13.45, -9.45]:
 		suite_detail_lights.append(_add_table_lamp(root, Vector3(x, 0.78, -7.72)))
 
-	# A restrained upholstered bench makes the foot of the bed read as a real hotel-like suite.
-	_box(root, "BedroomBenchSeat", Vector3(-11.45, 0.45, -5.34), Vector3(2.15, 0.34, 0.62), cream)
-	for x in [-12.28, -10.62]:
-		_box(root, "BedroomBenchLeg", Vector3(x, 0.22, -5.34), Vector3(0.08, 0.44, 0.46), champagne)
+	# A rounded upholstered bench with a recessed timber plinth and tapered
+	# champagne legs replaces the previous rectangular cushion block.
+	_sphere(root, "BedroomBenchCushion", Vector3(-11.45, 0.47, -5.34), Vector3(1.08, 0.19, 0.32), cream)
+	_sphere(root, "BedroomBenchUnderpad", Vector3(-11.45, 0.34, -5.34), Vector3(1.02, 0.10, 0.28), walnut)
+	for x in [-12.25, -10.65]:
+		for z in [-5.52, -5.16]:
+			_cylinder(root, "BedroomBenchTaperedLeg", Vector3(x, 0.19, z), 0.025, 0.045, 0.34, champagne)
+	for x in [-11.85, -11.45, -11.05]:
+		_sphere(root, "BedroomBenchTuft", Vector3(x, 0.645, -5.34), Vector3(0.025, 0.012, 0.025), champagne)
 	_add_collision_box(root, "BedroomBenchCollision", Vector3(-11.45, 0.38, -5.34), Vector3(2.15, 0.76, 0.62))
 	_add_seat_interaction(root, "bedroom_bench_seat", "bedroom bench", Vector3(-11.45, 0.02, -4.98), 0.0, Vector3(2.10, 1.25, 0.86))
 
@@ -192,7 +197,9 @@ func _build_master_bedroom() -> void:
 
 	# A leafy corner and a soft folded throw keep the suite from reading as a showroom.
 	_add_plant(root, Vector3(-14.30, 0.0, -5.35), 0.84)
-	_box(root, "BenchThrow", Vector3(-11.78, 0.64, -5.34), Vector3(0.74, 0.035, 0.58), textile)
+	_sphere(root, "BenchThrowFold", Vector3(-11.78, 0.64, -5.34), Vector3(0.39, 0.035, 0.29), textile)
+	for z in [-5.56, -5.46, -5.36, -5.26, -5.16]:
+		_box(root, "BenchThrowFringe", Vector3(-12.17, 0.615, z), Vector3(0.12, 0.012, 0.012), textile)
 	suite_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 2.95, -6.2), Vector3(-11.45, 0.8, -7.2), 1.55, 5.5))
 
 
@@ -330,10 +337,15 @@ func _build_entry_gallery() -> void:
 	atmosphere.add_child(_area_shape(Vector3(0.72, 0.70, 0.72)))
 	root.add_child(atmosphere)
 
-	# Upholstered perch and planting soften the solid study wall near the turn into the home.
-	_box(root, "EntryBenchSeat", Vector3(14.55, 0.48, -8.88), Vector3(2.25, 0.28, 0.54), cream)
+	# Sculpted entry perch: an elliptical cushion, timber shadow base and four
+	# tapered legs give the arrival sequence a furniture-grade silhouette.
+	_sphere(root, "EntryBenchCushion", Vector3(14.55, 0.50, -8.88), Vector3(1.13, 0.16, 0.29), cream)
+	_sphere(root, "EntryBenchUnderpad", Vector3(14.55, 0.38, -8.88), Vector3(1.06, 0.085, 0.25), walnut)
 	for x in [13.75, 15.35]:
-		_box(root, "EntryBenchLeg", Vector3(x, 0.23, -8.88), Vector3(0.07, 0.46, 0.42), champagne)
+		for z in [-9.03, -8.73]:
+			_cylinder(root, "EntryBenchTaperedLeg", Vector3(x, 0.21, z), 0.022, 0.042, 0.38, champagne)
+	for x in [14.12, 14.55, 14.98]:
+		_sphere(root, "EntryBenchTuft", Vector3(x, 0.642, -8.88), Vector3(0.022, 0.010, 0.022), champagne)
 	_add_collision_box(root, "EntryBenchCollision", Vector3(14.55, 0.38, -8.88), Vector3(2.25, 0.76, 0.54))
 	_add_seat_interaction(root, "entry_bench_seat", "entry bench", Vector3(14.55, 0.02, -9.18), 0.0, Vector3(2.15, 1.25, 0.82))
 	_add_plant(root, Vector3(16.65, 0.0, -9.35), 0.66)
