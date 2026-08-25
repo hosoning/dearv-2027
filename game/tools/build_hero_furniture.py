@@ -234,6 +234,86 @@ def tapered_prism(name, location, width_top, width_bottom, height, depth, materi
     return obj
 
 
+def extruded_silhouette(name, location, points, depth, material, parent=None, bevel=0.018):
+    """Create a softly beveled garment body from an authored front silhouette."""
+    count = len(points)
+    y0, y1 = -depth / 2.0, depth / 2.0
+    vertices = [(x, y0, z) for x, z in points] + [(x, y1, z) for x, z in points]
+    faces = [tuple(range(count)), tuple(reversed(range(count, count * 2)))]
+    for index in range(count):
+        nxt = (index + 1) % count
+        faces.append((index, nxt, count + nxt, count + index))
+    mesh = bpy.data.meshes.new(f"{name} mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    mesh.materials.append(material)
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    obj.parent = parent
+    bevel_modifier = obj.modifiers.new("Soft cloth edge", "BEVEL")
+    bevel_modifier.width = bevel
+    bevel_modifier.segments = 3
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier=bevel_modifier.name)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
+def build_tailored_jacket(root, x, y, z, cloth, metal):
+    torso_points = [
+        (-0.19, -0.38), (-0.235, -0.12), (-0.20, 0.18),
+        (-0.285, 0.27), (-0.14, 0.38), (-0.075, 0.31),
+        (0.075, 0.31), (0.14, 0.38), (0.285, 0.27),
+        (0.20, 0.18), (0.235, -0.12), (0.19, -0.38),
+    ]
+    extruded_silhouette("Tailored jacket body", (x, y, z), torso_points, 0.15, cloth, root, 0.022)
+    for side in (-1, 1):
+        rounded_box(
+            "Tailored sleeve",
+            (x + side * 0.285, y, z + 0.01),
+            (0.15, 0.145, 0.61),
+            cloth,
+            0.055,
+            6,
+            rotation=(0, math.radians(side * 8), 0),
+            parent=root,
+        )
+    # Raised lapels, collar and hardware make the front readable even from the room.
+    front_y = y - 0.088
+    tapered_prism("Jacket lapel", (x - 0.075, front_y, z + 0.13), 0.035, 0.13, 0.32, 0.018, cloth, root)
+    tapered_prism("Jacket lapel", (x + 0.075, front_y, z + 0.13), 0.035, 0.13, 0.32, 0.018, cloth, root)
+    pipe_between("Jacket collar", (x - 0.10, front_y, z + 0.31), (x + 0.10, front_y, z + 0.31), 0.018, cloth, root)
+    for button_z in (z - 0.02, z - 0.14):
+        cylinder("Jacket button", (x, front_y - 0.014, button_z), 0.018, 0.012, metal, root, 16, rotation=(math.radians(90), 0, 0))
+
+
+def build_pressed_trousers(root, x, y, z, cloth):
+    rounded_box("Trouser waistband", (x, y, z + 0.34), (0.34, 0.12, 0.075), cloth, 0.025, 4, parent=root)
+    for side in (-1, 1):
+        tapered_prism("Pressed trouser leg", (x + side * 0.085, y, z), 0.12, 0.145, 0.68, 0.105, cloth, root)
+        pipe_between("Trouser crease", (x + side * 0.085, y - 0.059, z - 0.28), (x + side * 0.085, y - 0.059, z + 0.27), 0.006, cloth, root)
+
+
+def build_couture_dress(root, x, y, z, cloth, metal):
+    bodice_points = [
+        (-0.10, -0.12), (-0.17, 0.08), (-0.16, 0.29),
+        (-0.105, 0.40), (-0.045, 0.32), (0.045, 0.32),
+        (0.105, 0.40), (0.16, 0.29), (0.17, 0.08), (0.10, -0.12),
+    ]
+    skirt_points = [
+        (-0.10, 0.28), (-0.18, 0.15), (-0.31, -0.55),
+        (-0.25, -0.62), (0.25, -0.62), (0.31, -0.55),
+        (0.18, 0.15), (0.10, 0.28),
+    ]
+    extruded_silhouette("Couture fitted bodice", (x, y, z + 0.34), bodice_points, 0.13, cloth, root, 0.018)
+    extruded_silhouette("Couture flowing skirt", (x, y, z - 0.24), skirt_points, 0.17, cloth, root, 0.025)
+    pipe_between("Dress waist belt", (x - 0.13, y - 0.092, z + 0.19), (x + 0.13, y - 0.092, z + 0.19), 0.018, metal, root)
+    for offset in (-0.16, 0.0, 0.16):
+        pipe_between("Dress soft pleat", (x + offset * 0.45, y - 0.096, z + 0.11), (x + offset, y - 0.102, z - 0.72), 0.008, cloth, root)
+
+
 def all_descendants(root):
     stack = list(root.children)
     result = []
@@ -375,10 +455,10 @@ def build_wardrobe():
         add_hanger(root, x, 1.30, 2.00, metal)
         cloth = suit_colors[index % len(suit_colors)]
         if index in (3, 8, 11):
-            tapered_prism("Couture dress", (x, 1.30, 1.26), 0.38, 0.62, 1.25, 0.12, cloth, root)
+            build_couture_dress(root, x, 1.30, 1.34, cloth, metal)
         else:
-            tapered_prism("Tailored jacket", (x, 1.30, 1.52), 0.50, 0.39, 0.76, 0.14, cloth, root)
-            rounded_box("Pressed trousers", (x, 1.31, 0.86), (0.34, 0.10, 0.72), cloth, 0.025, 4, parent=root)
+            build_tailored_jacket(root, x, 1.30, 1.53, cloth, metal)
+            build_pressed_trousers(root, x, 1.31, 0.84, cloth)
 
     # Real display shelves: bags rest on shelves; nothing floats in the room.
     for index, x in enumerate((-1.72, -0.62, 0.56, 1.72)):
