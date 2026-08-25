@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: blender-hero-assets
@@ -76,3 +77,8 @@ jobs:
             git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
             git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
           fi
+
+      - name: Export the freshly generated assets into the Web home
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run godot-web-export.yml --ref claude/memory-house-3d-handoff-a0d0e1
