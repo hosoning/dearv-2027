@@ -38,8 +38,16 @@ func can_interact(_actor: Node3D) -> bool:
 func interact(actor: Node3D) -> void:
 	if not can_interact(actor):
 		return
+	set_open(not _is_open)
+
+
+func set_open(value: bool) -> bool:
+	if not moving_part or _busy:
+		return false
+	if value == _is_open:
+		return true
+	_is_open = value
 	_busy = true
-	_is_open = not _is_open
 	var target_position := _closed_position + (open_offset if _is_open else Vector3.ZERO)
 	var target_rotation := _closed_rotation + (open_rotation_degrees if _is_open else Vector3.ZERO)
 	var tween := create_tween().set_parallel().set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_IN_OUT)
@@ -47,13 +55,17 @@ func interact(actor: Node3D) -> void:
 		tween.tween_property(moving_part, "position", target_position, motion_seconds)
 	if motion_type == MotionType.HINGE or open_rotation_degrees != Vector3.ZERO:
 		tween.tween_property(moving_part, "rotation_degrees", target_rotation, motion_seconds)
-	await tween.finished
-	_busy = false
-	persist(_is_open)
+	tween.finished.connect(_on_motion_finished)
+	return true
 
 
 func is_open() -> bool:
 	return _is_open
+
+
+func _on_motion_finished() -> void:
+	_busy = false
+	persist(_is_open)
 
 
 func _apply_immediate() -> void:
