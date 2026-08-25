@@ -1000,13 +1000,102 @@ func _food(id: String, display_name: String, can_wash: bool, can_chop: bool) -> 
 
 
 func _create_hinged_door(id: String, hinge_position: Vector3, width: float, rotation_y: float, open_degrees: float, lockable := false) -> void:
+	var frame_material := _material(Color("4a3429"), 0.40)
+	var edge_material := _material(Color("2b2420"), 0.35)
+	var hardware_material := _material(Color("a17e52"), 0.18, 0.82)
+
+	# The fixed frame is separate from the moving leaf: stepped jambs, architraves
+	# and a flush metal threshold give each opening a believable wall junction.
+	var frame := Node3D.new()
+	frame.name = "%sFrame" % id
+	frame.position = hinge_position
+	frame.rotation_degrees.y = rotation_y
+	add_child(frame)
+	_box(frame, "LeftJamb", Vector3(-0.055, 1.20, 0.0), Vector3(0.11, 2.46, 0.22), frame_material, false)
+	_box(frame, "RightJamb", Vector3(width + 0.055, 1.20, 0.0), Vector3(0.11, 2.46, 0.22), frame_material, false)
+	_box(frame, "HeadJamb", Vector3(width * 0.5, 2.43, 0.0), Vector3(width + 0.22, 0.11, 0.22), frame_material, false)
+	for side_z in [-0.135, 0.135]:
+		_box(frame, "LeftArchitrave", Vector3(-0.115, 1.20, side_z), Vector3(0.09, 2.54, 0.055), frame_material, false)
+		_box(frame, "RightArchitrave", Vector3(width + 0.115, 1.20, side_z), Vector3(0.09, 2.54, 0.055), frame_material, false)
+		_box(frame, "HeadArchitrave", Vector3(width * 0.5, 2.475, side_z), Vector3(width + 0.32, 0.09, 0.055), frame_material, false)
+	_box(frame, "DoorThreshold", Vector3(width * 0.5, 0.025, 0.0), Vector3(width + 0.06, 0.025, 0.24), hardware_material, false)
+
 	var hinge := Node3D.new()
 	hinge.name = "%sLeaf" % id
 	hinge.position = hinge_position
 	hinge.rotation_degrees.y = rotation_y
 	add_child(hinge)
+
+	# A veneered core with dark edge lipping, shallow face reveals and real
+	# hardware replaces the previous single rectangular slab.
 	_box(hinge, "DoorPanel", Vector3(width * 0.5, 1.2, 0.0), Vector3(width, 2.4, 0.085), warm_wood_material, true)
-	_box(hinge, "DoorHandle", Vector3(width - 0.16, 1.08, 0.08), Vector3(0.055, 0.055, 0.16), dark_metal_material, false)
+	_box(hinge, "DoorTopEdge", Vector3(width * 0.5, 2.365, 0.0), Vector3(width - 0.06, 0.045, 0.105), edge_material, false)
+	_box(hinge, "DoorBottomEdge", Vector3(width * 0.5, 0.035, 0.0), Vector3(width - 0.06, 0.045, 0.105), edge_material, false)
+	_box(hinge, "DoorLatchEdge", Vector3(width - 0.025, 1.2, 0.0), Vector3(0.05, 2.30, 0.105), edge_material, false)
+	for face_z in [-0.052, 0.052]:
+		_box(hinge, "DoorUpperReveal", Vector3(width * 0.5, 1.78, face_z), Vector3(width - 0.24, 0.018, 0.018), edge_material, false)
+		_box(hinge, "DoorLowerReveal", Vector3(width * 0.5, 0.66, face_z), Vector3(width - 0.24, 0.018, 0.018), edge_material, false)
+		for flute_x in [0.28, 0.50, 0.72]:
+			_box(hinge, "DoorVerticalReveal", Vector3(width * flute_x, 1.22, face_z), Vector3(0.016, 1.00, 0.018), edge_material, false)
+
+	# Three hinge knuckles and a lever on a circular rose are modeled separately.
+	for hinge_y in [0.38, 1.20, 2.02]:
+		var hinge_knuckle := MeshInstance3D.new()
+		hinge_knuckle.name = "DoorHingeKnuckle"
+		var hinge_mesh := CylinderMesh.new()
+		hinge_mesh.top_radius = 0.028
+		hinge_mesh.bottom_radius = 0.028
+		hinge_mesh.height = 0.18
+		hinge_mesh.radial_segments = 16
+		hinge_mesh.material = hardware_material
+		hinge_knuckle.mesh = hinge_mesh
+		hinge_knuckle.position = Vector3(0.025, hinge_y, 0.075)
+		hinge.add_child(hinge_knuckle)
+
+	var handle_rose := MeshInstance3D.new()
+	handle_rose.name = "DoorHandleRose"
+	var rose_mesh := CylinderMesh.new()
+	rose_mesh.top_radius = 0.075
+	rose_mesh.bottom_radius = 0.075
+	rose_mesh.height = 0.028
+	rose_mesh.radial_segments = 24
+	rose_mesh.material = hardware_material
+	handle_rose.mesh = rose_mesh
+	handle_rose.position = Vector3(width - 0.18, 1.08, 0.075)
+	handle_rose.rotation_degrees.x = 90.0
+	hinge.add_child(handle_rose)
+	_box(hinge, "DoorHandleSpindle", Vector3(width - 0.18, 1.08, 0.105), Vector3(0.045, 0.045, 0.15), hardware_material, false)
+	_box(hinge, "DoorHandleLever", Vector3(width - 0.31, 1.08, 0.18), Vector3(0.28, 0.045, 0.045), hardware_material, false)
+
+	if lockable:
+		# The entrance leaf gets a distinct deadbolt and peephole, readable from
+		# the foyer without adding UI or interaction clutter.
+		var deadbolt := MeshInstance3D.new()
+		deadbolt.name = "EntranceDeadbolt"
+		var deadbolt_mesh := CylinderMesh.new()
+		deadbolt_mesh.top_radius = 0.064
+		deadbolt_mesh.bottom_radius = 0.064
+		deadbolt_mesh.height = 0.032
+		deadbolt_mesh.radial_segments = 24
+		deadbolt_mesh.material = hardware_material
+		deadbolt.mesh = deadbolt_mesh
+		deadbolt.position = Vector3(width - 0.18, 1.36, 0.075)
+		deadbolt.rotation_degrees.x = 90.0
+		hinge.add_child(deadbolt)
+
+		var peephole := MeshInstance3D.new()
+		peephole.name = "EntrancePeephole"
+		var peephole_mesh := CylinderMesh.new()
+		peephole_mesh.top_radius = 0.027
+		peephole_mesh.bottom_radius = 0.027
+		peephole_mesh.height = 0.035
+		peephole_mesh.radial_segments = 18
+		peephole_mesh.material = dark_metal_material
+		peephole.mesh = peephole_mesh
+		peephole.position = Vector3(width * 0.50, 1.69, 0.065)
+		peephole.rotation_degrees.x = 90.0
+		hinge.add_child(peephole)
+
 	var interaction := DoorInteractable.new()
 	interaction.name = "%sInteraction" % id
 	interaction.object_id = String(id).to_snake_case()
