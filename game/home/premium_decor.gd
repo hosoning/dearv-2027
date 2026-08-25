@@ -372,16 +372,31 @@ func _build_dining_room() -> void:
 
 func _add_dining_chair(parent: Node3D, origin: Vector3, rotation_y: float, seat_id: String) -> void:
 	var chair := Node3D.new()
-	chair.name = "DiningChair"
+	chair.name = "SculptedDiningChair"
 	chair.position = origin
 	chair.rotation_degrees.y = rotation_y
 	parent.add_child(chair)
-	_cylinder(chair, "ChairBase", Vector3(0.0, 0.20, 0.0), 0.26, 0.31, 0.07, champagne)
-	_cylinder(chair, "ChairStem", Vector3(0.0, 0.39, 0.0), 0.045, 0.055, 0.36, champagne)
-	_cylinder(chair, "ChairSeat", Vector3(0.0, 0.59, 0.0), 0.35, 0.35, 0.12, cream, Vector3(1.0, 1.0, 0.88))
-	_box(chair, "ChairBack", Vector3(0.0, 0.94, 0.28), Vector3(0.68, 0.58, 0.12), cream)
-	_add_collision_box(chair, "DiningChairCollision", Vector3(0.0, 0.48, 0.08), Vector3(0.72, 0.96, 0.64))
-	_add_seat_interaction(chair, seat_id, "dining chair", Vector3(0.0, 0.02, -0.03), 0.0, Vector3(0.80, 1.25, 0.82))
+
+	# A tapered pedestal and thin under-seat collar keep the silhouette light.
+	_cylinder(chair, "ChairBase", Vector3(0.0, 0.18, 0.0), 0.23, 0.31, 0.055, champagne)
+	_cylinder(chair, "ChairStem", Vector3(0.0, 0.38, 0.0), 0.042, 0.060, 0.36, champagne)
+	_cylinder(chair, "ChairSeatCollar", Vector3(0.0, 0.535, 0.0), 0.31, 0.27, 0.055, walnut, Vector3(1.03, 1.0, 0.88))
+	_cylinder(chair, "ChairSeat", Vector3(0.0, 0.60, -0.015), 0.35, 0.34, 0.13, cream, Vector3(1.0, 1.0, 0.88))
+	_sphere(chair, "SeatFrontCrown", Vector3(0.0, 0.655, -0.16), Vector3(0.32, 0.075, 0.18), cream)
+
+	# The back is built from an embracing shell plus overlapping upholstered
+	# lobes, producing a rounded tub profile instead of a rectangular slab.
+	_sphere(chair, "CurvedBackShell", Vector3(0.0, 0.93, 0.31), Vector3(0.38, 0.34, 0.10), walnut)
+	_sphere(chair, "BackCenterCushion", Vector3(0.0, 0.95, 0.255), Vector3(0.30, 0.285, 0.105), cream)
+	_sphere(chair, "BackLeftWing", Vector3(-0.27, 0.89, 0.20), Vector3(0.15, 0.25, 0.12), cream)
+	_sphere(chair, "BackRightWing", Vector3(0.27, 0.89, 0.20), Vector3(0.15, 0.25, 0.12), cream)
+	_cylinder(chair, "LeftBackPiping", Vector3(-0.31, 0.94, 0.245), 0.012, 0.012, 0.43, champagne)
+	_cylinder(chair, "RightBackPiping", Vector3(0.31, 0.94, 0.245), 0.012, 0.012, 0.43, champagne)
+	_cylinder(chair, "LeftBackSupport", Vector3(-0.23, 0.72, 0.25), 0.018, 0.022, 0.28, champagne)
+	_cylinder(chair, "RightBackSupport", Vector3(0.23, 0.72, 0.25), 0.018, 0.022, 0.28, champagne)
+
+	_add_collision_box(chair, "DiningChairCollision", Vector3(0.0, 0.50, 0.08), Vector3(0.76, 1.0, 0.68))
+	_add_seat_interaction(chair, seat_id, "dining chair", Vector3(0.0, 0.02, -0.03), 0.0, Vector3(0.84, 1.28, 0.86))
 
 
 func _add_seat_interaction(parent: Node3D, seat_id: String, display_name: String, anchor_position: Vector3, rotation_y: float, area_size: Vector3) -> void:
