@@ -134,7 +134,18 @@ jobs:
             echo "No Godot Web changes"
           else
             git commit -m "Publish Godot Web home"
-            git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
+            for attempt in 1 2 3; do
+              if git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "Unable to publish Godot Web build after 3 attempts"
+                exit 1
+              fi
+              echo "Branch advanced while publishing; rebasing exported build"
+              git fetch origin claude/memory-house-3d-handoff-a0d0e1
+              git rebase origin/claude/memory-house-3d-handoff-a0d0e1
+            done
           fi
 
       - name: Rebuild Pages from the final exported home
