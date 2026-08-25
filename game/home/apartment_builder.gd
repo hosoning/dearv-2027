@@ -1054,29 +1054,66 @@ func _create_refrigerator(parent: Node3D, origin: Vector3) -> void:
 	fridge.name = "FrenchDoorRefrigerator"
 	fridge.position = origin
 	parent.add_child(fridge)
+
+	var liner_material := _material(Color("eeeae2"), 0.34)
+	var gasket_material := _material(Color("171817"), 0.48)
+	var chilled_glass := _material(Color(0.72, 0.86, 0.91, 0.30), 0.1)
+	chilled_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var produce_green := _material(Color("66875a"), 0.72)
+	var bottle_amber := _material(Color("b77a3e"), 0.42)
+	var bottle_clear := _material(Color(0.72, 0.88, 0.92, 0.42), 0.12)
+	bottle_clear.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+
+	# Built-in carcass, shadow reveals and ventilation keep the appliance from
+	# reading as a single silver block between the kitchen cabinets.
 	_box(fridge, "FridgeBody", Vector3(0.0, 1.12, 0.0), Vector3(1.72, 2.24, 0.82), appliance_material, true)
-	_box(fridge, "DarkInterior", Vector3(0.0, 1.26, 0.43), Vector3(1.52, 1.64, 0.05), dark_metal_material, false)
-	for y in [0.72, 1.15, 1.58]:
-		_box(fridge, "GlassShelf", Vector3(0.0, y, 0.48), Vector3(1.48, 0.025, 0.55), glass_material, false)
+	_box(fridge, "InteriorLiner", Vector3(0.0, 1.32, 0.39), Vector3(1.52, 1.66, 0.12), liner_material, false)
+	_box(fridge, "DarkInterior", Vector3(0.0, 1.28, 0.455), Vector3(1.42, 1.54, 0.025), gasket_material, false)
+	_box(fridge, "TopShadowReveal", Vector3(0.0, 2.27, 0.17), Vector3(1.76, 0.035, 0.58), gasket_material, false)
+	for x in [-0.63, -0.42, -0.21, 0.0, 0.21, 0.42, 0.63]:
+		_box(fridge, "TopVentSlat", Vector3(x, 2.265, 0.48), Vector3(0.11, 0.025, 0.025), gasket_material, false)
+
+	for y in [0.76, 1.17, 1.58]:
+		_box(fridge, "GlassShelf", Vector3(0.0, y, 0.49), Vector3(1.38, 0.022, 0.55), chilled_glass, false)
+		_box(fridge, "ShelfFrontTrim", Vector3(0.0, y + 0.018, 0.775), Vector3(1.42, 0.035, 0.035), appliance_material, false)
+	_box(fridge, "ProduceDrawerLeft", Vector3(-0.36, 0.58, 0.59), Vector3(0.66, 0.28, 0.36), chilled_glass, false)
+	_box(fridge, "ProduceDrawerRight", Vector3(0.36, 0.58, 0.59), Vector3(0.66, 0.28, 0.36), chilled_glass, false)
+	_box(fridge, "ProduceDrawerLeftPull", Vector3(-0.36, 0.69, 0.79), Vector3(0.42, 0.035, 0.03), appliance_material, false)
+	_box(fridge, "ProduceDrawerRightPull", Vector3(0.36, 0.69, 0.79), Vector3(0.42, 0.035, 0.03), appliance_material, false)
+	for x in [-0.50, -0.34, -0.16]:
+		_ellipsoid(fridge, "FreshProduce", Vector3(x, 0.83, 0.57), Vector3(0.10, 0.07, 0.09), produce_green)
+	for x in [0.20, 0.38, 0.56]:
+		_cylinder(fridge, "ChilledBottle", Vector3(x, 0.91, 0.57), 0.055, 0.34, bottle_clear)
+		_cylinder(fridge, "BottleCap", Vector3(x, 1.09, 0.57), 0.032, 0.045, bottle_amber)
 
 	var left_hinge := Node3D.new()
 	left_hinge.name = "LeftDoorHinge"
 	left_hinge.position = Vector3(-0.84, 1.38, 0.47)
 	fridge.add_child(left_hinge)
 	_box(left_hinge, "LeftDoor", Vector3(0.42, 0.0, 0.0), Vector3(0.82, 1.58, 0.09), appliance_material, true)
-	_box(left_hinge, "LeftHandle", Vector3(0.72, 0.0, 0.09), Vector3(0.035, 0.9, 0.055), dark_metal_material, false)
+	_box(left_hinge, "LeftDoorGasket", Vector3(0.42, 0.0, -0.052), Vector3(0.74, 1.48, 0.025), gasket_material, false)
+	_box(left_hinge, "LeftDoorCenterReveal", Vector3(0.825, 0.0, 0.052), Vector3(0.018, 1.50, 0.025), gasket_material, false)
+	_cylinder(left_hinge, "LeftHandle", Vector3(0.72, 0.0, 0.10), 0.025, 0.88, dark_metal_material)
+	_box(left_hinge, "DispenserRecess", Vector3(0.39, -0.16, 0.057), Vector3(0.34, 0.42, 0.022), gasket_material, false)
+	_box(left_hinge, "DispenserTray", Vector3(0.39, -0.34, 0.095), Vector3(0.28, 0.035, 0.13), dark_metal_material, false)
+	_box(left_hinge, "DispenserDisplay", Vector3(0.39, 0.09, 0.073), Vector3(0.21, 0.07, 0.015), glass_material, false)
 
 	var right_hinge := Node3D.new()
 	right_hinge.name = "RightDoorHinge"
 	right_hinge.position = Vector3(0.84, 1.38, 0.47)
 	fridge.add_child(right_hinge)
 	_box(right_hinge, "RightDoor", Vector3(-0.42, 0.0, 0.0), Vector3(0.82, 1.58, 0.09), appliance_material, true)
-	_box(right_hinge, "RightHandle", Vector3(-0.72, 0.0, 0.09), Vector3(0.035, 0.9, 0.055), dark_metal_material, false)
+	_box(right_hinge, "RightDoorGasket", Vector3(-0.42, 0.0, -0.052), Vector3(0.74, 1.48, 0.025), gasket_material, false)
+	_box(right_hinge, "RightDoorCenterReveal", Vector3(-0.825, 0.0, 0.052), Vector3(0.018, 1.50, 0.025), gasket_material, false)
+	_cylinder(right_hinge, "RightHandle", Vector3(-0.72, 0.0, 0.10), 0.025, 0.88, dark_metal_material)
+
 	_box(fridge, "FreezerDrawer", Vector3(0.0, 0.34, 0.47), Vector3(1.66, 0.58, 0.09), appliance_material, true)
+	_box(fridge, "FreezerDrawerReveal", Vector3(0.0, 0.63, 0.525), Vector3(1.58, 0.025, 0.025), gasket_material, false)
+	_cylinder(fridge, "FreezerHandle", Vector3(0.0, 0.49, 0.59), 0.025, 1.08, dark_metal_material, Vector3(0.0, 0.0, 90.0))
 
 	var interior_light := OmniLight3D.new()
 	interior_light.name = "InteriorLight"
-	interior_light.position = Vector3(0.0, 1.75, 0.52)
+	interior_light.position = Vector3(0.0, 1.75, 0.58)
 	interior_light.light_color = Color("fff0d5")
 	interior_light.light_energy = 0.0
 	interior_light.omni_range = 2.2
@@ -1510,6 +1547,23 @@ func _collision_box(parent: Node3D, node_name: String, position: Vector3, size: 
 	body.add_child(shape_node)
 	parent.add_child(body)
 	return body
+
+
+func _cylinder(parent: Node3D, node_name: String, position: Vector3, radius: float, height: float, material: Material, rotation_degrees_value := Vector3.ZERO) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = 24
+	mesh.rings = 2
+	mesh.material = material
+	instance.mesh = mesh
+	instance.position = position
+	instance.rotation_degrees = rotation_degrees_value
+	parent.add_child(instance)
+	return instance
 
 
 func _ellipsoid(parent: Node3D, node_name: String, position: Vector3, shape_scale: Vector3, material: Material) -> MeshInstance3D:
