@@ -10,7 +10,7 @@ var floor_material: ShaderMaterial
 var warm_wood_material: ShaderMaterial
 var pale_stone_material: ShaderMaterial
 var dark_metal_material: StandardMaterial3D
-var glass_material: StandardMaterial3D
+var glass_material: ShaderMaterial
 var appliance_material: StandardMaterial3D
 var warm_light_material: StandardMaterial3D
 var water_material: StandardMaterial3D
@@ -45,9 +45,7 @@ func _create_materials() -> void:
 	warm_light_material.emission_energy_multiplier = 2.8
 	water_material = _material(Color(0.34, 0.68, 0.86, 0.64), 0.12)
 	water_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glass_material = _material(Color(0.48, 0.66, 0.76, 0.2), 0.06, 0.12)
-	glass_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	glass_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	glass_material = _create_architectural_glass_material()
 
 
 func _build_shell() -> void:
@@ -81,6 +79,38 @@ func _build_shell() -> void:
 	# Concealed linear air-conditioning slots; no wall-mounted AC boxes.
 	for x in [-12.0, -2.0, 7.0, 15.0]:
 		_box(self, "ConcealedACSlot", Vector3(x, CEILING_HEIGHT - 0.015, 11.8), Vector3(3.8, 0.035, 0.18), dark_metal_material, false)
+
+
+func _create_architectural_glass_material() -> ShaderMaterial:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode blend_mix, depth_draw_alpha_prepass, cull_disabled, diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float facing = clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0);
+	float fresnel = pow(1.0 - facing, 2.75);
+	float sky_band = sin(world_position.y * 1.65 + world_position.x * 0.11 + world_position.z * 0.07) * 0.5 + 0.5;
+	float vertical_fade = smoothstep(0.0, 3.3, world_position.y);
+	vec3 clear_tint = vec3(0.10, 0.19, 0.23);
+	vec3 reflected_sky = vec3(0.48, 0.67, 0.76);
+	vec3 color = mix(clear_tint, reflected_sky, fresnel * 0.74 + sky_band * vertical_fade * 0.09);
+	ALBEDO = color;
+	ALPHA = clamp(0.055 + fresnel * 0.30 + sky_band * 0.025, 0.05, 0.38);
+	ROUGHNESS = mix(0.095, 0.035, fresnel);
+	METALLIC = 0.0;
+	SPECULAR = 1.0;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	return material
 
 
 func _create_walnut_material() -> ShaderMaterial:
@@ -330,9 +360,9 @@ func _build_windows() -> void:
 
 	# Bathroom glazing is translucent rather than a scenic picture.
 	for x in [-16.0, -12.0, -8.0]:
-		var frosted := glass_material.duplicate() as StandardMaterial3D
-		frosted.albedo_color = Color(0.72, 0.79, 0.8, 0.58)
-		frosted.roughness = 0.72
+		var frosted := _material(Color(0.72, 0.79, 0.8, 0.58), 0.72)
+		frosted.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		frosted.cull_mode = BaseMaterial3D.CULL_DISABLED
 		_box(self, "BathroomFrostedPane", Vector3(x, 1.62, 13.94), Vector3(3.82, 3.05, 0.045), frosted, false)
 	for x in [-18.0, -14.0, -10.0, -6.0]:
 		_box(self, "BathroomWindowMullion", Vector3(x, 1.62, 13.84), Vector3(0.11, 3.18, 0.16), frame_cap, false)
