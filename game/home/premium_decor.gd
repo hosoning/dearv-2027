@@ -3,7 +3,7 @@ extends Node3D
 
 var cream := ShaderMaterial.new()
 var walnut := ShaderMaterial.new()
-var champagne := StandardMaterial3D.new()
+var champagne := ShaderMaterial.new()
 var textile := ShaderMaterial.new()
 var charcoal := StandardMaterial3D.new()
 var mirror := StandardMaterial3D.new()
@@ -42,9 +42,7 @@ func _setup_materials() -> void:
 	textile.set_shader_parameter("base_color", Color("776d65"))
 	textile.set_shader_parameter("fabric_roughness", 0.94)
 	walnut.shader = _create_walnut_shader()
-	champagne.albedo_color = Color("b99666")
-	champagne.roughness = 0.28
-	champagne.metallic = 0.72
+	champagne.shader = _create_brushed_champagne_shader()
 	charcoal.albedo_color = Color("24211f")
 	charcoal.roughness = 0.62
 	mirror.albedo_color = Color(0.58, 0.66, 0.7, 0.42)
@@ -61,6 +59,34 @@ func _setup_materials() -> void:
 	leaf_dark.roughness = 0.78
 	leaf_light.albedo_color = Color("4f725c")
 	leaf_light.roughness = 0.82
+
+
+func _create_brushed_champagne_shader() -> Shader:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float brush_axis = world_position.y * 0.88 + world_position.x * 0.09 + world_position.z * 0.05;
+	float fine_brush = sin(brush_axis * 460.0) * 0.5 + 0.5;
+	float cross_brush = sin((world_position.x - world_position.z) * 115.0 + world_position.y * 23.0) * 0.5 + 0.5;
+	float brush = fine_brush * 0.72 + cross_brush * 0.28;
+	vec3 champagne_dark = vec3(0.455, 0.325, 0.195);
+	vec3 champagne_light = vec3(0.735, 0.565, 0.350);
+	ALBEDO = mix(champagne_dark, champagne_light, 0.44 + brush * 0.40);
+	ROUGHNESS = mix(0.21, 0.34, brush);
+	METALLIC = 0.82;
+	SPECULAR = 0.86;
+}
+"""
+	return shader
 
 
 func _create_walnut_shader() -> Shader:
