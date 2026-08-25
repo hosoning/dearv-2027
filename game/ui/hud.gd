@@ -248,6 +248,15 @@ func _build_atmosphere_actions(payload: Dictionary) -> void:
 		all_lights_button.text = "Turn all home lights off" if any_light_on else "Turn all home lights on"
 		all_lights_button.pressed.connect(_set_all_home_lights.bind(not any_light_on, target, player, entry_door))
 		inspector_actions.add_child(all_lights_button)
+	if entry_door or not shades.is_empty() or not light_switches.is_empty():
+		var welcome_button := Button.new()
+		welcome_button.text = "Run welcome-home scene"
+		welcome_button.pressed.connect(_run_welcome_home_scene.bind(target, player, entry_door))
+		inspector_actions.add_child(welcome_button)
+		var secure_button := Button.new()
+		secure_button.text = "Run secure-home scene"
+		secure_button.pressed.connect(_run_secure_home_scene.bind(target, player, entry_door))
+		inspector_actions.add_child(secure_button)
 
 
 func _open_home_controls(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
@@ -309,6 +318,33 @@ func _set_all_home_lights(enabled: bool, target: DayNightDirector, player: Comfo
 		inspector_body.text = "All home lights are on and saved." if enabled else "All home lights are off and saved."
 	else:
 		inspector_body.text = "The home lights are already in that state."
+
+
+func _run_welcome_home_scene(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
+	if entry_door:
+		entry_door.set_locked(false)
+	for node in get_tree().get_nodes_in_group("privacy_shade"):
+		if node is OpenableInteractable:
+			(node as OpenableInteractable).set_open(true)
+	for node in get_tree().get_nodes_in_group("home_light_switch"):
+		if node is LightSwitchInteractable:
+			(node as LightSwitchInteractable).set_on(true)
+	_open_home_controls(target, player, entry_door)
+	inspector_body.text = "Welcome home: the entrance is unlocked, privacy shades are rising and the lights are on. The scene is saved."
+
+
+func _run_secure_home_scene(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
+	if entry_door and not entry_door.set_locked(true):
+		inspector_body.text = "Close the entrance door before running the secure-home scene."
+		return
+	for node in get_tree().get_nodes_in_group("privacy_shade"):
+		if node is OpenableInteractable:
+			(node as OpenableInteractable).set_open(false)
+	for node in get_tree().get_nodes_in_group("home_light_switch"):
+		if node is LightSwitchInteractable:
+			(node as LightSwitchInteractable).set_on(false)
+	_open_home_controls(target, player, entry_door)
+	inspector_body.text = "Home secured: the entrance is locked, privacy shades are lowering and the lights are off. The scene is saved."
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
