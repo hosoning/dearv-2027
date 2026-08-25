@@ -306,6 +306,45 @@ func _build_entry_corridor() -> void:
 		_box(lobby, "ElevatorDoor", Vector3(x, 1.32, -20.08), Vector3(1.86, 2.58, 0.06), brushed_metal, false)
 		_box(lobby, "ElevatorSplit", Vector3(x, 1.32, -20.035), Vector3(0.025, 2.48, 0.02), dark_metal_material, false)
 		_box(lobby, "ElevatorHeader", Vector3(x, 2.86, -20.03), Vector3(0.74, 0.12, 0.035), dark_metal_material, false)
+		_box(lobby, "ElevatorThreshold", Vector3(x, 0.025, -19.98), Vector3(1.88, 0.025, 0.22), brushed_metal, false)
+		_box(lobby, "ElevatorFloorDisplay", Vector3(x, 2.86, -19.995), Vector3(0.52, 0.075, 0.025), warm_light_material, false)
+
+	# Large-format stone modules, flush brass inlay and detailed control hardware
+	# keep the private lift lobby consistent with the apartment finish.
+	var lobby_joint := _material(Color("5e5a53"), 0.58)
+	var lobby_brass := _material(Color("a68254"), 0.20, 0.80)
+	for x in [7.65, 9.10, 10.55, 12.0, 13.45]:
+		_box(lobby, "LobbyFloorJoint", Vector3(x, 0.006, -17.15), Vector3(0.022, 0.012, 5.85), lobby_joint, false)
+	for z in [-19.35, -18.25, -17.15, -16.05, -14.95]:
+		_box(lobby, "LobbyFloorJoint", Vector3(10.55, 0.007, z), Vector3(8.35, 0.012, 0.022), lobby_joint, false)
+	_box(lobby, "LobbyBrassAxis", Vector3(10.55, 0.018, -17.15), Vector3(0.035, 0.014, 5.92), lobby_brass, false)
+
+	# Shadow-gapped wall panels and a restrained luminous ceiling slot add depth
+	# to the long corridor without reducing its clear width.
+	for z in [-19.20, -17.70, -16.20, -14.70]:
+		_box(lobby, "LobbyLeftPanelReveal", Vector3(6.305, 1.62, z), Vector3(0.025, 2.82, 0.035), dark_metal_material, false)
+		_box(lobby, "LobbyRightPanelReveal", Vector3(14.795, 1.62, z), Vector3(0.025, 2.82, 0.035), dark_metal_material, false)
+	_box(lobby, "LobbyLeftSkirting", Vector3(6.32, 0.075, -17.15), Vector3(0.055, 0.15, 5.96), dark_wood, false)
+	_box(lobby, "LobbyRightSkirting", Vector3(14.78, 0.075, -17.15), Vector3(0.055, 0.15, 5.96), dark_wood, false)
+	_box(lobby, "LobbyCeilingSlot", Vector3(10.55, CEILING_HEIGHT - 0.035, -17.15), Vector3(0.12, 0.035, 5.55), warm_light_material, false)
+	_box(lobby, "LobbyCeilingSlotReveal", Vector3(10.55, CEILING_HEIGHT - 0.02, -17.15), Vector3(0.22, 0.025, 5.72), dark_metal_material, false)
+
+	# Shared call station with a recessed screen, round button and service seam.
+	_box(lobby, "ElevatorCallPanel", Vector3(10.55, 1.34, -20.015), Vector3(0.34, 0.72, 0.04), brushed_metal, false)
+	_box(lobby, "ElevatorCallScreen", Vector3(10.55, 1.56, -19.985), Vector3(0.22, 0.18, 0.022), dark_metal_material, false)
+	_box(lobby, "ElevatorCallScreenGlow", Vector3(10.55, 1.56, -19.969), Vector3(0.08, 0.055, 0.012), warm_light_material, false)
+	var call_button := MeshInstance3D.new()
+	call_button.name = "ElevatorCallButton"
+	var call_mesh := CylinderMesh.new()
+	call_mesh.top_radius = 0.052
+	call_mesh.bottom_radius = 0.052
+	call_mesh.height = 0.025
+	call_mesh.radial_segments = 24
+	call_mesh.material = lobby_brass
+	call_button.mesh = call_mesh
+	call_button.position = Vector3(10.55, 1.18, -19.975)
+	call_button.rotation_degrees.x = 90.0
+	lobby.add_child(call_button)
 
 	# Slim console and artwork make the lobby read as a private residence floor.
 	_box(lobby, "LobbyConsole", Vector3(6.48, 0.72, -17.45), Vector3(0.42, 1.15, 2.35), dark_wood, true)
