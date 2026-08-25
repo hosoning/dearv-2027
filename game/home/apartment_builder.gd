@@ -185,6 +185,7 @@ func _add_privacy_shade(
 	control.close_label = "Lower privacy shade"
 	control.position = control_position
 	control.add_child(_area_shape(Vector3(0.65, 1.1, 0.65)))
+	control.add_to_group("privacy_shade")
 	add_child(control)
 
 
