@@ -7,6 +7,7 @@ var champagne := ShaderMaterial.new()
 var textile := ShaderMaterial.new()
 var charcoal := StandardMaterial3D.new()
 var mirror := StandardMaterial3D.new()
+var crystal := StandardMaterial3D.new()
 var warm_glow := StandardMaterial3D.new()
 var ceramic := StandardMaterial3D.new()
 var leaf_dark := StandardMaterial3D.new()
@@ -48,6 +49,10 @@ func _setup_materials() -> void:
 	mirror.albedo_color = Color(0.58, 0.66, 0.7, 0.42)
 	mirror.metallic = 0.86
 	mirror.roughness = 0.08
+	crystal.albedo_color = Color(0.74, 0.88, 0.92, 0.34)
+	crystal.roughness = 0.07
+	crystal.metallic = 0.08
+	crystal.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	warm_glow.albedo_color = Color("ffd7a4")
 	warm_glow.roughness = 0.22
 	warm_glow.emission_enabled = true
@@ -347,6 +352,14 @@ func _build_dining_room() -> void:
 	_cylinder(root, "DiningTableTop", center + Vector3(0.0, 0.79, 0.0), 0.92, 0.92, 0.11, pale_stone(), Vector3(1.62, 1.0, 0.66))
 	_cylinder(root, "DiningPedestal", center + Vector3(0.0, 0.39, 0.0), 0.34, 0.52, 0.78, walnut, Vector3(1.15, 1.0, 0.82))
 	_add_collision_box(root, "DiningTableCollision", center + Vector3(0.0, 0.44, 0.0), Vector3(3.05, 0.88, 1.28))
+	# Six complete place settings make the table read as a prepared dining scene,
+	# with layered ceramic, folded linen, metal cutlery and stemmed glassware.
+	_add_place_setting(root, Vector3(5.25, 0.855, -0.60), 180.0)
+	_add_place_setting(root, Vector3(7.05, 0.855, -0.60), 180.0)
+	_add_place_setting(root, Vector3(5.25, 0.855, -1.70), 0.0)
+	_add_place_setting(root, Vector3(7.05, 0.855, -1.70), 0.0)
+	_add_place_setting(root, Vector3(4.88, 0.855, -1.15), 90.0)
+	_add_place_setting(root, Vector3(7.42, 0.855, -1.15), -90.0)
 	var serving := ServingStationInteractable.new()
 	serving.name = "DiningTableServingInteraction"
 	serving.object_id = "dining_table_serving"
@@ -368,6 +381,26 @@ func _build_dining_room() -> void:
 	_sphere(root, "DiningStem", center + Vector3(0.0, 1.14, 0.0), Vector3(0.035, 0.28, 0.035), leaf_dark)
 	_sphere(root, "DiningLeaf", center + Vector3(-0.12, 1.31, 0.0), Vector3(0.18, 0.07, 0.10), leaf_light)
 	_sphere(root, "DiningLeaf", center + Vector3(0.13, 1.40, 0.02), Vector3(0.16, 0.06, 0.09), leaf_dark)
+
+
+func _add_place_setting(parent: Node3D, origin: Vector3, rotation_y: float) -> void:
+	var setting := Node3D.new()
+	setting.name = "DiningPlaceSetting"
+	setting.position = origin
+	setting.rotation_degrees.y = rotation_y
+	parent.add_child(setting)
+
+	_cylinder(setting, "StoneCharger", Vector3.ZERO, 0.205, 0.205, 0.018, pale_stone())
+	_cylinder(setting, "DinnerPlate", Vector3(0.0, 0.018, 0.0), 0.155, 0.175, 0.025, ceramic)
+	_cylinder(setting, "ShallowBowl", Vector3(0.0, 0.043, 0.0), 0.105, 0.075, 0.045, ceramic)
+	_box(setting, "DinnerKnife", Vector3(0.245, 0.022, 0.0), Vector3(0.018, 0.018, 0.31), champagne)
+	_box(setting, "DinnerFork", Vector3(-0.245, 0.022, 0.0), Vector3(0.022, 0.018, 0.29), champagne)
+	for tine_x in [-0.014, 0.0, 0.014]:
+		_box(setting, "ForkTine", Vector3(-0.245 + tine_x, 0.028, -0.158), Vector3(0.006, 0.012, 0.065), champagne)
+	_sphere(setting, "FoldedNapkin", Vector3(0.0, 0.085, 0.0), Vector3(0.16, 0.035, 0.075), cream)
+	_cylinder(setting, "WineGlassFoot", Vector3(0.29, 0.018, -0.18), 0.055, 0.055, 0.012, crystal)
+	_cylinder(setting, "WineGlassStem", Vector3(0.29, 0.105, -0.18), 0.009, 0.009, 0.17, crystal)
+	_sphere(setting, "WineGlassBowl", Vector3(0.29, 0.225, -0.18), Vector3(0.072, 0.10, 0.072), crystal)
 
 
 func _add_dining_chair(parent: Node3D, origin: Vector3, rotation_y: float, seat_id: String) -> void:
