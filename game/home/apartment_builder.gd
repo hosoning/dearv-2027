@@ -1108,7 +1108,14 @@ func _create_hinged_door(id: String, hinge_position: Vector3, width: float, rota
 
 
 func _add_light_switch(id: String, position: Vector3, lights: Array[Light3D]) -> void:
-	_box(self, "%sPlate" % id, position, Vector3(0.16, 0.24, 0.035), pale_stone_material, false)
+	# Shadow-gap frame, flush faceplate and articulated rocker keep wall controls
+	# from reading as floating rectangles.
+	var switch_shadow := _material(Color("242321"), 0.48, 0.22)
+	var switch_face := _material(Color("d8d1c7"), 0.36)
+	_box(self, "%sShadowFrame" % id, position + Vector3(0.0, 0.0, 0.012), Vector3(0.205, 0.285, 0.025), switch_shadow, false)
+	_box(self, "%sPlate" % id, position, Vector3(0.172, 0.252, 0.038), switch_face, false)
+	_box(self, "%sRocker" % id, position + Vector3(0.0, 0.012, -0.026), Vector3(0.095, 0.142, 0.022), pale_stone_material, false)
+	_box(self, "%sRockerTopBevel" % id, position + Vector3(0.0, 0.072, -0.040), Vector3(0.076, 0.018, 0.014), warm_light_material, false)
 	var interaction := LightSwitchInteractable.new()
 	interaction.name = "%sSwitch" % id
 	interaction.object_id = id
@@ -1127,7 +1134,50 @@ func _ceiling_light(id: String, position: Vector3, energy: float, light_range: f
 	light.omni_range = light_range
 	light.shadow_enabled = true
 	add_child(light)
-	_box(self, "%sTrim" % id, position + Vector3(0.0, 0.08, 0.0), Vector3(0.22, 0.04, 0.22), warm_light_material, false)
+
+	# Recessed anti-glare downlight: a metal trim ring, dark baffle and set-back
+	# luminous lens replace the former glowing square.
+	var fixture := Node3D.new()
+	fixture.name = "%sFixture" % id
+	add_child(fixture)
+
+	var trim_material := _material(Color("b5afa5"), 0.24, 0.70)
+	var baffle_material := _material(Color("171716"), 0.42, 0.18)
+	var trim := MeshInstance3D.new()
+	trim.name = "DownlightTrimRing"
+	var trim_mesh := TorusMesh.new()
+	trim_mesh.inner_radius = 0.090
+	trim_mesh.outer_radius = 0.126
+	trim_mesh.rings = 24
+	trim_mesh.ring_segments = 12
+	trim_mesh.material = trim_material
+	trim.mesh = trim_mesh
+	trim.position = position + Vector3(0.0, 0.145, 0.0)
+	fixture.add_child(trim)
+
+	var baffle := MeshInstance3D.new()
+	baffle.name = "DownlightBaffle"
+	var baffle_mesh := CylinderMesh.new()
+	baffle_mesh.top_radius = 0.094
+	baffle_mesh.bottom_radius = 0.076
+	baffle_mesh.height = 0.075
+	baffle_mesh.radial_segments = 28
+	baffle_mesh.material = baffle_material
+	baffle.mesh = baffle_mesh
+	baffle.position = position + Vector3(0.0, 0.118, 0.0)
+	fixture.add_child(baffle)
+
+	var lens := MeshInstance3D.new()
+	lens.name = "DownlightLens"
+	var lens_mesh := CylinderMesh.new()
+	lens_mesh.top_radius = 0.073
+	lens_mesh.bottom_radius = 0.073
+	lens_mesh.height = 0.018
+	lens_mesh.radial_segments = 28
+	lens_mesh.material = warm_light_material
+	lens.mesh = lens_mesh
+	lens.position = position + Vector3(0.0, 0.078, 0.0)
+	fixture.add_child(lens)
 	return light
 
 
