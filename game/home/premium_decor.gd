@@ -1,10 +1,10 @@
 class_name PremiumDecor
 extends Node3D
 
-var cream := StandardMaterial3D.new()
+var cream := ShaderMaterial.new()
 var walnut := StandardMaterial3D.new()
 var champagne := StandardMaterial3D.new()
-var textile := StandardMaterial3D.new()
+var textile := ShaderMaterial.new()
 var charcoal := StandardMaterial3D.new()
 var mirror := StandardMaterial3D.new()
 var warm_glow := StandardMaterial3D.new()
@@ -34,15 +34,18 @@ func _ready() -> void:
 
 
 func _setup_materials() -> void:
-	cream.albedo_color = Color("e7dfd3")
-	cream.roughness = 0.86
+	var fabric_shader := _create_woven_fabric_shader()
+	cream.shader = fabric_shader
+	cream.set_shader_parameter("base_color", Color("e7dfd3"))
+	cream.set_shader_parameter("fabric_roughness", 0.86)
+	textile.shader = fabric_shader
+	textile.set_shader_parameter("base_color", Color("776d65"))
+	textile.set_shader_parameter("fabric_roughness", 0.94)
 	walnut.albedo_color = Color("4c3428")
 	walnut.roughness = 0.48
 	champagne.albedo_color = Color("b99666")
 	champagne.roughness = 0.28
 	champagne.metallic = 0.72
-	textile.albedo_color = Color("776d65")
-	textile.roughness = 0.94
 	charcoal.albedo_color = Color("24211f")
 	charcoal.roughness = 0.62
 	mirror.albedo_color = Color(0.58, 0.66, 0.7, 0.42)
@@ -59,6 +62,33 @@ func _setup_materials() -> void:
 	leaf_dark.roughness = 0.78
 	leaf_light.albedo_color = Color("4f725c")
 	leaf_light.roughness = 0.82
+
+
+func _create_woven_fabric_shader() -> Shader:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+uniform vec3 base_color : source_color = vec3(0.75);
+uniform float fabric_roughness : hint_range(0.0, 1.0) = 0.9;
+varying vec3 world_position;
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float warp = sin((world_position.x + world_position.y * 0.37 + world_position.z * 0.08) * 185.0) * 0.5 + 0.5;
+	float weft = sin((world_position.z + world_position.y * 0.61 - world_position.x * 0.06) * 172.0) * 0.5 + 0.5;
+	float basket = warp * 0.46 + weft * 0.46 + warp * weft * 0.08;
+	float soft_cloud = sin(world_position.x * 3.2 + world_position.z * 2.6 + world_position.y * 1.8) * 0.5 + 0.5;
+	ALBEDO = base_color * mix(0.91, 1.065, basket * 0.78 + soft_cloud * 0.22);
+	ROUGHNESS = clamp(fabric_roughness + (basket - 0.5) * 0.065, 0.55, 1.0);
+	SPECULAR = 0.14;
+}
+"""
+	return shader
 
 
 func _build_master_bedroom() -> void:
