@@ -5,10 +5,10 @@ const CEILING_HEIGHT := 3.25
 const WALL_THICKNESS := 0.16
 const HERO_MODEL_ROOT := "res://assets/models/"
 
-var wall_material: StandardMaterial3D
+var wall_material: ShaderMaterial
 var floor_material: ShaderMaterial
 var warm_wood_material: StandardMaterial3D
-var pale_stone_material: StandardMaterial3D
+var pale_stone_material: ShaderMaterial
 var dark_metal_material: StandardMaterial3D
 var glass_material: StandardMaterial3D
 var appliance_material: StandardMaterial3D
@@ -33,10 +33,10 @@ func _ready() -> void:
 
 
 func _create_materials() -> void:
-	wall_material = _material(Color("e8e1d7"), 0.82)
+	wall_material = _create_plaster_material()
 	floor_material = _create_plank_floor_material()
 	warm_wood_material = _material(Color("7d573c"), 0.5)
-	pale_stone_material = _material(Color("d9d2c6"), 0.32)
+	pale_stone_material = _create_limestone_material()
 	dark_metal_material = _material(Color("292825"), 0.22, 0.72)
 	appliance_material = _material(Color("b9b8b3"), 0.2, 0.8)
 	warm_light_material = _material(Color("ffcf91"), 0.28)
@@ -81,6 +81,70 @@ func _build_shell() -> void:
 	# Concealed linear air-conditioning slots; no wall-mounted AC boxes.
 	for x in [-12.0, -2.0, 7.0, 15.0]:
 		_box(self, "ConcealedACSlot", Vector3(x, CEILING_HEIGHT - 0.015, 11.8), Vector3(3.8, 0.035, 0.18), dark_metal_material, false)
+
+
+func _create_plaster_material() -> ShaderMaterial:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float fine_grain = sin(world_position.x * 63.0 + world_position.y * 47.0 + world_position.z * 57.0) * 0.5 + 0.5;
+	float cross_grain = sin(world_position.x * 29.0 - world_position.y * 71.0 + world_position.z * 31.0) * 0.5 + 0.5;
+	float cloud = sin(world_position.x * 1.8 + sin(world_position.y * 1.35) * 1.7 + world_position.z * 1.15) * 0.5 + 0.5;
+	float texture_value = fine_grain * 0.45 + cross_grain * 0.25 + cloud * 0.30;
+	vec3 warm_plaster = vec3(0.806, 0.770, 0.710);
+	ALBEDO = warm_plaster * mix(0.955, 1.035, texture_value);
+	ROUGHNESS = mix(0.76, 0.88, fine_grain * 0.55 + cross_grain * 0.45);
+	SPECULAR = 0.24;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	return material
+
+
+func _create_limestone_material() -> ShaderMaterial:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+
+float stone_hash(vec3 point) {
+	return fract(sin(dot(point, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
+}
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float broad = sin(world_position.x * 0.72 + sin(world_position.z * 0.46) * 2.2 + world_position.y * 1.35);
+	float secondary = sin(world_position.z * 1.18 - world_position.x * 0.31 + sin(world_position.y * 2.1));
+	float primary_vein = smoothstep(0.86, 0.975, abs(broad));
+	float hairline = smoothstep(0.925, 0.99, abs(secondary));
+	float mineral = stone_hash(floor(world_position * 9.0));
+	vec3 limestone = vec3(0.730, 0.700, 0.650);
+	vec3 vein_color = vec3(0.455, 0.425, 0.385);
+	vec3 color = limestone * mix(0.955, 1.045, mineral);
+	color = mix(color, vein_color, primary_vein * 0.24 + hairline * 0.12);
+	ALBEDO = color;
+	ROUGHNESS = mix(0.29, 0.39, mineral * 0.55 + primary_vein * 0.30);
+	SPECULAR = 0.48;
+}
+"""
+	var material := ShaderMaterial.new()
+	material.shader = shader
+	return material
 
 
 func _create_plank_floor_material() -> ShaderMaterial:
