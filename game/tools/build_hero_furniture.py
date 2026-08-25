@@ -210,6 +210,34 @@ def pipe_between(name, start, end, radius, material, parent=None):
     return obj
 
 
+def tapered_pipe_between(name, start, end, radius_start, radius_end, material, parent=None):
+    """Build a softly rounded tapered tube between two authored garment points."""
+    start_v = Vector(start)
+    end_v = Vector(end)
+    direction = end_v - start_v
+    midpoint = (start_v + end_v) * 0.5
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=28,
+        radius1=radius_start,
+        radius2=radius_end,
+        depth=direction.length,
+        location=midpoint,
+    )
+    obj = bpy.context.object
+    obj.name = name
+    obj.rotation_euler = direction.to_track_quat("Z", "Y").to_euler()
+    obj.data.materials.append(material)
+    bevel = obj.modifiers.new("Soft sleeve edge", "BEVEL")
+    bevel.width = min(radius_end * 0.22, 0.014)
+    bevel.segments = 3
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier=bevel.name)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    obj.parent = parent
+    return obj
+
+
 def tapered_prism(name, location, width_top, width_bottom, height, depth, material, parent=None):
     z0 = -height / 2.0
     z1 = height / 2.0
@@ -272,22 +300,27 @@ def build_tailored_jacket(root, x, y, z, cloth, metal):
         (0.20, 0.18), (0.235, -0.12), (0.19, -0.38),
     ]
     extruded_silhouette("Tailored jacket body", (x, y, z), torso_points, 0.15, cloth, root, 0.022)
-    for side in (-1, 1):
-        rounded_box(
-            "Tailored sleeve",
-            (x + side * 0.285, y, z + 0.01),
-            (0.15, 0.145, 0.61),
-            cloth,
-            0.055,
-            6,
-            rotation=(0, math.radians(side * 8), 0),
-            parent=root,
-        )
-    # Raised lapels, collar and hardware make the front readable even from the room.
     front_y = y - 0.088
+
+    # Anatomical shoulder caps and tapered, slightly angled sleeves replace
+    # the old rounded cuboids, so every jacket reads as hanging clothing.
+    for side in (-1, 1):
+        shoulder = (x + side * 0.23, y, z + 0.23)
+        elbow = (x + side * 0.31, y + 0.004, z - 0.02)
+        cuff = (x + side * 0.285, y + 0.008, z - 0.31)
+        sphere("Jacket shoulder cap", shoulder, (0.12, 0.086, 0.14), cloth, root, 28)
+        tapered_pipe_between("Jacket upper sleeve", shoulder, elbow, 0.082, 0.066, cloth, root)
+        tapered_pipe_between("Jacket lower sleeve", elbow, cuff, 0.067, 0.052, cloth, root)
+        pipe_between("Jacket cuff", (cuff[0] - 0.045, front_y, cuff[2]), (cuff[0] + 0.045, front_y, cuff[2]), 0.010, metal, root)
+
+    # Raised lapels, collar, shirt insert, pockets and hardware make the front
+    # readable even from the far side of the dressing island.
     tapered_prism("Jacket lapel", (x - 0.075, front_y, z + 0.13), 0.035, 0.13, 0.32, 0.018, cloth, root)
     tapered_prism("Jacket lapel", (x + 0.075, front_y, z + 0.13), 0.035, 0.13, 0.32, 0.018, cloth, root)
+    tapered_prism("Jacket shirt insert", (x, front_y - 0.012, z + 0.17), 0.055, 0.17, 0.25, 0.012, metal, root)
     pipe_between("Jacket collar", (x - 0.10, front_y, z + 0.31), (x + 0.10, front_y, z + 0.31), 0.018, cloth, root)
+    for side in (-1, 1):
+        pipe_between("Jacket welt pocket", (x + side * 0.055, front_y - 0.014, z - 0.14), (x + side * 0.19, front_y - 0.014, z - 0.10), 0.009, metal, root)
     for button_z in (z - 0.02, z - 0.14):
         cylinder("Jacket button", (x, front_y - 0.014, button_z), 0.018, 0.012, metal, root, 16, rotation=(math.radians(90), 0, 0))
 
