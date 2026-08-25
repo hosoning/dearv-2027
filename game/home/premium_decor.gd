@@ -125,12 +125,28 @@ func _build_master_bedroom() -> void:
 
 	# Oversized textile rug anchors the bed instead of leaving it floating on the timber floor.
 	_box(root, "BedroomRug", Vector3(-11.45, 0.018, -6.75), Vector3(5.6, 0.028, 4.5), textile)
+	_box(root, "BedroomRugBindingNorth", Vector3(-11.45, 0.038, -4.505), Vector3(5.56, 0.018, 0.035), charcoal)
+	_box(root, "BedroomRugBindingSouth", Vector3(-11.45, 0.038, -8.995), Vector3(5.56, 0.018, 0.035), charcoal)
+	_box(root, "BedroomRugBindingWest", Vector3(-14.23, 0.038, -6.75), Vector3(0.035, 0.018, 4.48), charcoal)
+	_box(root, "BedroomRugBindingEast", Vector3(-8.67, 0.038, -6.75), Vector3(0.035, 0.018, 4.48), charcoal)
+
+	# Tailored upholstered wall panels sit within a walnut surround. Deep seams,
+	# perimeter metal trim and varied nap replace the former single slab.
 	_box(root, "HeadboardWallPanel", Vector3(-11.45, 1.72, -8.73), Vector3(6.4, 2.75, 0.08), walnut)
-	for x in [-13.62, -9.28]:
-		_box(root, "BedsideCabinet", Vector3(x, 0.36, -7.85), Vector3(0.82, 0.72, 0.58), walnut)
-		_add_collision_box(root, "BedsideCabinetCollision", Vector3(x, 0.36, -7.85), Vector3(0.82, 0.72, 0.58))
-		_box(root, "BedsideTop", Vector3(x, 0.74, -7.85), Vector3(0.88, 0.045, 0.62), champagne)
-		suite_detail_lights.append(_add_table_lamp(root, Vector3(x, 0.78, -7.85)))
+	for panel_index in range(5):
+		var panel_x := -14.05 + float(panel_index) * 1.30
+		_box(root, "UpholsteredWallPanel", Vector3(panel_x, 1.72, -8.675), Vector3(1.16, 2.36, 0.055), textile if panel_index % 2 == 0 else cream)
+		if panel_index < 4:
+			_box(root, "UpholsteredPanelReveal", Vector3(panel_x + 0.65, 1.72, -8.638), Vector3(0.035, 2.38, 0.025), charcoal)
+	_box(root, "HeadboardTrimTop", Vector3(-11.45, 2.96, -8.64), Vector3(6.20, 0.045, 0.035), champagne)
+	_box(root, "HeadboardTrimBottom", Vector3(-11.45, 0.48, -8.64), Vector3(6.20, 0.045, 0.035), champagne)
+	_box(root, "HeadboardTrimLeft", Vector3(-14.55, 1.72, -8.64), Vector3(0.045, 2.52, 0.035), champagne)
+	_box(root, "HeadboardTrimRight", Vector3(-8.35, 1.72, -8.64), Vector3(0.045, 2.52, 0.035), champagne)
+
+	# ApartmentBuilder owns the interactive bedside cabinets. Place the lamps on
+	# those exact tops so no duplicate boxes or collision shells overlap them.
+	for x in [-13.45, -9.45]:
+		suite_detail_lights.append(_add_table_lamp(root, Vector3(x, 0.78, -7.72)))
 
 	# A restrained upholstered bench makes the foot of the bed read as a real hotel-like suite.
 	_box(root, "BedroomBenchSeat", Vector3(-11.45, 0.45, -5.34), Vector3(2.15, 0.34, 0.62), cream)
