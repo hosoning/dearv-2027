@@ -226,6 +226,17 @@ func _build_atmosphere_actions(payload: Dictionary) -> void:
 		lock_button.text = "Unlock private entrance" if locked else "Lock private entrance"
 		lock_button.pressed.connect(_set_entry_lock.bind(entry_door, not locked, target, player))
 		inspector_actions.add_child(lock_button)
+	var shades := get_tree().get_nodes_in_group("privacy_shade")
+	if not shades.is_empty():
+		var all_lowered := true
+		for node in shades:
+			if node is OpenableInteractable and (node as OpenableInteractable).is_open():
+				all_lowered = false
+				break
+		var privacy_button := Button.new()
+		privacy_button.text = "Raise all privacy shades" if all_lowered else "Lower all privacy shades"
+		privacy_button.pressed.connect(_set_privacy_shades.bind(all_lowered, target, player, entry_door))
+		inspector_actions.add_child(privacy_button)
 
 
 func _open_home_controls(target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
@@ -257,6 +268,21 @@ func _set_entry_lock(entry_door: DoorInteractable, locked: bool, target: DayNigh
 		inspector_body.text = "The private entrance is locked and saved." if locked else "The private entrance is unlocked and saved."
 	else:
 		inspector_body.text = "Close the entrance door before locking it."
+
+
+func _set_privacy_shades(open: bool, target: DayNightDirector, player: ComfortController, entry_door: DoorInteractable) -> void:
+	var changed := 0
+	for node in get_tree().get_nodes_in_group("privacy_shade"):
+		if not node is OpenableInteractable:
+			continue
+		var shade := node as OpenableInteractable
+		if shade.is_open() != open and shade.set_open(open):
+			changed += 1
+	_open_home_controls(target, player, entry_door)
+	if changed > 0:
+		inspector_body.text = "All privacy shades are rising and will be saved." if open else "All privacy shades are lowering and will be saved."
+	else:
+		inspector_body.text = "The privacy shades are already in that position."
 
 
 func _build_inventory_actions(payload: Dictionary) -> void:
