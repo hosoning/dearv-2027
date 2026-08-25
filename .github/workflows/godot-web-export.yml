@@ -19,7 +19,9 @@ concurrency:
 
 jobs:
   export-web:
-    if: github.actor != 'github-actions[bot]'
+    # Generated Blender assets are committed by github-actions[bot]. The path
+    # filters already prevent exported Web files from looping back here, so bot
+    # commits under game/assets must be allowed through to reach the live build.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
