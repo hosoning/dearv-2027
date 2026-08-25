@@ -2,7 +2,7 @@ class_name PremiumDecor
 extends Node3D
 
 var cream := ShaderMaterial.new()
-var walnut := StandardMaterial3D.new()
+var walnut := ShaderMaterial.new()
 var champagne := StandardMaterial3D.new()
 var textile := ShaderMaterial.new()
 var charcoal := StandardMaterial3D.new()
@@ -41,8 +41,7 @@ func _setup_materials() -> void:
 	textile.shader = fabric_shader
 	textile.set_shader_parameter("base_color", Color("776d65"))
 	textile.set_shader_parameter("fabric_roughness", 0.94)
-	walnut.albedo_color = Color("4c3428")
-	walnut.roughness = 0.48
+	walnut.shader = _create_walnut_shader()
 	champagne.albedo_color = Color("b99666")
 	champagne.roughness = 0.28
 	champagne.metallic = 0.72
@@ -62,6 +61,34 @@ func _setup_materials() -> void:
 	leaf_dark.roughness = 0.78
 	leaf_light.albedo_color = Color("4f725c")
 	leaf_light.roughness = 0.82
+
+
+func _create_walnut_shader() -> Shader:
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+
+void vertex() {
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float grain_axis = world_position.y * 0.80 + world_position.x * 0.16 + world_position.z * 0.08;
+	float long_grain = sin(grain_axis * 23.0 + sin(world_position.x * 2.4 + world_position.z * 2.0) * 2.8) * 0.5 + 0.5;
+	float fine_grain = sin(grain_axis * 136.0 + sin(world_position.x * 7.2 - world_position.z * 4.6) * 0.82) * 0.5 + 0.5;
+	float pore = sin((world_position.x + world_position.z) * 88.0 + world_position.y * 41.0) * 0.5 + 0.5;
+	float grain = long_grain * 0.54 + fine_grain * 0.33 + pore * 0.13;
+	vec3 smoked_dark = vec3(0.145, 0.072, 0.042);
+	vec3 smoked_light = vec3(0.330, 0.195, 0.120);
+	ALBEDO = mix(smoked_dark, smoked_light, grain);
+	ROUGHNESS = mix(0.40, 0.55, fine_grain * 0.65 + pore * 0.35);
+	SPECULAR = 0.32;
+}
+"""
+	return shader
 
 
 func _create_woven_fabric_shader() -> Shader:
