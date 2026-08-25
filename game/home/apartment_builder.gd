@@ -406,13 +406,55 @@ func _build_kitchen() -> void:
 	kitchen.name = "InteractiveKitchen"
 	add_child(kitchen)
 
-	# Full L-shaped kitchen run. The island is a bar only and deliberately has no sink.
+	# Full L-shaped kitchen run. Layered fronts, reveals and appliance niches keep
+	# the cabinetry from reading as three monolithic blocks.
+	var cabinet_face := _material(Color("78543b"), 0.46)
+	var cabinet_reveal := _material(Color("241f1b"), 0.42, 0.18)
+	var handle_material := _material(Color("9b7b55"), 0.22, 0.76)
+	var backsplash_material := _material(Color("c9c2b7"), 0.38)
+
 	_box(kitchen, "BackCabinetRun", Vector3(0.0, 0.46, -12.75), Vector3(10.6, 0.92, 0.72), warm_wood_material, true)
+	_box(kitchen, "BackToeKick", Vector3(-0.45, 0.10, -12.35), Vector3(9.55, 0.18, 0.08), cabinet_reveal, false)
 	_box(kitchen, "BackStoneTop", Vector3(0.0, 0.95, -12.75), Vector3(10.7, 0.08, 0.78), pale_stone_material, true)
+	_box(kitchen, "BackStoneApron", Vector3(0.0, 0.90, -12.34), Vector3(10.7, 0.12, 0.035), pale_stone_material, false)
+	_box(kitchen, "StoneBacksplash", Vector3(-0.45, 1.48, -13.13), Vector3(9.55, 0.96, 0.055), backsplash_material, false)
+
+	# Individually inset base fronts with 8 mm shadow gaps and slim metal pulls.
+	for x in [-4.45, -3.35, -2.25, -1.15, -0.05, 1.05, 2.15, 3.25]:
+		_box(kitchen, "BaseCabinetFront", Vector3(x, 0.52, -12.365), Vector3(1.02, 0.70, 0.035), cabinet_face, false)
+		_box(kitchen, "BaseCabinetTopGap", Vector3(x, 0.875, -12.383), Vector3(1.02, 0.018, 0.018), cabinet_reveal, false)
+		_box(kitchen, "BaseCabinetPull", Vector3(x, 0.77, -12.395), Vector3(0.42, 0.025, 0.025), handle_material, false)
+
+	# Shallow upper cabinets stop below the ceiling and cast a warm task-light
+	# line across the stone splashback.
+	for x in [-3.85, -2.55, -1.25, 0.05, 1.35, 2.65]:
+		_box(kitchen, "UpperCabinetCarcass", Vector3(x, 2.24, -13.48), Vector3(1.20, 1.12, 0.48), warm_wood_material, false)
+		_box(kitchen, "UpperCabinetFront", Vector3(x, 2.24, -13.225), Vector3(1.12, 1.02, 0.035), cabinet_face, false)
+		_box(kitchen, "UpperCabinetSideReveal", Vector3(x + 0.59, 2.24, -13.205), Vector3(0.018, 1.04, 0.025), cabinet_reveal, false)
+		_box(kitchen, "UpperCabinetPull", Vector3(x + 0.43, 1.81, -13.185), Vector3(0.025, 0.28, 0.025), handle_material, false)
+	_box(kitchen, "UnderCabinetLight", Vector3(-0.60, 1.67, -13.20), Vector3(7.75, 0.025, 0.055), warm_light_material, false)
+
+	# The perpendicular run gets the same joinery rhythm, including a true
+	# recessed plinth and side-facing drawer fronts.
 	_box(kitchen, "LeftCabinetRun", Vector3(-5.0, 0.46, -10.25), Vector3(0.72, 0.92, 5.7), warm_wood_material, true)
+	_box(kitchen, "LeftToeKick", Vector3(-4.60, 0.10, -10.05), Vector3(0.08, 0.18, 4.95), cabinet_reveal, false)
 	_box(kitchen, "LeftStoneTop", Vector3(-5.0, 0.95, -10.25), Vector3(0.78, 0.08, 5.8), pale_stone_material, true)
+	_box(kitchen, "LeftStoneApron", Vector3(-4.59, 0.90, -10.25), Vector3(0.035, 0.12, 5.8), pale_stone_material, false)
+	for z in [-11.65, -10.45, -9.25, -8.05]:
+		_box(kitchen, "LeftCabinetFront", Vector3(-4.615, 0.52, z), Vector3(0.035, 0.70, 1.10), cabinet_face, false)
+		_box(kitchen, "LeftCabinetPull", Vector3(-4.595, 0.77, z), Vector3(0.025, 0.025, 0.44), handle_material, false)
+
+	# Waterfall stone ends, a floating shadow line and a wood service face make
+	# the bar read as constructed furniture rather than a rectangular primitive.
 	_box(kitchen, "BarBase", Vector3(0.25, 0.5, -6.0), Vector3(5.8, 1.0, 1.12), warm_wood_material, true)
+	_box(kitchen, "BarShadowPlinth", Vector3(0.25, 0.08, -6.0), Vector3(5.15, 0.14, 0.92), cabinet_reveal, false)
 	_box(kitchen, "BarStone", Vector3(0.25, 1.04, -6.0), Vector3(6.1, 0.09, 1.34), pale_stone_material, true)
+	for side in [-1.0, 1.0]:
+		_box(kitchen, "BarWaterfallEnd", Vector3(0.25 + side * 3.005, 0.54, -6.0), Vector3(0.09, 1.02, 1.34), pale_stone_material, false)
+	_box(kitchen, "BarServiceFace", Vector3(0.25, 0.55, -5.425), Vector3(5.72, 0.78, 0.035), cabinet_face, false)
+	for x in [-1.55, -0.35, 0.85, 2.05]:
+		_box(kitchen, "BarFaceReveal", Vector3(x, 0.55, -5.40), Vector3(0.018, 0.76, 0.025), cabinet_reveal, false)
+
 	for x in [-1.7, -0.4, 0.9, 2.2]:
 		_add_bar_stool(kitchen, Vector3(x, 0.0, -4.95))
 
