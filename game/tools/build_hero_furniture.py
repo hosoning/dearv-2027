@@ -76,9 +76,12 @@ def mat(name, color, roughness=0.55, metallic=0.0):
 
     tex_coord = nodes.new("ShaderNodeTexCoord")
 
-    grain_scale = {"wood": 3.5, "fabric": 26.0, "metal": 40.0, "stone": 9.0, "smooth": 14.0}[pattern]
+    grain_scale = {"wood": 5.5, "fabric": 26.0, "metal": 40.0, "stone": 9.0, "smooth": 14.0}[pattern]
     mapping = nodes.new("ShaderNodeMapping")
-    mapping.inputs["Scale"].default_value = (1.0, 1.0, 6.0 if pattern == "wood" else 1.0)
+    # Wood grain follows the local vertical instead of forming broad cloudy
+    # patches across cabinet faces. Higher cross-grain frequency and slower
+    # variation along Z reads as directional veneer at room scale.
+    mapping.inputs["Scale"].default_value = (3.6, 3.6, 0.42) if pattern == "wood" else (1.0, 1.0, 1.0)
     links.new(tex_coord.outputs["Object"], mapping.inputs["Vector"])
 
     color_noise = nodes.new("ShaderNodeTexNoise")
@@ -88,7 +91,7 @@ def mat(name, color, roughness=0.55, metallic=0.0):
     links.new(mapping.outputs["Vector"], color_noise.inputs["Vector"])
 
     color_ramp = nodes.new("ShaderNodeValToRGB")
-    spread = 0.16 if pattern == "wood" else 0.06 if pattern == "fabric" else 0.03
+    spread = 0.09 if pattern == "wood" else 0.06 if pattern == "fabric" else 0.03
     color_ramp.color_ramp.elements[0].position = 0.4
     color_ramp.color_ramp.elements[0].color = (
         max(0.0, color[0] * (1 - spread)),
@@ -439,12 +442,21 @@ def build_wardrobe():
         mat("Ivory leather", (0.66, 0.61, 0.52, 1.0), 0.42),
     ]
 
-    # Open U-shaped cabinetry. There is no partition wall between bed and closet.
-    rounded_box("Back wardrobe carcass", (0.0, 1.95, 1.32), (5.8, 0.46, 2.64), backing, 0.035, 4, parent=root)
-    rounded_box("Left wardrobe carcass", (-2.67, 0.0, 1.32), (0.46, 4.3, 2.64), backing, 0.035, 4, parent=root)
-    rounded_box("Right wardrobe carcass", (2.67, 0.0, 1.32), (0.46, 4.3, 2.64), backing, 0.035, 4, parent=root)
+    # Open U-shaped fitted cabinetry. Thin recessed backs, structural stiles,
+    # plinths and crown rails replace the previous three monolithic slabs.
+    # The negative space between bays is now visible from inside the suite.
+    rounded_box("Back recessed panel", (0.0, 2.13, 1.32), (5.8, 0.10, 2.48), backing, 0.018, 3, parent=root)
+    for side in (-1, 1):
+        rounded_box("Side recessed panel", (side * 2.85, 0.0, 1.32), (0.10, 4.3, 2.48), backing, 0.018, 3, parent=root)
+        rounded_box("Side base plinth", (side * 2.76, 0.0, 0.10), (0.24, 4.35, 0.20), oak, 0.025, 4, parent=root)
+        rounded_box("Side crown rail", (side * 2.76, 0.0, 2.55), (0.24, 4.35, 0.18), oak, 0.025, 4, parent=root)
+        for y in (-1.92, -0.92, 0.08, 1.08, 1.92):
+            rounded_box("Side wardrobe stile", (side * 2.76, y, 1.32), (0.24, 0.075, 2.50), oak, 0.018, 3, parent=root)
+            rounded_box("Side display shelf", (side * 2.69, y + 0.38, 0.72), (0.33, 0.72, 0.055), oak, 0.012, 3, parent=root)
+    rounded_box("Back base plinth", (0.0, 2.04, 0.10), (5.85, 0.24, 0.20), oak, 0.025, 4, parent=root)
+    rounded_box("Back crown rail", (0.0, 2.04, 2.55), (5.85, 0.24, 0.18), oak, 0.025, 4, parent=root)
     for x in (-2.42, -1.42, -0.42, 0.58, 1.58, 2.42):
-        rounded_box("Wardrobe divider", (x, 1.69, 1.32), (0.055, 0.49, 2.55), oak, 0.012, 3, parent=root)
+        rounded_box("Wardrobe divider", (x, 1.91, 1.32), (0.075, 0.39, 2.50), oak, 0.016, 3, parent=root)
     for x in (-2.0, -1.0, 0.0, 1.0, 2.0):
         rounded_box("Top shelf", (x, 1.58, 2.30), (0.90, 0.56, 0.055), oak, 0.012, 3, parent=root)
         rounded_box("Bottom shelf", (x, 1.58, 0.28), (0.90, 0.56, 0.055), oak, 0.012, 3, parent=root)
