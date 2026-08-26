@@ -28,6 +28,7 @@ func _ready() -> void:
 	_build_distant_city_view()
 	_build_doors()
 	_build_lighting()
+	_build_ceiling_services()
 	_build_master_suite_assets()
 	_build_kitchen()
 	_build_study_rig()
@@ -720,6 +721,58 @@ func _build_lighting() -> void:
 	_add_light_switch("bedroom_lights", Vector3(-5.12, 1.18, 5.15), bedroom_lights)
 	_add_light_switch("dressing_lights", Vector3(-8.15, 1.18, 7.86), dressing_lights)
 	_add_light_switch("bathroom_lights", Vector3(-12.85, 1.18, 8.14), bathroom_lights)
+
+
+func _build_ceiling_services() -> void:
+	var services := Node3D.new()
+	services.name = "CeilingServiceDetails"
+	add_child(services)
+	var slot_material := _material(Color("252725"), 0.42, 0.38)
+	var detector_material := _material(Color("dedbd3"), 0.62)
+	var sprinkler_material := _material(Color("9a8e7c"), 0.28, 0.72)
+
+	# Recessed linear supply and return slots establish believable mechanical
+	# coordination across the large ceiling rather than leaving a blank plane.
+	var diffuser_data := [
+		[Vector3(-2.2, 3.145, 3.2), Vector3(3.2, 0.025, 0.20), true],
+		[Vector3(6.2, 3.145, -5.5), Vector3(2.6, 0.025, 0.20), true],
+		[Vector3(-11.5, 3.145, -5.6), Vector3(2.8, 0.025, 0.20), true],
+		[Vector3(14.2, 3.145, 3.2), Vector3(0.20, 0.025, 2.5), false]
+	]
+	for diffuser in diffuser_data:
+		var position: Vector3 = diffuser[0]
+		var size: Vector3 = diffuser[1]
+		var along_x: bool = diffuser[2]
+		_box(services, "RecessedLinearDiffuser", position, size, slot_material, false)
+		for offset in [-0.055, 0.0, 0.055]:
+			var fin_position := position + (Vector3(0.0, 0.0, offset) if along_x else Vector3(offset, 0.0, 0.0))
+			var fin_size := Vector3(size.x * 0.94, 0.012, 0.012) if along_x else Vector3(0.012, 0.012, size.z * 0.94)
+			_box(services, "DiffuserFin", fin_position + Vector3(0.0, -0.016, 0.0), fin_size, detector_material, false)
+
+	# Flush detectors, sprinkler escutcheons and projecting heads add the small
+	# hardware normally visible between downlights in a finished residence.
+	for detector_position in [
+		Vector3(3.8, 3.125, 2.0),
+		Vector3(-11.3, 3.125, -4.2),
+		Vector3(14.1, 3.125, 4.8)
+	]:
+		_cylinder(services, "SmokeDetectorBody", detector_position, 0.095, 0.105, 0.045, detector_material)
+		_cylinder(services, "SmokeDetectorSensorRing", detector_position + Vector3(0.0, -0.030, 0.0), 0.052, 0.052, 0.016, slot_material)
+		for angle in range(0, 360, 60):
+			var radians := deg_to_rad(float(angle))
+			var vent_position := detector_position + Vector3(cos(radians) * 0.073, -0.030, sin(radians) * 0.073)
+			_box(services, "DetectorVent", vent_position, Vector3(0.020, 0.010, 0.010), slot_material, false)
+
+	for sprinkler_position in [
+		Vector3(-4.2, 3.125, 5.6),
+		Vector3(5.0, 3.125, -2.0),
+		Vector3(-12.8, 3.125, 2.8),
+		Vector3(-8.0, 3.125, 11.0),
+		Vector3(15.4, 3.125, -1.0)
+	]:
+		_cylinder(services, "SprinklerEscutcheon", sprinkler_position, 0.060, 0.060, 0.022, detector_material)
+		_cylinder(services, "SprinklerHead", sprinkler_position + Vector3(0.0, -0.038, 0.0), 0.018, 0.024, 0.055, sprinkler_material)
+		_box(services, "SprinklerDeflector", sprinkler_position + Vector3(0.0, -0.070, 0.0), Vector3(0.075, 0.010, 0.025), sprinkler_material, false)
 
 
 func _build_kitchen() -> void:
