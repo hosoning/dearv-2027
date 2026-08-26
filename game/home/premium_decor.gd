@@ -226,10 +226,26 @@ func _build_walk_in_wardrobe() -> void:
 	_cylinder(root, "PerfumeBottleRound", Vector3(-11.50, 1.16, 3.78), 0.085, 0.095, 0.16, ceramic)
 	_sphere(root, "PerfumeCapRound", Vector3(-11.50, 1.27, 3.78), Vector3(0.042, 0.042, 0.042), champagne)
 
-	# Small dressing stool rather than another large block.
-	_box(root, "DressingStoolSeat", Vector3(-11.45, 0.48, 5.15), Vector3(0.92, 0.22, 0.58), cream)
-	for x in [-11.78, -11.12]:
-		_box(root, "DressingStoolLeg", Vector3(x, 0.24, 5.15), Vector3(0.055, 0.48, 0.42), champagne)
+	# Fine jewellery and a watch occupy the dressing top at human scale.
+	_box(root, "WatchStrap", Vector3(-11.18, 1.088, 3.82), Vector3(0.10, 0.016, 0.42), charcoal)
+	_cylinder(root, "WatchCase", Vector3(-11.18, 1.112, 3.82), 0.085, 0.085, 0.025, champagne)
+	_cylinder(root, "WatchDial", Vector3(-11.18, 1.130, 3.82), 0.068, 0.068, 0.010, mirror)
+	for index in range(11):
+		var chain_x := -10.88 + float(index) * 0.055
+		var chain_z := 3.70 + sin(float(index) * 0.55) * 0.09
+		_sphere(root, "NecklaceLink", Vector3(chain_x, 1.105, chain_z), Vector3(0.018, 0.010, 0.018), champagne)
+	_sphere(root, "NecklacePendant", Vector3(-10.61, 1.118, 3.61), Vector3(0.045, 0.018, 0.06), champagne)
+	for x in [-11.96, -11.82]:
+		_sphere(root, "StudEarring", Vector3(x, 1.112, 3.94), Vector3(0.035, 0.018, 0.035), champagne)
+		_sphere(root, "EarringStone", Vector3(x, 1.128, 3.94), Vector3(0.018, 0.012, 0.018), crystal)
+
+	# The dressing stool now has an oval upholstered crown, timber shadow collar
+	# and four tapered legs instead of a padded rectangular block.
+	_sphere(root, "DressingStoolCushion", Vector3(-11.45, 0.50, 5.15), Vector3(0.47, 0.14, 0.30), cream)
+	_sphere(root, "DressingStoolUnderpad", Vector3(-11.45, 0.40, 5.15), Vector3(0.43, 0.075, 0.26), walnut)
+	for x in [-11.76, -11.14]:
+		for z in [4.98, 5.32]:
+			_cylinder(root, "DressingStoolTaperedLeg", Vector3(x, 0.22, z), 0.020, 0.038, 0.40, champagne)
 	_add_collision_box(root, "DressingStoolCollision", Vector3(-11.45, 0.38, 5.15), Vector3(0.92, 0.76, 0.58))
 	_add_seat_interaction(root, "dressing_stool_seat", "dressing stool", Vector3(-11.45, 0.02, 5.15), 0.0, Vector3(0.98, 1.15, 0.76))
 
