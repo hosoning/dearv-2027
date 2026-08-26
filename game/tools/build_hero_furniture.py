@@ -372,6 +372,7 @@ def build_couture_dress(root, x, y, z, cloth, metal):
         pipe_between("Dress soft pleat", (x + offset * 0.45, y - 0.096, z + 0.11), (x + offset, y - 0.102, z - 0.72), 0.008, cloth, root)
 
 
+# Re-triggered after a stale hosted-runner assignment; generated geometry is unchanged.
 def build_folded_knit_stack(root, x, y, z, cloth_layers, trim):
     """Build a soft, visibly folded knitwear stack for an open wardrobe shelf."""
     for layer_index, cloth in enumerate(cloth_layers):
