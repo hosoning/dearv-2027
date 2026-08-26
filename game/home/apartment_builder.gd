@@ -834,6 +834,7 @@ func _build_kitchen() -> void:
 
 	_create_refrigerator(kitchen, Vector3(4.05, 0.0, -12.15))
 	_create_sink(kitchen, Vector3(-2.2, 0.0, -12.55))
+	_create_wine_cooler(kitchen, Vector3(-0.55, 0.0, -12.34))
 	_create_stove(kitchen, Vector3(1.0, 0.0, -12.55))
 	_create_integrated_oven(kitchen, Vector3(2.48, 0.0, -12.34))
 	_create_prep_station(kitchen, Vector3(-4.42, 0.0, -9.65))
@@ -1179,6 +1180,65 @@ func _create_prep_station(parent: Node3D, origin: Vector3) -> void:
 	station.position = origin + Vector3(0.0, 1.18, 0.0)
 	station.add_child(_area_shape(Vector3(1.55, 0.85, 1.05)))
 	parent.add_child(station)
+
+
+func _create_wine_cooler(parent: Node3D, origin: Vector3) -> void:
+	var cooler := Node3D.new()
+	cooler.name = "UnderCounterWineCooler"
+	cooler.position = origin
+	parent.add_child(cooler)
+
+	var recess_material := _material(Color("090b0c"), 0.30)
+	var rack_material := _material(Color("6e7372"), 0.24, 0.78)
+	var bottle_green := _material(Color(0.07, 0.19, 0.14, 0.88), 0.18, 0.08)
+	bottle_green.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var bottle_amber := _material(Color(0.30, 0.13, 0.055, 0.90), 0.20, 0.05)
+	bottle_amber.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var door_glass := _material(Color(0.045, 0.075, 0.082, 0.70), 0.06, 0.14)
+	door_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var label_material := _material(Color("d7c6a5"), 0.64)
+	var cork_material := _material(Color("a87947"), 0.78)
+	var cool_light := _material(Color("b8e6e7"), 0.16)
+	cool_light.emission_enabled = true
+	cool_light.emission = Color("b8e6e7")
+	cool_light.emission_energy_multiplier = 0.65
+
+	# Deep niche, insulated liner and individual metal shelves establish real
+	# depth behind the smoked door instead of another flat cabinet panel.
+	_box(cooler, "CoolerShadowReveal", Vector3(0.0, 0.46, -0.015), Vector3(1.00, 0.84, 0.11), recess_material, false)
+	_box(cooler, "CoolerBody", Vector3(0.0, 0.46, 0.045), Vector3(0.94, 0.80, 0.14), appliance_material, false)
+	_box(cooler, "CoolerInterior", Vector3(0.0, 0.46, 0.135), Vector3(0.78, 0.66, 0.09), recess_material, false)
+	_box(cooler, "CoolerLight", Vector3(-0.34, 0.70, 0.205), Vector3(0.025, 0.34, 0.018), cool_light, false)
+
+	for y in [0.25, 0.42, 0.59]:
+		_box(cooler, "BottleRackFront", Vector3(0.0, y, 0.255), Vector3(0.72, 0.022, 0.025), rack_material, false)
+		_box(cooler, "BottleRackBack", Vector3(0.0, y, 0.145), Vector3(0.72, 0.022, 0.025), rack_material, false)
+		for x in [-0.27, -0.09, 0.09, 0.27]:
+			_box(cooler, "RackRunner", Vector3(x, y, 0.20), Vector3(0.018, 0.018, 0.13), rack_material, false)
+
+	# Alternating green and amber bottles sit horizontally on each rack, with
+	# separate necks, corks and paper labels readable through the glazing.
+	var bottle_index := 0
+	for y in [0.30, 0.47, 0.64]:
+		for x in [-0.27, -0.09, 0.09, 0.27]:
+			var glass_material := bottle_green if bottle_index % 2 == 0 else bottle_amber
+			_cylinder(cooler, "WineBottleBody", Vector3(x, y, 0.23), 0.052, 0.27, glass_material, Vector3(90.0, 0.0, 0.0))
+			_cylinder(cooler, "WineBottleNeck", Vector3(x, y, 0.385), 0.025, 0.08, glass_material, Vector3(90.0, 0.0, 0.0))
+			_cylinder(cooler, "BottleCork", Vector3(x, y, 0.43), 0.019, 0.025, cork_material, Vector3(90.0, 0.0, 0.0))
+			_cylinder(cooler, "BottleLabel", Vector3(x, y, 0.265), 0.055, 0.075, label_material, Vector3(90.0, 0.0, 0.0))
+			bottle_index += 1
+
+	# Four-sided door frame, gasket, real round pull and lower compressor grille.
+	_box(cooler, "DoorGasket", Vector3(0.0, 0.46, 0.255), Vector3(0.84, 0.70, 0.035), recess_material, false)
+	_box(cooler, "DoorGlass", Vector3(0.0, 0.46, 0.282), Vector3(0.70, 0.56, 0.025), door_glass, false)
+	_box(cooler, "DoorTopRail", Vector3(0.0, 0.78, 0.30), Vector3(0.86, 0.07, 0.04), appliance_material, false)
+	_box(cooler, "DoorBottomRail", Vector3(0.0, 0.14, 0.30), Vector3(0.86, 0.07, 0.04), appliance_material, false)
+	_box(cooler, "DoorLeftRail", Vector3(-0.395, 0.46, 0.30), Vector3(0.07, 0.58, 0.04), appliance_material, false)
+	_box(cooler, "DoorRightRail", Vector3(0.395, 0.46, 0.30), Vector3(0.07, 0.58, 0.04), appliance_material, false)
+	_cylinder(cooler, "DoorPull", Vector3(0.32, 0.47, 0.36), 0.022, 0.44, dark_metal_material)
+	for x in [-0.32, -0.21, -0.10, 0.01, 0.12, 0.23, 0.32]:
+		_box(cooler, "CompressorVent", Vector3(x, 0.08, 0.325), Vector3(0.07, 0.018, 0.018), recess_material, false)
+	_box(cooler, "TemperatureDisplay", Vector3(0.0, 0.79, 0.335), Vector3(0.16, 0.045, 0.012), cool_light, false)
 
 
 func _create_integrated_oven(parent: Node3D, origin: Vector3) -> void:
