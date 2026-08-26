@@ -813,12 +813,23 @@ def build_bathroom():
     metal = mat("Brushed nickel", (0.32, 0.34, 0.35, 1.0), 0.24, 0.78)
     glass = mat("Low iron shower glass", (0.50, 0.68, 0.72, 0.18), 0.08)
     glass.blend_method = "BLEND"
+    gasket = mat("Bathroom dark gasket", (0.045, 0.052, 0.054, 1.0), 0.48, 0.24)
+    water = mat("Clear bath water", (0.28, 0.56, 0.64, 0.20), 0.06)
+    water.blend_method = "BLEND"
 
     # Freestanding oval tub built from nested smooth ellipsoids.
     sphere("Tub outer shell", (-3.72, 0.25, 0.49), (1.28, 0.67, 0.50), porcelain, root, 48)
     sphere("Tub inner well", (-3.72, 0.12, 0.64), (1.04, 0.48, 0.34), stone, root, 48)
     pipe_between("Tub filler riser", (-2.35, 0.66, 0.05), (-2.35, 0.66, 0.90), 0.028, metal, root)
     pipe_between("Tub filler spout", (-2.35, 0.66, 0.90), (-2.65, 0.47, 0.90), 0.028, metal, root)
+    # Water surface, drain, overflow and twin controls make the bath read as a functioning fixture.
+    sphere("Bath water surface", (-3.72, 0.12, 0.79), (0.91, 0.40, 0.045), water, root, 48)
+    cylinder("Tub waste", (-3.94, 0.12, 0.842), 0.055, 0.018, metal, root, 32)
+    cylinder("Tub overflow", (-3.72, 0.505, 0.76), 0.052, 0.018, metal, root, 32, rotation=(math.radians(90), 0, 0))
+    for control_x in (-2.48, -2.24):
+        cylinder("Tub filler control", (control_x, 0.66, 0.12), 0.070, 0.075, metal, root, 32)
+        pipe_between("Tub control lever", (control_x, 0.66, 0.16), (control_x + 0.06, 0.66, 0.20), 0.012, metal, root)
+    cylinder("Tub spout aerator", (-2.68, 0.45, 0.90), 0.031, 0.028, gasket, root, 24, rotation=(math.radians(90), 0, 0))
 
     # Wall-mounted double vanity: both sinks are physically supported by the cabinet.
     rounded_box("Floating double vanity", (0.0, 0.75, 0.62), (3.35, 0.72, 0.74), walnut, 0.055, 6, parent=root)
@@ -828,6 +839,14 @@ def build_bathroom():
         pipe_between("Vanity faucet riser", (x, 0.92, 1.04), (x, 0.92, 1.36), 0.021, metal, root)
         pipe_between("Vanity faucet spout", (x, 0.92, 1.36), (x, 0.64, 1.36), 0.021, metal, root)
         rounded_box("Tall mirror", (x, 1.135, 2.02), (1.24, 0.045, 1.50), glass, 0.025, 4, parent=root)
+        cylinder("Basin drain", (x, 0.56, 1.145), 0.050, 0.016, metal, root, 28)
+        for handle_x in (x - 0.14, x + 0.14):
+            cylinder("Vanity faucet control", (handle_x, 0.92, 1.09), 0.045, 0.060, metal, root, 28)
+            pipe_between("Vanity control lever", (handle_x, 0.92, 1.12), (handle_x + 0.055, 0.92, 1.16), 0.010, metal, root)
+        pipe_between("Mirror frame top", (x - 0.62, 1.105, 2.77), (x + 0.62, 1.105, 2.77), 0.018, metal, root)
+        pipe_between("Mirror frame bottom", (x - 0.62, 1.105, 1.27), (x + 0.62, 1.105, 1.27), 0.018, metal, root)
+        pipe_between("Mirror frame left", (x - 0.62, 1.105, 1.27), (x - 0.62, 1.105, 2.77), 0.018, metal, root)
+        pipe_between("Mirror frame right", (x + 0.62, 1.105, 1.27), (x + 0.62, 1.105, 2.77), 0.018, metal, root)
 
     # Enclosed shower and wall-hung toilet.
     rounded_box("Shower tray", (3.65, 0.10, 0.055), (1.72, 1.52, 0.11), stone, 0.035, 4, parent=root)
@@ -836,9 +855,27 @@ def build_bathroom():
     pipe_between("Rain shower riser", (3.95, 0.65, 0.34), (3.95, 0.65, 2.20), 0.024, metal, root)
     pipe_between("Rain shower arm", (3.95, 0.65, 2.20), (3.62, 0.38, 2.20), 0.024, metal, root)
     cylinder("Rain shower head", (3.62, 0.38, 2.17), 0.19, 0.035, metal, root, 48)
+    # Door hardware, mixer, hand shower and linear drain complete the enclosure.
+    for hinge_x in (3.02, 4.28):
+        rounded_box("Shower glass hinge", (hinge_x, -0.675, 0.72), (0.10, 0.055, 0.16), metal, 0.018, 4, parent=root)
+        rounded_box("Shower glass hinge", (hinge_x, -0.675, 1.72), (0.10, 0.055, 0.16), metal, 0.018, 4, parent=root)
+    pipe_between("Shower door handle", (3.05, -0.69, 0.86), (3.05, -0.69, 1.56), 0.024, metal, root)
+    rounded_box("Shower threshold", (3.65, -0.665, 0.13), (1.72, 0.10, 0.10), metal, 0.025, 4, parent=root)
+    rounded_box("Linear shower drain", (3.65, 0.48, 0.122), (0.78, 0.14, 0.025), gasket, 0.018, 4, parent=root)
+    for drain_x in (3.36, 3.50, 3.64, 3.78, 3.92):
+        rounded_box("Shower drain slot", (drain_x, 0.48, 0.139), (0.065, 0.10, 0.010), metal, 0.006, 2, parent=root)
+    cylinder("Shower mixer escutcheon", (4.465, 0.15, 1.14), 0.13, 0.035, metal, root, 40, rotation=(0, math.radians(90), 0))
+    pipe_between("Shower mixer lever", (4.44, 0.15, 1.14), (4.33, 0.15, 1.06), 0.016, metal, root)
+    pipe_between("Hand shower rail", (4.43, 0.48, 0.76), (4.43, 0.48, 1.66), 0.018, metal, root)
+    pipe_between("Hand shower wand", (4.39, 0.48, 1.24), (4.32, 0.48, 1.56), 0.025, metal, root)
     rounded_box("Wall toilet cistern", (2.25, 0.92, 0.74), (0.78, 0.26, 1.08), stone, 0.06, 6, parent=root)
     sphere("Wall-hung toilet bowl", (2.25, 0.56, 0.48), (0.43, 0.60, 0.37), porcelain, root, 40)
     rounded_box("Toilet seat", (2.25, 0.38, 0.65), (0.70, 0.88, 0.075), porcelain, 0.12, 8, parent=root)
+    rounded_box("Soft-close toilet lid", (2.25, 0.77, 0.84), (0.66, 0.075, 0.72), porcelain, 0.10, 8, rotation=(math.radians(-9), 0, 0), parent=root)
+    pipe_between("Toilet seat hinge", (2.04, 0.72, 0.72), (2.46, 0.72, 0.72), 0.024, metal, root)
+    rounded_box("Dual flush plate", (2.25, 0.775, 0.98), (0.40, 0.025, 0.20), metal, 0.035, 5, parent=root)
+    for button_x, button_radius in ((2.17, 0.052), (2.33, 0.038)):
+        cylinder("Dual flush button", (button_x, 0.755, 0.98), button_radius, 0.018, gasket, root, 28, rotation=(math.radians(90), 0, 0))
     return root
 
 
