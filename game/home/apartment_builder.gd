@@ -633,6 +633,12 @@ func _build_distant_city_view() -> void:
 		_box(city, "RoofPlantRoom", Vector3(tower.x - tower.z * 0.15, tower_base_y + tower.w + 2.15, tower.y), Vector3(tower.z * 0.26, 1.3, tower_depth * 0.28), facade_stone, false)
 		_box(city, "RoofAntenna", Vector3(tower.x + tower.z * 0.16, tower_base_y + tower.w + 4.2, tower.y), Vector3(0.12, 5.0, 0.12), dark_metal_material, false)
 
+	# Two genuinely near residential towers frame the panorama. Their deep
+	# balconies, glass rails, services and planting shift strongly against the
+	# distant skyline as the player walks along the windows.
+	_build_nearby_residential_tower(city, Vector3(23.0, -39.0, 31.0), 11.0, 61.0, 10.0, false)
+	_build_nearby_residential_tower(city, Vector3(-27.0, -42.0, 35.0), 9.5, 55.0, 9.0, true)
+
 	# Small moving-scale cues are modeled as geometry on the water. Even while
 	# static, their separated distances strengthen perspective through the glass.
 	var boat_material := _material(Color("e7e0d2"), 0.48)
@@ -687,6 +693,86 @@ func _build_distant_city_view() -> void:
 		bird.add_child(right_wing)
 		_ellipsoid(right_wing, "FeatheredWing", Vector3(0.02, 0.0, 0.19), Vector3(0.13, 0.025, 0.25), bird_material)
 		harbour_birds.append(bird)
+
+
+func _build_nearby_residential_tower(
+	parent: Node3D,
+	base_position: Vector3,
+	width: float,
+	height: float,
+	depth: float,
+	mirrored: bool
+) -> void:
+	var tower := Node3D.new()
+	tower.name = "NearbyResidentialTower"
+	tower.position = base_position
+	parent.add_child(tower)
+
+	var concrete := _material(Color("777873"), 0.70)
+	var side_concrete := _material(Color("555a59"), 0.64)
+	var balcony_soffit := _material(Color("353a3b"), 0.46, 0.18)
+	var rail_metal := _material(Color("5d676a"), 0.20, 0.72)
+	var rail_glass := _material(Color(0.30, 0.48, 0.53, 0.34), 0.08, 0.12)
+	rail_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var window_dark := _material(Color("172329"), 0.08, 0.18)
+	var window_lit := _material(Color("e7b97c"), 0.20)
+	window_lit.emission_enabled = true
+	window_lit.emission = Color("ffc77d")
+	window_lit.emission_energy_multiplier = 1.8
+	var planter_material := _material(Color("5d4534"), 0.76)
+	var plant_material := _material(Color("31543f"), 0.82)
+	var service_material := _material(Color("c7c5be"), 0.52, 0.16)
+	var sign := -1.0 if mirrored else 1.0
+
+	# A real extruded mass with a recessed center bay and chamfer-like side piers.
+	_box(tower, "TowerCore", Vector3(0.0, height * 0.5, 0.0), Vector3(width, height, depth), side_concrete, false)
+	_box(tower, "FrontFacadeLeft", Vector3(-width * 0.32, height * 0.5, -depth * 0.5 - 0.12), Vector3(width * 0.30, height, 0.24), concrete, false)
+	_box(tower, "FrontFacadeRight", Vector3(width * 0.32, height * 0.5, -depth * 0.5 - 0.12), Vector3(width * 0.30, height, 0.24), concrete, false)
+	_box(tower, "RecessedGlazingBay", Vector3(0.0, height * 0.5, -depth * 0.5 - 0.16), Vector3(width * 0.30, height * 0.94, 0.18), window_dark, false)
+	for mullion_x in [-0.10, 0.10]:
+		_box(tower, "GlazingBayMullion", Vector3(mullion_x * width, height * 0.5, -depth * 0.5 - 0.27), Vector3(0.10, height * 0.92, 0.16), rail_metal, false)
+
+	# Every second residential floor projects into space. Side returns and
+	# transparent rails remain legible from oblique viewpoints.
+	var floor_count := int(height / 3.1)
+	for floor_index in range(2, floor_count, 2):
+		var floor_y := float(floor_index) * 3.1
+		var balcony_x := sign * width * 0.29
+		_box(tower, "BalconySlab", Vector3(balcony_x, floor_y, -depth * 0.5 - 1.05), Vector3(width * 0.38, 0.18, 2.05), balcony_soffit, false)
+		_box(tower, "BalconyFrontRail", Vector3(balcony_x, floor_y + 0.62, -depth * 0.5 - 2.02), Vector3(width * 0.37, 1.05, 0.055), rail_glass, false)
+		_box(tower, "BalconyRailTop", Vector3(balcony_x, floor_y + 1.17, -depth * 0.5 - 2.02), Vector3(width * 0.39, 0.06, 0.08), rail_metal, false)
+		for divider in [-0.5, 0.0, 0.5]:
+			_box(tower, "BalconyRailPost", Vector3(balcony_x + divider * width * 0.32, floor_y + 0.63, -depth * 0.5 - 2.05), Vector3(0.045, 1.08, 0.07), rail_metal, false)
+
+		# Domestic objects prevent the balconies from reading as repeated bands.
+		if floor_index % 4 == 0:
+			_box(tower, "BalconyPlanter", Vector3(balcony_x + sign * width * 0.11, floor_y + 0.30, -depth * 0.5 - 1.55), Vector3(0.72, 0.32, 0.38), planter_material, false)
+			_ellipsoid(tower, "BalconyPlant", Vector3(balcony_x + sign * width * 0.11, floor_y + 0.78, -depth * 0.5 - 1.55), Vector3(0.48, 0.62, 0.42), plant_material)
+		else:
+			_box(tower, "OutdoorChairSeat", Vector3(balcony_x, floor_y + 0.35, -depth * 0.5 - 1.45), Vector3(0.62, 0.10, 0.60), concrete, false)
+			_box(tower, "OutdoorChairBack", Vector3(balcony_x, floor_y + 0.68, -depth * 0.5 - 1.70), Vector3(0.62, 0.62, 0.10), concrete, false)
+
+	# Individual apartments alternate warm and dark glazing rather than using
+	# one luminous strip, with projecting air-conditioning units and brackets.
+	for floor_index in range(1, floor_count):
+		var floor_y := float(floor_index) * 3.1
+		for column in [-0.33, 0.0, 0.33]:
+			var panel_material := window_lit if (floor_index + int((column + 0.34) * 10.0)) % 4 == 0 else window_dark
+			var panel := _box(tower, "ApartmentWindow", Vector3(column * width, floor_y + 1.35, -depth * 0.5 - 0.29), Vector3(width * 0.20, 1.75, 0.08), panel_material, false)
+			if panel_material == window_lit:
+				panel.add_to_group("city_night_emissive")
+		if floor_index % 3 == 0:
+			var service_x := -sign * width * 0.36
+			_box(tower, "AirConditionerBracket", Vector3(service_x, floor_y + 0.55, -depth * 0.5 - 0.48), Vector3(1.05, 0.08, 0.34), rail_metal, false)
+			_box(tower, "AirConditionerUnit", Vector3(service_x, floor_y + 0.86, -depth * 0.5 - 0.62), Vector3(0.92, 0.52, 0.42), service_material, false)
+			for vent_x in [-0.25, -0.08, 0.08, 0.25]:
+				_box(tower, "AirConditionerVent", Vector3(service_x + vent_x, floor_y + 0.86, -depth * 0.5 - 0.845), Vector3(0.08, 0.30, 0.025), rail_metal, false)
+
+	# Layered roofline with parapet, lift overrun, water tank and antenna.
+	_box(tower, "RoofParapet", Vector3(0.0, height + 0.55, 0.0), Vector3(width + 0.5, 1.1, depth + 0.5), balcony_soffit, false)
+	_box(tower, "LiftOverrun", Vector3(-sign * width * 0.18, height + 2.05, 0.8), Vector3(width * 0.34, 2.0, depth * 0.34), concrete, false)
+	_cylinder(tower, "RoofWaterTank", Vector3(sign * width * 0.20, height + 2.35, -0.6), 0.72, 2.1, service_material)
+	_cylinder(tower, "AntennaMast", Vector3(0.0, height + 5.0, 0.0), 0.065, 6.0, rail_metal)
 
 
 func _build_doors() -> void:
