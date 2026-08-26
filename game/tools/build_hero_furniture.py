@@ -372,6 +372,55 @@ def build_couture_dress(root, x, y, z, cloth, metal):
         pipe_between("Dress soft pleat", (x + offset * 0.45, y - 0.096, z + 0.11), (x + offset, y - 0.102, z - 0.72), 0.008, cloth, root)
 
 
+def build_folded_knit_stack(root, x, y, z, cloth_layers, trim):
+    """Build a soft, visibly folded knitwear stack for an open wardrobe shelf."""
+    for layer_index, cloth in enumerate(cloth_layers):
+        layer_z = z + layer_index * 0.082
+        layer_x = x + (0.018 if layer_index % 2 else -0.012)
+        sphere(
+            "Folded knit body",
+            (layer_x, y, layer_z),
+            (0.285, 0.175, 0.045),
+            cloth,
+            root,
+            28,
+        )
+        # Folded sleeves overlap the body rather than forming a rectangular slab.
+        sphere(
+            "Folded knit sleeve",
+            (layer_x - 0.055, y - 0.016, layer_z + 0.036),
+            (0.205, 0.092, 0.026),
+            cloth,
+            root,
+            24,
+        )
+        # Ribbing and a small V-neck fold remain readable at shelf distance.
+        pipe_between(
+            "Knit ribbed edge",
+            (layer_x - 0.23, y - 0.174, layer_z - 0.018),
+            (layer_x + 0.23, y - 0.174, layer_z - 0.018),
+            0.006,
+            trim,
+            root,
+        )
+        pipe_between(
+            "Knit neckline left",
+            (layer_x - 0.075, y - 0.187, layer_z + 0.054),
+            (layer_x, y - 0.191, layer_z + 0.020),
+            0.006,
+            trim,
+            root,
+        )
+        pipe_between(
+            "Knit neckline right",
+            (layer_x, y - 0.191, layer_z + 0.020),
+            (layer_x + 0.075, y - 0.187, layer_z + 0.054),
+            0.006,
+            trim,
+            root,
+        )
+
+
 def rumpled_sheet(name, location, width, depth, material, parent=None, phase=0.0, edge_drop=0.14):
     """Create a continuous cloth surface with authored ripples and soft edge drape."""
     columns = 18
@@ -583,6 +632,21 @@ def build_wardrobe():
         rounded_box("Top shelf", (x, 1.58, 2.30), (0.90, 0.56, 0.055), oak, 0.012, 3, parent=root)
         rounded_box("Bottom shelf", (x, 1.58, 0.28), (0.90, 0.56, 0.055), oak, 0.012, 3, parent=root)
     pipe_between("Long garment rail", (-2.25, 1.30, 2.03), (2.25, 1.30, 2.03), 0.018, metal, root)
+
+    # Soft folded knitwear fills the overhead bays with believable fabric
+    # volume, overlapping sleeves, ribbed hems and visible neckline folds.
+    for stack_index, stack_x in enumerate((-2.0, -1.0, 0.0, 1.0, 2.0)):
+        build_folded_knit_stack(
+            root,
+            stack_x,
+            1.44,
+            2.38,
+            [
+                suit_colors[(stack_index + 1) % len(suit_colors)],
+                suit_colors[(stack_index + 3) % len(suit_colors)],
+            ],
+            metal,
+        )
 
     for index in range(13):
         x = -2.15 + index * 0.36
