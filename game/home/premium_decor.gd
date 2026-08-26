@@ -734,28 +734,67 @@ func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> OmniLight3D:
 	return light
 
 func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> OmniLight3D:
-	_box(parent, "LampStem", origin + Vector3(0.0, 0.22 * scale_factor, 0.0), Vector3(0.045, 0.44, 0.045) * scale_factor, champagne)
+	# A layered ceramic body, stepped neck and tailored shade replace the former
+	# box stem. The same authored lamp scales cleanly for bedside and study use.
+	_cylinder(parent, "TableLampWeightedFoot", origin + Vector3(0.0, 0.025 * scale_factor, 0.0), 0.18 * scale_factor, 0.20 * scale_factor, 0.05 * scale_factor, champagne)
+	_sphere(parent, "TableLampCeramicBody", origin + Vector3(0.0, 0.18 * scale_factor, 0.0), Vector3(0.16, 0.17, 0.16) * scale_factor, ceramic)
+	_sphere(parent, "TableLampBodyShoulder", origin + Vector3(0.0, 0.29 * scale_factor, 0.0), Vector3(0.11, 0.09, 0.11) * scale_factor, ceramic)
+	_cylinder(parent, "TableLampNeck", origin + Vector3(0.0, 0.37 * scale_factor, 0.0), 0.035 * scale_factor, 0.055 * scale_factor, 0.13 * scale_factor, champagne)
+	_cylinder(parent, "TableLampSocket", origin + Vector3(0.0, 0.425 * scale_factor, 0.0), 0.055 * scale_factor, 0.065 * scale_factor, 0.055 * scale_factor, charcoal)
+
 	var shade := MeshInstance3D.new()
-	shade.name = "LampShade"
+	shade.name = "TailoredTableLampShade"
 	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.13 * scale_factor
-	mesh.bottom_radius = 0.22 * scale_factor
-	mesh.height = 0.28 * scale_factor
-	mesh.radial_segments = 36
+	mesh.top_radius = 0.14 * scale_factor
+	mesh.bottom_radius = 0.25 * scale_factor
+	mesh.height = 0.30 * scale_factor
+	mesh.radial_segments = 48
 	mesh.material = cream
 	shade.mesh = mesh
-	shade.position = origin + Vector3(0.0, 0.52 * scale_factor, 0.0)
+	shade.position = origin + Vector3(0.0, 0.57 * scale_factor, 0.0)
 	parent.add_child(shade)
+
+	# Fine vertical ribs create a visibly tailored, pleated shade surface.
+	for angle in range(0, 360, 30):
+		var angle_radians := deg_to_rad(float(angle))
+		var rib_radius := 0.195 * scale_factor
+		var rib := _box(
+			parent,
+			"TableLampShadePleat",
+			origin + Vector3(sin(angle_radians) * rib_radius, 0.57 * scale_factor, cos(angle_radians) * rib_radius),
+			Vector3(0.010, 0.27, 0.012) * scale_factor,
+			textile
+		)
+		rib.rotation_degrees.y = float(angle)
+
+	for rim_data in [
+		[0.135, 0.148, 0.715],
+		[0.242, 0.258, 0.420]
+	]:
+		var rim := MeshInstance3D.new()
+		rim.name = "TableLampShadeRolledRim"
+		var rim_mesh := TorusMesh.new()
+		rim_mesh.inner_radius = rim_data[0] * scale_factor
+		rim_mesh.outer_radius = rim_data[1] * scale_factor
+		rim_mesh.rings = 48
+		rim_mesh.ring_segments = 10
+		rim_mesh.material = champagne
+		rim.mesh = rim_mesh
+		rim.position = origin + Vector3(0.0, rim_data[2] * scale_factor, 0.0)
+		parent.add_child(rim)
+
+	_sphere(parent, "TableLampGlassDiffuser", origin + Vector3(0.0, 0.43 * scale_factor, 0.0), Vector3(0.15, 0.075, 0.15) * scale_factor, crystal)
+	_sphere(parent, "TableLampVisibleBulb", origin + Vector3(0.0, 0.46 * scale_factor, 0.0), Vector3(0.055, 0.075, 0.055) * scale_factor, warm_glow)
+
 	var light := OmniLight3D.new()
 	light.name = "TableLampGlow"
-	light.position = origin + Vector3(0.0, 0.49 * scale_factor, 0.0)
+	light.position = origin + Vector3(0.0, 0.47 * scale_factor, 0.0)
 	light.light_color = Color("ffd4a0")
-	light.light_energy = 0.72
-	light.omni_range = 2.7
+	light.light_energy = 0.76
+	light.omni_range = 2.85 * scale_factor
 	light.shadow_enabled = true
 	parent.add_child(light)
 	return light
-
 
 func _add_floor_lamp(parent: Node3D, origin: Vector3) -> OmniLight3D:
 	# Weighted disc base, stepped stem and articulated arcing arm give the
