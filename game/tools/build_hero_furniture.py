@@ -325,6 +325,28 @@ def build_tailored_jacket(root, x, y, z, cloth, metal):
         cylinder("Jacket button", (x, front_y - 0.014, button_z), 0.018, 0.012, metal, root, 16, rotation=(math.radians(90), 0, 0))
 
 
+def build_silk_blouse(root, x, y, z, cloth, metal):
+    body_points = [
+        (-0.16, -0.34), (-0.21, -0.10), (-0.18, 0.20),
+        (-0.27, 0.28), (-0.13, 0.37), (-0.06, 0.30),
+        (0.06, 0.30), (0.13, 0.37), (0.27, 0.28),
+        (0.18, 0.20), (0.21, -0.10), (0.16, -0.34),
+    ]
+    extruded_silhouette("Silk blouse body", (x, y, z), body_points, 0.11, cloth, root, 0.020)
+    front_y = y - 0.068
+    for side in (-1, 1):
+        shoulder = (x + side * 0.22, y, z + 0.22)
+        cuff = (x + side * 0.30, y + 0.008, z - 0.27)
+        sphere("Blouse gathered shoulder", shoulder, (0.115, 0.075, 0.12), cloth, root, 26)
+        tapered_pipe_between("Blouse draped sleeve", shoulder, cuff, 0.095, 0.045, cloth, root)
+        cylinder("Blouse cuff", cuff, 0.052, 0.045, metal, root, 20)
+    pipe_between("Blouse neckline left", (x - 0.105, front_y, z + 0.31), (x, front_y - 0.006, z + 0.22), 0.012, metal, root)
+    pipe_between("Blouse neckline right", (x, front_y - 0.006, z + 0.22), (x + 0.105, front_y, z + 0.31), 0.012, metal, root)
+    for button_z in (z + 0.12, z, z - 0.12):
+        cylinder("Blouse pearl button", (x, front_y - 0.010, button_z), 0.013, 0.010, metal, root, 14, rotation=(math.radians(90), 0, 0))
+    pipe_between("Blouse curved hem", (x - 0.15, front_y, z - 0.33), (x + 0.15, front_y, z - 0.33), 0.010, cloth, root)
+
+
 def build_pressed_trousers(root, x, y, z, cloth):
     rounded_box("Trouser waistband", (x, y, z + 0.34), (0.34, 0.12, 0.075), cloth, 0.025, 4, parent=root)
     for side in (-1, 1):
@@ -501,6 +523,9 @@ def build_wardrobe():
         cloth = suit_colors[index % len(suit_colors)]
         if index in (3, 8, 11):
             build_couture_dress(root, x, 1.30, 1.34, cloth, metal)
+        elif index in (1, 6, 10):
+            build_silk_blouse(root, x, 1.30, 1.53, cloth, metal)
+            build_pressed_trousers(root, x, 1.31, 0.84, cloth)
         else:
             build_tailored_jacket(root, x, 1.30, 1.53, cloth, metal)
             build_pressed_trousers(root, x, 1.31, 0.84, cloth)
