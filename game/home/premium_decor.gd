@@ -523,8 +523,11 @@ func _build_bathroom_details() -> void:
 		90.0,
 		stool_area
 	)
-	_box(root, "FoldedTowelLower", Vector3(-13.45, 0.64, 12.12), Vector3(0.52, 0.08, 0.36), cream)
-	_box(root, "FoldedTowelUpper", Vector3(-13.43, 0.73, 12.10), Vector3(0.44, 0.07, 0.31), textile)
+	# Rolled, crowned towel forms avoid the rigid stack-of-boxes silhouette.
+	_sphere(root, "RolledTowelLower", Vector3(-13.45, 0.65, 12.12), Vector3(0.28, 0.09, 0.18), cream)
+	_sphere(root, "RolledTowelUpper", Vector3(-13.43, 0.76, 12.10), Vector3(0.23, 0.075, 0.15), textile)
+	for x in [-13.64, -13.45, -13.26]:
+		_sphere(root, "TowelSoftFold", Vector3(x, 0.815, 12.10), Vector3(0.075, 0.018, 0.12), cream)
 	_add_plant(root, Vector3(-15.55, 0.0, 12.55), 0.72)
 
 	# Linear drain, recessed niche and slim glass channels give the shower a
@@ -551,7 +554,8 @@ func _build_bathroom_details() -> void:
 		_box(root, "BathCaddyEnd", Vector3(x, 0.79, 11.06), Vector3(0.08, 0.12, 0.38), walnut)
 	_cylinder(root, "BathCandleCup", Vector3(-15.58, 0.93, 11.06), 0.085, 0.09, 0.16, ceramic)
 	_sphere(root, "BathCandleFlame", Vector3(-15.58, 1.04, 11.06), Vector3(0.025, 0.055, 0.025), warm_glow)
-	_box(root, "BathWashcloth", Vector3(-14.88, 0.89, 11.06), Vector3(0.38, 0.035, 0.27), cream)
+	_sphere(root, "BathWashclothFold", Vector3(-14.88, 0.90, 11.06), Vector3(0.20, 0.030, 0.14), cream)
+	_sphere(root, "BathWashclothCorner", Vector3(-15.04, 0.925, 10.99), Vector3(0.08, 0.018, 0.07), textile)
 
 	# Twin mirror halos and a wall-mounted towel rail layer warm practical detail
 	# over the authored sanitary fittings.
@@ -563,8 +567,13 @@ func _build_bathroom_details() -> void:
 	_box(root, "TowelRail", Vector3(-15.45, 1.42, 8.14), Vector3(1.08, 0.045, 0.045), champagne)
 	for x in [-15.95, -14.95]:
 		_box(root, "TowelRailMount", Vector3(x, 1.42, 8.10), Vector3(0.055, 0.12, 0.09), champagne)
-	_box(root, "HangingBathTowel", Vector3(-15.45, 1.02, 8.18), Vector3(0.88, 0.74, 0.035), cream)
-	_box(root, "HangingTowelFold", Vector3(-15.45, 1.02, 8.155), Vector3(0.035, 0.72, 0.018), textile)
+	# A crowned hanging towel uses overlapping cloth volumes and an uneven hem,
+	# so it sags from the rail instead of reading as a thin wall panel.
+	_sphere(root, "HangingBathTowelBody", Vector3(-15.45, 1.05, 8.18), Vector3(0.44, 0.38, 0.035), cream)
+	_sphere(root, "HangingTowelLeftHem", Vector3(-15.68, 0.70, 8.18), Vector3(0.22, 0.08, 0.035), cream)
+	_sphere(root, "HangingTowelRightHem", Vector3(-15.22, 0.73, 8.18), Vector3(0.22, 0.09, 0.035), cream)
+	for x in [-15.68, -15.52, -15.36, -15.20]:
+		_box(root, "HangingTowelFold", Vector3(x, 1.03, 8.145), Vector3(0.018, 0.60, 0.014), textile)
 
 	# A warm wash over the vanity balances the cooler translucent glazing.
 	bathroom_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4))
