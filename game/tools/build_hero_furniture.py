@@ -480,6 +480,25 @@ def add_hanger(root, x, y, z, metal):
     pipe_between("Hanger hook", (x, y, z), (x, y, z + 0.15), 0.008, metal, root)
 
 
+def build_shoe_pair(root, x, y, z, leather, metal, heel_height=0.06):
+    """Author a left/right footwear pair with separate sole, toe, vamp and heel."""
+    for side in (-1, 1):
+        shoe_x = x + side * 0.14
+        rounded_box("Shoe sole", (shoe_x, y, z), (0.22, 0.48, 0.035), leather, 0.016, 4, parent=root)
+        sphere("Shoe rounded toe", (shoe_x, y - 0.15, z + 0.055), (0.115, 0.15, 0.07), leather, root, 28)
+        sphere("Shoe sculpted vamp", (shoe_x, y + 0.015, z + 0.09), (0.105, 0.14, 0.085), leather, root, 28)
+        sphere("Shoe heel quarter", (shoe_x, y + 0.16, z + 0.105), (0.105, 0.095, 0.11), leather, root, 28)
+        cylinder("Shoe heel", (shoe_x, y + 0.17, z - heel_height * 0.30), 0.035, heel_height, metal, root, 20)
+        pipe_between(
+            "Shoe buckle bar",
+            (shoe_x - 0.075, y - 0.005, z + 0.145),
+            (shoe_x + 0.075, y - 0.005, z + 0.145),
+            0.008,
+            metal,
+            root,
+        )
+
+
 def build_wardrobe():
     root = root_object("DearV_Walk_In_Wardrobe")
     oak = mat("Dark open-grain oak", (0.155, 0.085, 0.045, 1.0), 0.5)
@@ -538,6 +557,19 @@ def build_wardrobe():
         pipe_between("Bag handle left", (x - 0.20, 1.25, 1.17), (x - 0.12, 1.25, 1.38), 0.017, leather_colors[index % 3], root)
         pipe_between("Bag handle top", (x - 0.12, 1.25, 1.38), (x + 0.12, 1.25, 1.38), 0.017, leather_colors[index % 3], root)
         pipe_between("Bag handle right", (x + 0.12, 1.25, 1.38), (x + 0.20, 1.25, 1.17), 0.017, leather_colors[index % 3], root)
+
+    # Footwear is modeled as paired objects resting on the lower shelves:
+    # layered soles, rounded toes, raised vamps, heel quarters and buckles.
+    for index, shoe_x in enumerate((-1.75, -0.60, 0.60, 1.75)):
+        build_shoe_pair(
+            root,
+            shoe_x,
+            1.48,
+            0.36,
+            leather_colors[index % len(leather_colors)],
+            metal,
+            0.055 + (index % 2) * 0.045,
+        )
 
     # Central dressing island with drawers and a padded jewellery tray.
     rounded_box("Dressing island", (0.0, -0.40, 0.52), (2.05, 0.92, 1.02), oak, 0.065, 7, parent=root)
