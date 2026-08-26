@@ -835,6 +835,7 @@ func _build_kitchen() -> void:
 	_create_refrigerator(kitchen, Vector3(4.05, 0.0, -12.15))
 	_create_sink(kitchen, Vector3(-2.2, 0.0, -12.55))
 	_create_stove(kitchen, Vector3(1.0, 0.0, -12.55))
+	_create_integrated_oven(kitchen, Vector3(2.48, 0.0, -12.34))
 	_create_prep_station(kitchen, Vector3(-4.42, 0.0, -9.65))
 
 
@@ -1178,6 +1179,63 @@ func _create_prep_station(parent: Node3D, origin: Vector3) -> void:
 	station.position = origin + Vector3(0.0, 1.18, 0.0)
 	station.add_child(_area_shape(Vector3(1.55, 0.85, 1.05)))
 	parent.add_child(station)
+
+
+func _create_integrated_oven(parent: Node3D, origin: Vector3) -> void:
+	var oven := Node3D.new()
+	oven.name = "IntegratedWallOven"
+	oven.position = origin
+	parent.add_child(oven)
+
+	var cavity_material := _material(Color("090b0c"), 0.24, 0.12)
+	var enamel_material := _material(Color("171a1c"), 0.16, 0.36)
+	var trim_material := _material(Color("8e9393"), 0.20, 0.82)
+	var oven_glass := _material(Color(0.055, 0.075, 0.082, 0.82), 0.06, 0.16)
+	oven_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var display_material := _material(Color("79d9d0"), 0.12)
+	display_material.emission_enabled = true
+	display_material.emission = Color("79d9d0")
+	display_material.emission_energy_multiplier = 1.6
+	var interior_glow := _material(Color("f5b56e"), 0.36)
+	interior_glow.emission_enabled = true
+	interior_glow.emission = Color("f5b56e")
+	interior_glow.emission_energy_multiplier = 0.42
+
+	# A deep cabinet reveal and layered metal fascia make the appliance read as
+	# a fitted object instead of another flat cabinet rectangle.
+	_box(oven, "CabinetShadowRecess", Vector3(0.0, 0.47, -0.015), Vector3(1.30, 0.88, 0.12), cavity_material, false)
+	_box(oven, "OvenCarcass", Vector3(0.0, 0.47, 0.035), Vector3(1.22, 0.82, 0.12), appliance_material, false)
+	_box(oven, "InnerCavity", Vector3(0.0, 0.42, 0.112), Vector3(1.02, 0.54, 0.075), cavity_material, false)
+	_box(oven, "CavityBack", Vector3(0.0, 0.42, 0.154), Vector3(0.92, 0.45, 0.018), enamel_material, false)
+
+	# Rack rails and trays remain visible through the smoked glass.
+	for y in [0.30, 0.42, 0.54]:
+		_box(oven, "RackLeftRail", Vector3(-0.39, y, 0.175), Vector3(0.025, 0.018, 0.12), trim_material, false)
+		_box(oven, "RackRightRail", Vector3(0.39, y, 0.175), Vector3(0.025, 0.018, 0.12), trim_material, false)
+		for x in [-0.34, -0.22, -0.10, 0.02, 0.14, 0.26, 0.34]:
+			_box(oven, "RackBar", Vector3(x, y, 0.238), Vector3(0.018, 0.018, 0.17), trim_material, false)
+	_box(oven, "RoastingTray", Vector3(0.0, 0.30, 0.255), Vector3(0.72, 0.035, 0.18), enamel_material, false)
+	_box(oven, "InteriorLamp", Vector3(0.38, 0.58, 0.205), Vector3(0.075, 0.075, 0.018), interior_glow, false)
+
+	# Closed door: double smoked glazing, perimeter gasket and a properly round
+	# horizontal handle with separate standoffs.
+	_box(oven, "DoorGasket", Vector3(0.0, 0.42, 0.205), Vector3(1.10, 0.60, 0.035), cavity_material, false)
+	_box(oven, "DoorGlass", Vector3(0.0, 0.42, 0.232), Vector3(1.02, 0.52, 0.028), oven_glass, false)
+	for x in [-0.48, 0.48]:
+		_cylinder(oven, "HandleStandoff", Vector3(x, 0.66, 0.285), 0.028, 0.10, dark_metal_material, Vector3(90.0, 0.0, 0.0))
+	_cylinder(oven, "DoorHandle", Vector3(0.0, 0.66, 0.335), 0.032, 1.08, dark_metal_material, Vector3(0.0, 0.0, 90.0))
+
+	# The control strip carries two physical dials, a luminous clock and small
+	# engraved controls rather than a featureless black band.
+	_box(oven, "ControlFascia", Vector3(0.0, 0.77, 0.215), Vector3(1.12, 0.16, 0.045), enamel_material, false)
+	for x in [-0.42, 0.42]:
+		_cylinder(oven, "ControlKnob", Vector3(x, 0.77, 0.265), 0.062, 0.06, trim_material, Vector3(90.0, 0.0, 0.0))
+		_box(oven, "KnobIndex", Vector3(x, 0.815, 0.302), Vector3(0.012, 0.025, 0.012), cavity_material, false)
+	_box(oven, "DigitalDisplay", Vector3(0.0, 0.77, 0.262), Vector3(0.28, 0.072, 0.018), display_material, false)
+	for x in [-0.23, -0.17, 0.17, 0.23]:
+		_cylinder(oven, "TouchControl", Vector3(x, 0.77, 0.277), 0.012, 0.012, trim_material, Vector3(90.0, 0.0, 0.0))
+	for x in [-0.44, -0.30, -0.16, 0.0, 0.16, 0.30, 0.44]:
+		_box(oven, "LowerVentSlot", Vector3(x, 0.095, 0.242), Vector3(0.09, 0.018, 0.018), cavity_material, false)
 
 
 func _create_refrigerator(parent: Node3D, origin: Vector3) -> void:
