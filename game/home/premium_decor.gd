@@ -583,7 +583,42 @@ func _build_living_details() -> void:
 	var root := Node3D.new()
 	root.name = "LivingRoomLayer"
 	add_child(root)
-	_box(root, "LivingRug", Vector3(0.15, 0.018, 4.15), Vector3(6.65, 0.025, 4.4), cream)
+	# A low elliptical woven rug replaces the hard rectangular slab. Rolled
+	# binding, inset border and shallow pile islands give it a textile edge.
+	_cylinder(root, "LivingRugPile", Vector3(0.15, 0.022, 4.15), 1.0, 1.0, 0.032, cream, Vector3(3.30, 1.0, 2.16))
+	var rug_binding := MeshInstance3D.new()
+	rug_binding.name = "LivingRugRolledBinding"
+	var binding_mesh := TorusMesh.new()
+	binding_mesh.inner_radius = 0.965
+	binding_mesh.outer_radius = 1.0
+	binding_mesh.rings = 72
+	binding_mesh.ring_segments = 12
+	binding_mesh.material = textile
+	rug_binding.mesh = binding_mesh
+	rug_binding.position = Vector3(0.15, 0.043, 4.15)
+	rug_binding.scale = Vector3(3.30, 0.72, 2.16)
+	root.add_child(rug_binding)
+
+	var rug_inlay := MeshInstance3D.new()
+	rug_inlay.name = "LivingRugInsetBorder"
+	var inlay_mesh := TorusMesh.new()
+	inlay_mesh.inner_radius = 0.785
+	inlay_mesh.outer_radius = 0.805
+	inlay_mesh.rings = 72
+	inlay_mesh.ring_segments = 10
+	inlay_mesh.material = textile
+	rug_inlay.mesh = inlay_mesh
+	rug_inlay.position = Vector3(0.15, 0.047, 4.15)
+	rug_inlay.scale = Vector3(3.30, 0.45, 2.16)
+	root.add_child(rug_inlay)
+
+	for tuft_data in [
+		Vector3(-2.42, 0.0, 3.42), Vector3(-1.78, 0.0, 5.18),
+		Vector3(-0.92, 0.0, 2.45), Vector3(-0.36, 0.0, 5.76),
+		Vector3(0.54, 0.0, 2.32), Vector3(1.16, 0.0, 5.83),
+		Vector3(1.92, 0.0, 2.78), Vector3(2.56, 0.0, 4.90)
+	]:
+		_sphere(root, "LivingRugPileTuft", Vector3(tuft_data.x, 0.046, tuft_data.z), Vector3(0.18, 0.010, 0.12), cream)
 
 	# Loose decorative cushions and a draped throw sit on the authored sectional.
 	# Ellipsoidal fill, corner pinches and seam piping keep them visibly soft.
