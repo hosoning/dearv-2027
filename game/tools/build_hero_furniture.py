@@ -372,6 +372,112 @@ def build_couture_dress(root, x, y, z, cloth, metal):
         pipe_between("Dress soft pleat", (x + offset * 0.45, y - 0.096, z + 0.11), (x + offset, y - 0.102, z - 0.72), 0.008, cloth, root)
 
 
+def build_structured_handbag(root, x, y, z, leather, metal, variation=0):
+    """Create a tailored handbag with a shaped body, gussets and real hardware."""
+    body_points = [
+        (-0.27, -0.18), (-0.30, 0.08), (-0.23, 0.19),
+        (0.23, 0.19), (0.30, 0.08), (0.27, -0.18),
+    ]
+    bag = extruded_silhouette(
+        "Sculpted handbag body",
+        (x, y, z),
+        body_points,
+        0.20,
+        leather,
+        root,
+        0.030,
+    )
+    bag["dearv_role"] = "handbag"
+    front_y = y - 0.116
+
+    # Separate side gussets make the bag expand in depth instead of reading as
+    # a softened box; the raised flap and zipper sit proud of the body.
+    for side in (-1, 1):
+        sphere(
+            "Handbag side gusset",
+            (x + side * 0.255, y, z - 0.005),
+            (0.052, 0.112, 0.165),
+            leather,
+            root,
+            24,
+        )
+    flap_points = [
+        (-0.22, -0.08), (-0.24, 0.09), (-0.17, 0.15),
+        (0.17, 0.15), (0.24, 0.09), (0.22, -0.08),
+        (0.0, -0.15),
+    ]
+    extruded_silhouette(
+        "Handbag front flap",
+        (x, front_y, z + 0.065),
+        flap_points,
+        0.026,
+        leather,
+        root,
+        0.014,
+    )
+    pipe_between(
+        "Handbag zipper",
+        (x - 0.20, front_y - 0.012, z + 0.185),
+        (x + 0.20, front_y - 0.012, z + 0.185),
+        0.008,
+        metal,
+        root,
+    )
+    cylinder(
+        "Handbag clasp",
+        (x, front_y - 0.030, z - 0.015),
+        0.028,
+        0.018,
+        metal,
+        root,
+        18,
+        rotation=(math.radians(90), 0, 0),
+    )
+
+    # A segmented arched handle has visible anchor rings and a leather grip.
+    for side in (-1, 1):
+        anchor_x = x + side * 0.18
+        cylinder(
+            "Handle anchor ring",
+            (anchor_x, y - 0.108, z + 0.16),
+            0.022,
+            0.022,
+            metal,
+            root,
+            18,
+            rotation=(math.radians(90), 0, 0),
+        )
+        pipe_between(
+            "Handbag handle riser",
+            (anchor_x, y, z + 0.17),
+            (x + side * 0.115, y, z + 0.36 + variation * 0.012),
+            0.016,
+            leather,
+            root,
+        )
+    pipe_between(
+        "Handbag handle grip",
+        (x - 0.115, y, z + 0.36 + variation * 0.012),
+        (x + 0.115, y, z + 0.36 + variation * 0.012),
+        0.018,
+        leather,
+        root,
+    )
+
+    # Four small protective feet visibly support the bag on its shelf.
+    for foot_x in (-0.20, 0.20):
+        for foot_y in (-0.065, 0.065):
+            cylinder(
+                "Handbag metal foot",
+                (x + foot_x, y + foot_y, z - 0.205),
+                0.014,
+                0.022,
+                metal,
+                root,
+                14,
+            )
+
+
 # Re-triggered after a stale hosted-runner assignment; generated geometry is unchanged.
 def build_folded_knit_stack(root, x, y, z, cloth_layers, trim):
     """Build a soft, visibly folded knitwear stack for an open wardrobe shelf."""
@@ -662,14 +768,19 @@ def build_wardrobe():
             build_tailored_jacket(root, x, 1.30, 1.53, cloth, metal)
             build_pressed_trousers(root, x, 1.31, 0.84, cloth)
 
-    # Real display shelves: bags rest on shelves; nothing floats in the room.
+    # Real display shelves: sculpted handbags rest on shelves; shaped bodies,
+    # expanding side gussets and separate hardware replace rounded cuboids.
     for index, x in enumerate((-1.72, -0.62, 0.56, 1.72)):
         rounded_box("Bag display shelf", (x, 1.39, 0.72), (0.92, 0.58, 0.045), oak, 0.012, 3, parent=root)
-        bag = rounded_box("Structured handbag", (x, 1.25, 0.98), (0.58, 0.18, 0.38), leather_colors[index % 3], 0.07, 7, parent=root)
-        bag["dearv_role"] = "handbag"
-        pipe_between("Bag handle left", (x - 0.20, 1.25, 1.17), (x - 0.12, 1.25, 1.38), 0.017, leather_colors[index % 3], root)
-        pipe_between("Bag handle top", (x - 0.12, 1.25, 1.38), (x + 0.12, 1.25, 1.38), 0.017, leather_colors[index % 3], root)
-        pipe_between("Bag handle right", (x + 0.12, 1.25, 1.38), (x + 0.20, 1.25, 1.17), 0.017, leather_colors[index % 3], root)
+        build_structured_handbag(
+            root,
+            x,
+            1.25,
+            0.99,
+            leather_colors[index % 3],
+            metal,
+            index % 2,
+        )
 
     # Footwear is modeled as paired objects resting on the lower shelves:
     # layered soles, rounded toes, raised vamps, heel quarters and buckles.
