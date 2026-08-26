@@ -412,6 +412,11 @@ func _build_windows() -> void:
 	_box(self, "LivingWindowRightReveal", Vector3(15.12, 1.62, 13.72), Vector3(0.18, 3.25, 0.40), wall_material, false)
 	_box(self, "LivingShadePocket", Vector3(5.0, 3.16, 13.48), Vector3(20.35, 0.13, 0.26), gasket_material, false)
 	_box(self, "LivingShadeTrack", Vector3(5.0, 3.085, 13.48), Vector3(20.0, 0.025, 0.055), frame_cap, false)
+	# Open sheer panels use real rippled cloth geometry. They stay gathered at
+	# the sides, preserving the panorama while giving the glazing a soft,
+	# domestic foreground layer that changes highlight as the player moves.
+	_add_sheer_curtain("LivingSheerLeft", Vector3(-4.42, 1.58, 13.43), 1.22, 2.96, 0.0, false)
+	_add_sheer_curtain("LivingSheerRight", Vector3(14.42, 1.58, 13.43), 1.22, 2.96, 0.0, true)
 
 	# A slim flush trench convector below the glass adds believable servicing
 	# detail and breaks up the otherwise uninterrupted sill line.
@@ -430,6 +435,8 @@ func _build_windows() -> void:
 	_box(self, "BedroomWindowHead", Vector3(-17.80, 3.16, -2.0), Vector3(0.34, 0.13, 16.25), frame_cap, false)
 	_box(self, "BedroomStoneSill", Vector3(-17.72, 0.105, -2.0), Vector3(0.48, 0.07, 16.25), sill_material, false)
 	_box(self, "BedroomShadePocket", Vector3(-17.50, 3.16, -2.0), Vector3(0.26, 0.13, 16.35), gasket_material, false)
+	_add_sheer_curtain("BedroomSheerNorth", Vector3(-17.43, 1.58, -8.95), 1.18, 2.96, 90.0, false)
+	_add_sheer_curtain("BedroomSheerSouth", Vector3(-17.43, 1.58, 4.95), 1.18, 2.96, 90.0, true)
 
 	# Bathroom glazing is translucent rather than a scenic picture.
 	for x in [-16.0, -12.0, -8.0]:
@@ -463,6 +470,75 @@ func _build_windows() -> void:
 		Vector3(-17.45, 1.18, 5.25),
 		shade_material
 	)
+
+
+func _add_sheer_curtain(
+	curtain_name: String,
+	origin: Vector3,
+	width: float,
+	height: float,
+	rotation_y: float,
+	mirror_folds: bool
+) -> void:
+	var curtain := MeshInstance3D.new()
+	curtain.name = curtain_name
+	curtain.position = origin
+	curtain.rotation_degrees.y = rotation_y
+
+	var sheer := _material(Color(0.92, 0.90, 0.85, 0.42), 0.90)
+	sheer.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	sheer.cull_mode = BaseMaterial3D.CULL_DISABLED
+
+	# Dense horizontal subdivision produces a true sinusoidal cross-section.
+	# Vertical easing gathers the heading and lets the lower cloth open slightly.
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surface.set_material(sheer)
+	var columns := 28
+	var rows := 14
+	for row in range(rows):
+		for column in range(columns):
+			var u0 := float(column) / float(columns)
+			var u1 := float(column + 1) / float(columns)
+			var v0 := float(row) / float(rows)
+			var v1 := float(row + 1) / float(rows)
+			var p00 := _curtain_vertex(u0, v0, width, height, mirror_folds)
+			var p10 := _curtain_vertex(u1, v0, width, height, mirror_folds)
+			var p01 := _curtain_vertex(u0, v1, width, height, mirror_folds)
+			var p11 := _curtain_vertex(u1, v1, width, height, mirror_folds)
+			for point_data in [
+				[p00, Vector2(u0, v0)], [p10, Vector2(u1, v0)], [p11, Vector2(u1, v1)],
+				[p00, Vector2(u0, v0)], [p11, Vector2(u1, v1)], [p01, Vector2(u0, v1)]
+			]:
+				surface.set_normal(Vector3(0.0, 0.0, -1.0))
+				surface.set_uv(point_data[1])
+				surface.add_vertex(point_data[0])
+	curtain.mesh = surface.commit()
+	add_child(curtain)
+
+	# A weighted stitched hem and narrow heading tape reinforce the cloth edges.
+	var hem := _material(Color(0.82, 0.80, 0.75, 0.48), 0.92)
+	hem.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var heading := Node3D.new()
+	heading.name = "%sTailoring" % curtain_name
+	heading.position = origin
+	heading.rotation_degrees.y = rotation_y
+	add_child(heading)
+	_box(heading, "CurtainHeadingTape", Vector3(0.0, height * 0.5 - 0.035, -0.02), Vector3(width, 0.07, 0.035), hem, false)
+	_box(heading, "CurtainWeightedHem", Vector3(0.0, -height * 0.5 + 0.04, 0.015), Vector3(width * 1.06, 0.055, 0.035), hem, false)
+
+
+func _curtain_vertex(u: float, v: float, width: float, height: float, mirror_folds: bool) -> Vector3:
+	var direction := -1.0 if mirror_folds else 1.0
+	var gathered_u := pow(u, 1.16) if mirror_folds else 1.0 - pow(1.0 - u, 1.16)
+	var x := (gathered_u - 0.5) * width * direction
+	var vertical_opening := 0.72 + v * 0.28
+	var fold_phase := u * TAU * 6.0
+	var z := sin(fold_phase) * 0.085 * vertical_opening
+	z += sin(v * PI) * cos(fold_phase * 0.5) * 0.018
+	var y := (0.5 - v) * height
+	y -= sin(u * PI) * 0.035 * v
+	return Vector3(x, y, z)
 
 
 func _add_privacy_shade(
