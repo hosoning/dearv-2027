@@ -723,27 +723,49 @@ func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> Om
 
 
 func _add_floor_lamp(parent: Node3D, origin: Vector3) -> OmniLight3D:
-	_box(parent, "FloorLampStem", origin + Vector3(0.0, 0.82, 0.0), Vector3(0.055, 1.64, 0.055), champagne)
-	var shade := MeshInstance3D.new()
-	shade.name = "FloorLampShade"
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.22
-	mesh.bottom_radius = 0.36
-	mesh.height = 0.42
-	mesh.radial_segments = 40
-	mesh.material = cream
-	shade.mesh = mesh
-	shade.position = origin + Vector3(0.0, 1.65, 0.0)
-	parent.add_child(shade)
+	# Weighted disc base, stepped stem and articulated arcing arm give the
+	# living lamp a furniture-grade silhouette rather than a pole and cone.
+	_cylinder(parent, "FloorLampWeightedBase", origin + Vector3(0.0, 0.045, 0.0), 0.30, 0.34, 0.09, charcoal)
+	_cylinder(parent, "FloorLampBaseInlay", origin + Vector3(0.0, 0.098, 0.0), 0.22, 0.25, 0.025, champagne)
+	_cylinder(parent, "FloorLampLowerStem", origin + Vector3(0.0, 0.73, 0.0), 0.028, 0.040, 1.30, champagne)
+	_cylinder(parent, "FloorLampStemCollar", origin + Vector3(0.0, 1.38, 0.0), 0.060, 0.060, 0.085, charcoal)
+
+	var lower_arm := _cylinder(parent, "FloorLampLowerArm", origin + Vector3(0.15, 1.55, 0.0), 0.025, 0.030, 0.46, champagne)
+	lower_arm.rotation_degrees.z = -38.0
+	var elbow := _sphere(parent, "FloorLampElbowJoint", origin + Vector3(0.29, 1.72, 0.0), Vector3(0.058, 0.058, 0.058), charcoal)
+	elbow.rotation_degrees.z = -18.0
+	var upper_arm := _cylinder(parent, "FloorLampUpperArm", origin + Vector3(0.49, 1.82, 0.0), 0.022, 0.027, 0.46, champagne)
+	upper_arm.rotation_degrees.z = -67.0
+	_sphere(parent, "FloorLampShadeJoint", origin + Vector3(0.70, 1.88, 0.0), Vector3(0.052, 0.052, 0.052), champagne)
+
+	# Layered metal dome, pale reflector, glass diffuser and visible bulb.
+	_cylinder(parent, "FloorLampShadeNeck", origin + Vector3(0.70, 1.80, 0.0), 0.055, 0.075, 0.10, champagne)
+	_cylinder(parent, "FloorLampDome", origin + Vector3(0.70, 1.65, 0.0), 0.14, 0.34, 0.28, charcoal)
+	_cylinder(parent, "FloorLampReflector", origin + Vector3(0.70, 1.52, 0.0), 0.24, 0.30, 0.065, cream)
+	_sphere(parent, "FloorLampGlassDiffuser", origin + Vector3(0.70, 1.45, 0.0), Vector3(0.22, 0.10, 0.22), crystal)
+	_sphere(parent, "FloorLampVisibleBulb", origin + Vector3(0.70, 1.48, 0.0), Vector3(0.075, 0.095, 0.075), warm_glow)
+
+	var rim := MeshInstance3D.new()
+	rim.name = "FloorLampRolledRim"
+	var rim_mesh := TorusMesh.new()
+	rim_mesh.inner_radius = 0.31
+	rim_mesh.outer_radius = 0.345
+	rim_mesh.rings = 48
+	rim_mesh.ring_segments = 12
+	rim_mesh.material = champagne
+	rim.mesh = rim_mesh
+	rim.position = origin + Vector3(0.70, 1.505, 0.0)
+	parent.add_child(rim)
+
 	var light := OmniLight3D.new()
-	light.position = origin + Vector3(0.0, 1.55, 0.0)
+	light.name = "FloorLampGlow"
+	light.position = origin + Vector3(0.70, 1.42, 0.0)
 	light.light_color = Color("ffd4a0")
-	light.light_energy = 1.05
-	light.omni_range = 4.2
+	light.light_energy = 1.12
+	light.omni_range = 4.4
 	light.shadow_enabled = true
 	parent.add_child(light)
 	return light
-
 
 func _add_warm_spot(parent: Node3D, from: Vector3, target: Vector3, energy: float, light_range: float) -> SpotLight3D:
 	var light := SpotLight3D.new()
