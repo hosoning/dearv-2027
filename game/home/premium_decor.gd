@@ -584,6 +584,24 @@ func _build_living_details() -> void:
 	root.name = "LivingRoomLayer"
 	add_child(root)
 	_box(root, "LivingRug", Vector3(0.15, 0.018, 4.15), Vector3(6.65, 0.025, 4.4), cream)
+
+	# Loose decorative cushions and a draped throw sit on the authored sectional.
+	# Ellipsoidal fill, corner pinches and seam piping keep them visibly soft.
+	for cushion_data in [
+		Vector4(-1.10, 0.78, 4.69, -7.0),
+		Vector4(0.12, 0.80, 4.72, 4.0),
+		Vector4(1.12, 0.76, 4.66, -3.0)
+	]:
+		var cushion := _sphere(root, "SectionalLooseCushion", Vector3(cushion_data.x, cushion_data.y, cushion_data.z), Vector3(0.39, 0.16, 0.34), cream)
+		cushion.rotation_degrees.y = cushion_data.w
+		for side in [-1.0, 1.0]:
+			_sphere(root, "CushionPinchedCorner", Vector3(cushion_data.x + side * 0.35, cushion_data.y, cushion_data.z), Vector3(0.055, 0.07, 0.06), cream)
+		_box(root, "CushionTopSeam", Vector3(cushion_data.x, cushion_data.y + 0.15, cushion_data.z - 0.02), Vector3(0.62, 0.012, 0.018), champagne)
+
+	_sphere(root, "SectionalThrowMainFold", Vector3(1.48, 0.68, 3.88), Vector3(0.58, 0.055, 0.45), textile)
+	_sphere(root, "SectionalThrowCascade", Vector3(1.80, 0.48, 3.80), Vector3(0.28, 0.31, 0.055), textile)
+	for z in [3.54, 3.66, 3.78, 3.90, 4.02]:
+		_box(root, "SectionalThrowFringe", Vector3(2.06, 0.25, z), Vector3(0.13, 0.012, 0.012), textile)
 	# The sculptural oval table and soft planting break up the room's box-heavy silhouette.
 	_cylinder(root, "LowCoffeeTable", Vector3(0.25, 0.35, 6.15), 0.95, 0.95, 0.16, pale_stone(), Vector3(1.22, 1.0, 0.58))
 	_cylinder(root, "CoffeeTablePedestal", Vector3(0.25, 0.18, 6.15), 0.32, 0.46, 0.34, champagne, Vector3(1.15, 1.0, 0.82))
