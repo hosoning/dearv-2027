@@ -1661,22 +1661,39 @@ func _ceiling_light(id: String, position: Vector3, energy: float, light_range: f
 
 func _add_bar_stool(parent: Node3D, position: Vector3) -> void:
 	var stool := Node3D.new()
-	stool.name = "BarStool"
+	stool.name = "SculptedBarStool"
 	stool.position = position
 	parent.add_child(stool)
 	var seat_material := _material(Color("4d4540"), 0.78)
-	var seat := MeshInstance3D.new()
-	var seat_mesh := CylinderMesh.new()
-	seat_mesh.top_radius = 0.26
-	seat_mesh.bottom_radius = 0.26
-	seat_mesh.height = 0.12
-	seat_mesh.radial_segments = 32
-	seat_mesh.material = seat_material
-	seat.mesh = seat_mesh
-	seat.position.y = 0.74
-	stool.add_child(seat)
-	_box(stool, "Stem", Vector3(0.0, 0.36, 0.0), Vector3(0.055, 0.72, 0.055), dark_metal_material, true)
-	_box(stool, "Foot", Vector3(0.0, 0.04, 0.0), Vector3(0.48, 0.05, 0.48), dark_metal_material, true)
+	var piping_material := _material(Color("88745d"), 0.30, 0.70)
+
+	# Layered oval upholstery, an embracing low back and round metalwork replace
+	# the former cylinder-on-square-post construction.
+	_ellipsoid(stool, "SeatUndershell", Vector3(0.0, 0.70, 0.0), Vector3(0.31, 0.075, 0.28), warm_wood_material)
+	_ellipsoid(stool, "SeatCushion", Vector3(0.0, 0.77, -0.015), Vector3(0.29, 0.085, 0.26), seat_material)
+	_ellipsoid(stool, "SeatFrontCrown", Vector3(0.0, 0.805, -0.18), Vector3(0.25, 0.045, 0.12), seat_material)
+	_cylinder(stool, "RoundStem", Vector3(0.0, 0.38, 0.0), 0.032, 0.64, dark_metal_material)
+	_cylinder(stool, "WeightedDiscBase", Vector3(0.0, 0.035, 0.0), 0.28, 0.055, dark_metal_material)
+
+	var foot_ring := MeshInstance3D.new()
+	foot_ring.name = "CircularFootrest"
+	var foot_ring_mesh := TorusMesh.new()
+	foot_ring_mesh.inner_radius = 0.205
+	foot_ring_mesh.outer_radius = 0.225
+	foot_ring_mesh.rings = 32
+	foot_ring_mesh.ring_segments = 10
+	foot_ring_mesh.material = piping_material
+	foot_ring.mesh = foot_ring_mesh
+	foot_ring.position = Vector3(0.0, 0.30, 0.0)
+	stool.add_child(foot_ring)
+
+	_cylinder(stool, "LeftBackSupport", Vector3(-0.19, 0.86, 0.19), 0.018, 0.30, piping_material)
+	_cylinder(stool, "RightBackSupport", Vector3(0.19, 0.86, 0.19), 0.018, 0.30, piping_material)
+	_ellipsoid(stool, "CurvedBackShell", Vector3(0.0, 1.01, 0.23), Vector3(0.32, 0.20, 0.075), warm_wood_material)
+	_ellipsoid(stool, "CurvedBackCushion", Vector3(0.0, 1.01, 0.185), Vector3(0.27, 0.16, 0.075), seat_material)
+	_cylinder(stool, "BackLeftPiping", Vector3(-0.27, 1.01, 0.18), 0.010, 0.25, piping_material)
+	_cylinder(stool, "BackRightPiping", Vector3(0.27, 1.01, 0.18), 0.010, 0.25, piping_material)
+	_collision_box(stool, "BarStoolCollision", Vector3(0.0, 0.52, 0.06), Vector3(0.62, 1.05, 0.58))
 
 
 func _wall(position: Vector3, size: Vector3) -> void:
