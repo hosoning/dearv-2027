@@ -14,6 +14,8 @@ var glass_material: ShaderMaterial
 var appliance_material: StandardMaterial3D
 var warm_light_material: StandardMaterial3D
 var water_material: StandardMaterial3D
+var harbour_boats: Array[Node3D] = []
+var harbour_motion_time := 0.0
 
 
 func _ready() -> void:
@@ -30,6 +32,21 @@ func _ready() -> void:
 	_build_study_rig()
 	_build_sofa_interaction()
 	_register_food_and_recipes()
+
+
+func _process(delta: float) -> void:
+	# Subtle independent boat travel and hull motion make the coastal view
+	# spatially legible through the glazing instead of behaving like a backdrop.
+	harbour_motion_time += delta
+	for boat in harbour_boats:
+		var speed := float(boat.get_meta("harbour_speed", 1.0))
+		var phase := float(boat.get_meta("harbour_phase", 0.0))
+		var base_y := float(boat.get_meta("harbour_base_y", boat.position.y))
+		boat.position.x += speed * delta
+		if boat.position.x > 72.0:
+			boat.position.x = -72.0
+		boat.position.y = base_y + sin(harbour_motion_time * 1.35 + phase) * 0.055
+		boat.rotation_degrees.z = sin(harbour_motion_time * 1.10 + phase) * 0.75
 
 
 func _create_materials() -> void:
@@ -604,10 +621,24 @@ func _build_distant_city_view() -> void:
 	var boat_material := _material(Color("e7e0d2"), 0.48)
 	var wake_material := _material(Color(0.72, 0.84, 0.88, 0.48), 0.18)
 	wake_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	for boat_data in [Vector3(-24.0, -57.55, 70.0), Vector3(9.0, -57.55, 87.0), Vector3(47.0, -57.55, 73.0)]:
-		_ellipsoid(city, "HarbourBoatHull", boat_data, Vector3(1.30, 0.275, 0.36), boat_material)
-		_ellipsoid(city, "HarbourBoatCabin", boat_data + Vector3(-0.28, 0.54, 0.0), Vector3(0.48, 0.27, 0.28), glass_material)
-		_box(city, "HarbourWake", boat_data + Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
+	var moving_boat_data := [
+		Vector4(-24.0, -57.55, 70.0, 0.72),
+		Vector4(9.0, -57.55, 87.0, 0.46),
+		Vector4(47.0, -57.55, 73.0, 0.60)
+	]
+	for index in range(moving_boat_data.size()):
+		var boat_data: Vector4 = moving_boat_data[index]
+		var boat := Node3D.new()
+		boat.name = "MovingHarbourBoat"
+		boat.position = Vector3(boat_data.x, boat_data.y, boat_data.z)
+		boat.set_meta("harbour_speed", boat_data.w)
+		boat.set_meta("harbour_phase", float(index) * 2.15)
+		boat.set_meta("harbour_base_y", boat_data.y)
+		city.add_child(boat)
+		_ellipsoid(boat, "HarbourBoatHull", Vector3.ZERO, Vector3(1.30, 0.275, 0.36), boat_material)
+		_ellipsoid(boat, "HarbourBoatCabin", Vector3(-0.28, 0.54, 0.0), Vector3(0.48, 0.27, 0.28), glass_material)
+		_box(boat, "HarbourWake", Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
+		harbour_boats.append(boat)
 
 
 func _build_doors() -> void:
