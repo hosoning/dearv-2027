@@ -372,6 +372,58 @@ def build_couture_dress(root, x, y, z, cloth, metal):
         pipe_between("Dress soft pleat", (x + offset * 0.45, y - 0.096, z + 0.11), (x + offset, y - 0.102, z - 0.72), 0.008, cloth, root)
 
 
+def rumpled_sheet(name, location, width, depth, material, parent=None, phase=0.0, edge_drop=0.14):
+    """Create a continuous cloth surface with authored ripples and soft edge drape."""
+    columns = 18
+    rows = 20
+    half_x = width * 0.5
+    half_y = depth * 0.5
+    vertices = []
+    faces = []
+    for row in range(rows + 1):
+        v = row / rows
+        py = -half_y + depth * v
+        for column in range(columns + 1):
+            u = column / columns
+            px = -half_x + width * u
+            ripple = (
+                math.sin(px * 7.4 + phase) * 0.018
+                + math.sin(py * 8.2 - phase * 0.7) * 0.014
+                + math.sin((px + py) * 4.6 + phase * 1.3) * 0.012
+            )
+            side_fall = max(0.0, (abs(px) / half_x - 0.76) / 0.24)
+            foot_fall = max(0.0, ((-py) / half_y - 0.70) / 0.30)
+            drape = max(side_fall, foot_fall) * edge_drop
+            vertices.append((px, py, ripple - drape))
+    stride = columns + 1
+    for row in range(rows):
+        for column in range(columns):
+            a = row * stride + column
+            faces.append((a, a + 1, a + stride + 1, a + stride))
+    mesh = bpy.data.meshes.new(f"{name} mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    mesh.materials.append(material)
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    obj.parent = parent
+    subdivision = obj.modifiers.new("Soft cloth subdivision", "SUBSURF")
+    subdivision.subdivision_type = "CATMULL_CLARK"
+    subdivision.levels = 1
+    subdivision.render_levels = 1
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier=subdivision.name)
+    solidify = obj.modifiers.new("Linen thickness", "SOLIDIFY")
+    solidify.thickness = 0.018
+    solidify.offset = -0.25
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier=solidify.name)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
+    return obj
+
+
 def all_descendants(root):
     stack = list(root.children)
     result = []
@@ -384,13 +436,6 @@ def all_descendants(root):
 
 def build_bed():
     root = root_object("DearV_Upholstered_Bed")
-    # Reworked to match a specific reference: a low, monolithic bouclé
-    # platform sitting flush on the floor, no headboard, no visible legs --
-    # just loose linen bedding draped over the top. Neutral oatmeal/stone
-    # tones throughout, no accent color.
-    # Toned apart clearly (the first pass came out nearly monochrome under
-    # the studio lighting): a visibly darker taupe base, light cream
-    # bedding on top.
     boucle = mat("Taupe bouclé base", (0.40, 0.365, 0.315, 1.0), 0.95)
     linen = mat("Ivory washed linen", (0.87, 0.845, 0.795, 1.0), 0.82)
     duvet = mat("Soft stone duvet", (0.78, 0.755, 0.70, 1.0), 0.86)
@@ -399,19 +444,22 @@ def build_bed():
     rounded_box("Bouclé platform base", (0.0, 0.0, base_h / 2), (2.05, 2.32, base_h), boucle, 0.16, 12, parent=root)
     rounded_box("Linen mattress topper", (0.0, -0.02, base_h + 0.08), (1.95, 2.22, 0.16), linen, 0.075, 11, parent=root)
 
-    # Loosely draped duvet: three overlapping, slightly rotated slabs with
-    # a gentle height ripple (not a staircase) between them, so the top
-    # reads as soft rumpled fabric.
-    duvet_z = base_h + 0.16 + 0.05
-    rounded_box("Duvet fold 1", (0.0, -0.55, duvet_z), (1.86, 1.05, 0.11), duvet, 0.05, 10, rotation=(math.radians(1.5), 0, math.radians(-1)), parent=root)
-    rounded_box("Duvet fold 2", (0.05, -0.05, duvet_z + 0.018), (1.82, 0.75, 0.10), duvet, 0.05, 10, rotation=(math.radians(-3), 0, math.radians(1.8)), parent=root)
-    rounded_box("Duvet fold 3", (-0.08, 0.35, duvet_z + 0.03), (1.78, 0.55, 0.09), duvet, 0.05, 10, rotation=(math.radians(3.5), 0, math.radians(-1.6)), parent=root)
+    # One continuous subdivided duvet now spans the bed. Authored multi-axis
+    # ripples, side falloff and a deeper foot drop replace the stacked slabs.
+    rumpled_sheet("Continuous rumpled duvet", (0.0, -0.14, 0.69), 1.94, 1.78, duvet, root, phase=0.7, edge_drop=0.17)
+    rumpled_sheet("Turned linen top sheet", (0.0, 0.62, 0.705), 1.82, 0.34, linen, root, phase=2.1, edge_drop=0.045)
+    for x in (-0.66, -0.22, 0.24, 0.67):
+        pipe_between("Duvet soft ridge", (x, -0.92, 0.61), (x + 0.04, 0.48, 0.72), 0.012, duvet, root)
 
-    # Two simple pillows leaning at the head end -- there's no headboard
-    # to prop them against, so they lean back on their own.
-    pillow_z = base_h + 0.16 + 0.14
+    # Ellipsoidal pillows with pinched corners and separate seam piping read as
+    # filled linen rather than beveled boxes.
+    pillow_z = 0.75
     for index, x in enumerate((-0.46, 0.46)):
-        rounded_box(f"Linen pillow {index + 1}", (x, 0.92, pillow_z), (0.78, 0.24, 0.30), linen, 0.11, 10, rotation=(math.radians(-9), 0, math.radians((-1) ** index * 1.5)), parent=root)
+        pillow = sphere(f"Linen pillow {index + 1}", (x, 0.89, pillow_z), (0.39, 0.14, 0.18), linen, root, 40)
+        pillow.rotation_euler = (math.radians(-8), 0, math.radians((-1) ** index * 1.8))
+        for side in (-1, 1):
+            sphere("Pillow pinched corner", (x + side * 0.36, 0.89, pillow_z), (0.055, 0.07, 0.065), linen, root, 24)
+        pipe_between("Pillow upper seam", (x - 0.31, 0.80, pillow_z + 0.13), (x + 0.31, 0.80, pillow_z + 0.13), 0.008, duvet, root)
     return root
 
 
