@@ -15,6 +15,7 @@ var appliance_material: StandardMaterial3D
 var warm_light_material: StandardMaterial3D
 var water_material: StandardMaterial3D
 var harbour_boats: Array[Node3D] = []
+var harbour_birds: Array[Node3D] = []
 var harbour_motion_time := 0.0
 
 
@@ -47,6 +48,21 @@ func _process(delta: float) -> void:
 			boat.position.x = -72.0
 		boat.position.y = base_y + sin(harbour_motion_time * 1.35 + phase) * 0.055
 		boat.rotation_degrees.z = sin(harbour_motion_time * 1.10 + phase) * 0.75
+	for bird in harbour_birds:
+		var bird_speed := float(bird.get_meta("flight_speed", 2.0))
+		var bird_phase := float(bird.get_meta("flight_phase", 0.0))
+		var bird_base_y := float(bird.get_meta("flight_base_y", bird.position.y))
+		bird.position.x -= bird_speed * delta
+		if bird.position.x < -62.0:
+			bird.position.x = 62.0
+		bird.position.y = bird_base_y + sin(harbour_motion_time * 0.72 + bird_phase) * 0.32
+		var flap := sin(harbour_motion_time * 4.2 + bird_phase) * 18.0
+		var left_wing := bird.get_node_or_null("LeftWing") as Node3D
+		var right_wing := bird.get_node_or_null("RightWing") as Node3D
+		if left_wing:
+			left_wing.rotation_degrees.x = flap
+		if right_wing:
+			right_wing.rotation_degrees.x = -flap
 
 
 func _create_materials() -> void:
@@ -639,6 +655,37 @@ func _build_distant_city_view() -> void:
 		_ellipsoid(boat, "HarbourBoatCabin", Vector3(-0.28, 0.54, 0.0), Vector3(0.48, 0.27, 0.28), glass_material)
 		_box(boat, "HarbourWake", Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
 		harbour_boats.append(boat)
+
+	# Small modeled gulls cross at nearer depths. Their independent flight arcs
+	# and wing beats add another moving parallax layer above the marina.
+	var bird_material := _material(Color("ddd9cf"), 0.62)
+	var bird_beak := _material(Color("c39452"), 0.54)
+	var flight_data := [
+		Vector4(-38.0, 5.0, 42.0, 2.10),
+		Vector4(16.0, 7.2, 55.0, 1.65),
+		Vector4(48.0, 3.4, 36.0, 2.55)
+	]
+	for index in range(flight_data.size()):
+		var data: Vector4 = flight_data[index]
+		var bird := Node3D.new()
+		bird.name = "FlyingHarbourGull"
+		bird.position = Vector3(data.x, data.y, data.z)
+		bird.set_meta("flight_speed", data.w)
+		bird.set_meta("flight_phase", float(index) * 1.9)
+		bird.set_meta("flight_base_y", data.y)
+		city.add_child(bird)
+		_ellipsoid(bird, "GullBody", Vector3.ZERO, Vector3(0.24, 0.075, 0.07), bird_material)
+		_ellipsoid(bird, "GullHead", Vector3(-0.21, 0.04, 0.0), Vector3(0.075, 0.065, 0.065), bird_material)
+		_ellipsoid(bird, "GullBeak", Vector3(-0.30, 0.035, 0.0), Vector3(0.08, 0.025, 0.025), bird_beak)
+		var left_wing := Node3D.new()
+		left_wing.name = "LeftWing"
+		bird.add_child(left_wing)
+		_ellipsoid(left_wing, "FeatheredWing", Vector3(0.02, 0.0, -0.19), Vector3(0.13, 0.025, 0.25), bird_material)
+		var right_wing := Node3D.new()
+		right_wing.name = "RightWing"
+		bird.add_child(right_wing)
+		_ellipsoid(right_wing, "FeatheredWing", Vector3(0.02, 0.0, 0.19), Vector3(0.13, 0.025, 0.25), bird_material)
+		harbour_birds.append(bird)
 
 
 func _build_doors() -> void:
