@@ -660,19 +660,43 @@ func _add_plant(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
 
 
 func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> OmniLight3D:
-	_box(parent, "PendantCord", ceiling_origin + Vector3(0.0, -0.42, 0.0), Vector3(0.025, 0.84, 0.025), charcoal)
-	_cylinder(parent, "PendantCanopy", ceiling_origin + Vector3(0.0, -0.02, 0.0), 0.13, 0.13, 0.045, champagne)
-	_cylinder(parent, "PendantShade", ceiling_origin + Vector3(0.0, -0.90, 0.0), 0.16, 0.31, 0.28, charcoal)
+	# Layered ceiling canopy, braided drop and a spun-metal bell create a clear
+	# jewellery-like silhouette instead of a cylinder hanging from a box.
+	_cylinder(parent, "PendantCeilingPlate", ceiling_origin + Vector3(0.0, -0.025, 0.0), 0.16, 0.16, 0.035, champagne)
+	_cylinder(parent, "PendantCanopy", ceiling_origin + Vector3(0.0, -0.07, 0.0), 0.105, 0.15, 0.07, charcoal)
+	_sphere(parent, "PendantSwivel", ceiling_origin + Vector3(0.0, -0.12, 0.0), Vector3(0.055, 0.045, 0.055), champagne)
+	_cylinder(parent, "PendantBraidedCord", ceiling_origin + Vector3(0.0, -0.50, 0.0), 0.012, 0.012, 0.76, charcoal)
+	_cylinder(parent, "PendantNeck", ceiling_origin + Vector3(0.0, -0.90, 0.0), 0.055, 0.075, 0.10, champagne)
+
+	# A three-stage shade catches highlights across curved profiles. The pale
+	# reflector and translucent diffuser are separate physical layers.
+	_cylinder(parent, "PendantUpperBell", ceiling_origin + Vector3(0.0, -1.02, 0.0), 0.10, 0.27, 0.25, charcoal)
+	_cylinder(parent, "PendantLowerBell", ceiling_origin + Vector3(0.0, -1.17, 0.0), 0.27, 0.36, 0.13, charcoal)
+	_cylinder(parent, "PendantInnerReflector", ceiling_origin + Vector3(0.0, -1.17, 0.0), 0.22, 0.31, 0.07, cream)
+	_sphere(parent, "PendantGlassDiffuser", ceiling_origin + Vector3(0.0, -1.26, 0.0), Vector3(0.255, 0.115, 0.255), crystal)
+	_sphere(parent, "PendantVisibleBulb", ceiling_origin + Vector3(0.0, -1.245, 0.0), Vector3(0.085, 0.105, 0.085), warm_glow)
+
+	var rim := MeshInstance3D.new()
+	rim.name = "PendantRolledRim"
+	var rim_mesh := TorusMesh.new()
+	rim_mesh.inner_radius = 0.335
+	rim_mesh.outer_radius = 0.365
+	rim_mesh.rings = 48
+	rim_mesh.ring_segments = 12
+	rim_mesh.material = champagne
+	rim.mesh = rim_mesh
+	rim.position = ceiling_origin + Vector3(0.0, -1.235, 0.0)
+	parent.add_child(rim)
+
 	var light := OmniLight3D.new()
 	light.name = "PendantGlow"
-	light.position = ceiling_origin + Vector3(0.0, -1.08, 0.0)
+	light.position = ceiling_origin + Vector3(0.0, -1.29, 0.0)
 	light.light_color = Color("ffd4a0")
-	light.light_energy = 0.58
-	light.omni_range = 3.2
+	light.light_energy = 0.64
+	light.omni_range = 3.35
 	light.shadow_enabled = true
 	parent.add_child(light)
 	return light
-
 
 func _add_table_lamp(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> OmniLight3D:
 	_box(parent, "LampStem", origin + Vector3(0.0, 0.22 * scale_factor, 0.0), Vector3(0.045, 0.44, 0.045) * scale_factor, champagne)
