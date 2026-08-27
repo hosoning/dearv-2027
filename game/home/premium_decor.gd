@@ -399,6 +399,37 @@ func _build_study() -> void:
 	# Desk accessories and a pool of task light make the authored GLB feel inhabited.
 	_box(root, "DeskPad", Vector3(14.35, 0.855, 3.0), Vector3(1.65, 0.025, 0.72), charcoal)
 	_box(root, "PenTray", Vector3(15.43, 0.88, 2.75), Vector3(0.42, 0.05, 0.18), champagne)
+
+	# A complete working set replaces the empty desk-pad look: low-profile
+	# keyboard with individual keycaps, curved mouse, notebook, page block and pen.
+	var keyboard_base := _box(root, "StudyKeyboardBase", Vector3(14.30, 0.885, 3.14), Vector3(0.72, 0.045, 0.26), champagne)
+	keyboard_base.rotation_degrees.x = -3.0
+	for key_row in range(3):
+		for key_column in range(9):
+			var key_width := 0.055 if key_column < 8 else 0.080
+			_box(
+				root,
+				"StudyKeyboardKey",
+				Vector3(13.99 + float(key_column) * 0.076, 0.918 + float(key_row) * 0.002, 3.055 + float(key_row) * 0.080),
+				Vector3(key_width, 0.018, 0.050),
+				cream if (key_row + key_column) % 5 != 0 else textile
+			)
+	_box(root, "StudyKeyboardSpacebar", Vector3(14.30, 0.922, 3.292), Vector3(0.28, 0.018, 0.045), cream)
+
+	_sphere(root, "StudyMouseBody", Vector3(14.88, 0.925, 3.18), Vector3(0.105, 0.055, 0.145), charcoal)
+	_box(root, "StudyMouseCenterSeam", Vector3(14.88, 0.975, 3.115), Vector3(0.012, 0.012, 0.12), champagne)
+	_cylinder(root, "StudyMouseWheel", Vector3(14.88, 0.995, 3.13), 0.018, 0.018, 0.035, champagne).rotation_degrees.x = 90.0
+
+	_box(root, "StudyNotebookCover", Vector3(15.08, 0.898, 3.35), Vector3(0.50, 0.035, 0.34), walnut)
+	_box(root, "StudyNotebookPages", Vector3(15.08, 0.924, 3.35), Vector3(0.45, 0.025, 0.30), cream)
+	_box(root, "StudyNotebookSpine", Vector3(14.84, 0.935, 3.35), Vector3(0.025, 0.045, 0.34), champagne)
+	for page_line_z in [3.27, 3.34, 3.41]:
+		_box(root, "StudyNotebookRule", Vector3(15.12, 0.941, page_line_z), Vector3(0.30, 0.007, 0.008), textile)
+	var study_pen := _cylinder(root, "StudyFountainPen", Vector3(15.23, 0.97, 3.18), 0.012, 0.015, 0.36, charcoal)
+	study_pen.rotation_degrees.z = 82.0
+	_cylinder(root, "StudyPenCapBand", Vector3(15.36, 0.97, 3.18), 0.018, 0.018, 0.035, champagne).rotation_degrees.z = 82.0
+	_cylinder(root, "StudyDeskGrommet", Vector3(13.78, 0.89, 2.78), 0.055, 0.055, 0.025, charcoal)
+
 	study_detail_lights.append(_add_table_lamp(root, Vector3(13.05, 0.83, 2.62), 0.82))
 	# A restrained desk globe brings a curved silhouette to the executive study.
 	_cylinder(root, "GlobeStand", Vector3(15.18, 1.00, 3.26), 0.09, 0.13, 0.18, champagne)
