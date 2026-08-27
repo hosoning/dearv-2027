@@ -613,8 +613,59 @@ func _build_kitchen_details() -> void:
 	_sphere(root, "BarFruit", Vector3(1.67, 1.20, -5.97), Vector3(0.085, 0.085, 0.085), leaf_light)
 	_sphere(root, "BarFruit", Vector3(1.82, 1.19, -6.05), Vector3(0.075, 0.075, 0.075), walnut)
 
+	# A sculpted kettle and breakfast toaster give the long worktop real close-range
+	# appliance detail. Curved shells, separate hardware and visible contents
+	# avoid the former empty-counter / rectangular-prop look.
+	_cylinder(root, "KettleWeightedBase", Vector3(-4.96, 1.015, -8.68), 0.205, 0.225, 0.045, charcoal)
+	_sphere(root, "KettleRoundedBody", Vector3(-4.96, 1.245, -8.68), Vector3(0.235, 0.265, 0.215), champagne)
+	_sphere(root, "KettleShoulder", Vector3(-4.96, 1.415, -8.68), Vector3(0.175, 0.115, 0.175), champagne)
+	_cylinder(root, "KettleLid", Vector3(-4.96, 1.515, -8.68), 0.105, 0.135, 0.040, charcoal)
+	_sphere(root, "KettleLidKnob", Vector3(-4.96, 1.560, -8.68), Vector3(0.045, 0.040, 0.045), champagne)
+	var kettle_spout := _cylinder(root, "KettleTaperedSpout", Vector3(-4.70, 1.355, -8.68), 0.055, 0.115, 0.36, champagne)
+	kettle_spout.rotation_degrees.z = -58.0
+	_cylinder(root, "KettleSpoutRim", Vector3(-4.52, 1.465, -8.68), 0.058, 0.072, 0.035, charcoal).rotation_degrees.z = -58.0
+	var kettle_handle := MeshInstance3D.new()
+	kettle_handle.name = "KettleArchedHandle"
+	var kettle_handle_mesh := TorusMesh.new()
+	kettle_handle_mesh.inner_radius = 0.175
+	kettle_handle_mesh.outer_radius = 0.205
+	kettle_handle_mesh.rings = 40
+	kettle_handle_mesh.ring_segments = 10
+	kettle_handle_mesh.material = charcoal
+	kettle_handle.mesh = kettle_handle_mesh
+	kettle_handle.position = Vector3(-5.12, 1.38, -8.68)
+	kettle_handle.rotation_degrees.x = 90.0
+	kettle_handle.scale = Vector3(0.72, 1.10, 1.0)
+	root.add_child(kettle_handle)
+	_box(root, "KettleWaterGauge", Vector3(-4.735, 1.255, -8.68), Vector3(0.018, 0.22, 0.055), crystal)
+	_sphere(root, "KettlePowerGlow", Vector3(-4.74, 1.075, -8.68), Vector3(0.018, 0.018, 0.018), warm_glow)
+
+	# The toaster uses a pillowed metal body, inset browning slots, lever and two
+	# irregular bread crowns so it reads as a used appliance rather than a box.
+	_sphere(root, "ToasterSoftBody", Vector3(-3.72, 1.145, -12.68), Vector3(0.38, 0.16, 0.255), champagne)
+	_sphere(root, "ToasterTopCrown", Vector3(-3.72, 1.255, -12.68), Vector3(0.36, 0.075, 0.235), champagne)
+	for slot_x in [-3.84, -3.60]:
+		_box(root, "ToasterSlot", Vector3(slot_x, 1.315, -12.68), Vector3(0.115, 0.018, 0.31), charcoal)
+		sphere_toast(root, slot_x, -12.68)
+	_box(root, "ToasterLeverStem", Vector3(-3.30, 1.20, -12.68), Vector3(0.035, 0.19, 0.035), charcoal)
+	_sphere(root, "ToasterLeverGrip", Vector3(-3.30, 1.105, -12.68), Vector3(0.055, 0.035, 0.055), walnut)
+	_sphere(root, "ToasterIndicator", Vector3(-3.35, 1.15, -12.42), Vector3(0.020, 0.020, 0.015), warm_glow)
+
 	# A small herb planter softens the full-height cabinetry beside the sink.
 	_add_plant(root, Vector3(-3.55, 0.98, -12.48), 0.34)
+
+
+func sphere_toast(parent: Node3D, x: float, z: float) -> void:
+	var toast_crust := StandardMaterial3D.new()
+	toast_crust.albedo_color = Color("9a6844")
+	toast_crust.roughness = 0.92
+	var toast_crumb := StandardMaterial3D.new()
+	toast_crumb.albedo_color = Color("d5b786")
+	toast_crumb.roughness = 0.96
+	_sphere(parent, "ToastSliceCrust", Vector3(x, 1.415, z), Vector3(0.072, 0.115, 0.15), toast_crust)
+	_sphere(parent, "ToastSliceCrumb", Vector3(x, 1.420, z - 0.012), Vector3(0.058, 0.096, 0.132), toast_crumb)
+	_sphere(parent, "ToastCrownLeft", Vector3(x - 0.030, 1.505, z), Vector3(0.045, 0.045, 0.14), toast_crust)
+	_sphere(parent, "ToastCrownRight", Vector3(x + 0.030, 1.505, z), Vector3(0.045, 0.045, 0.14), toast_crust)
 
 
 func _build_bathroom_details() -> void:
