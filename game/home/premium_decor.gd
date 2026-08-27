@@ -443,6 +443,58 @@ func _build_walk_in_wardrobe() -> void:
 		_sphere(root, "StudEarring", Vector3(x, 1.112, 3.94), Vector3(0.035, 0.018, 0.035), champagne)
 		_sphere(root, "EarringStone", Vector3(x, 1.128, 3.94), Vector3(0.018, 0.012, 0.018), crystal)
 
+
+	# A two-tier shoe display adds recognisable footwear anatomy to the wardrobe.
+	# Loafers have separated toes, quarters, tongues, straps and welts; the heels
+	# use curved uppers, narrow waists, tapered heel posts and ankle straps.
+	_box(root, "WardrobeShoeRackLowerShelf", Vector3(-12.65, 0.16, 5.48), Vector3(0.86, 0.055, 0.70), walnut)
+	_box(root, "WardrobeShoeRackUpperShelf", Vector3(-12.65, 0.53, 5.48), Vector3(0.86, 0.055, 0.70), walnut)
+	for rack_x in [-13.05, -12.25]:
+		_cylinder(root, "WardrobeShoeRackPost", Vector3(rack_x, 0.34, 5.80), 0.018, 0.025, 0.42, champagne)
+		_cylinder(root, "WardrobeShoeRackPost", Vector3(rack_x, 0.34, 5.16), 0.018, 0.025, 0.42, champagne)
+
+	var loafer_leather := StandardMaterial3D.new()
+	loafer_leather.albedo_color = Color("3b2923")
+	loafer_leather.roughness = 0.62
+	var shoe_welt := StandardMaterial3D.new()
+	shoe_welt.albedo_color = Color("211b18")
+	shoe_welt.roughness = 0.86
+	for shoe_x in [-12.84, -12.49]:
+		_sphere(root, "WardrobeLoaferSole", Vector3(shoe_x, 0.225, 5.48), Vector3(0.135, 0.025, 0.30), shoe_welt)
+		_sphere(root, "WardrobeLoaferToe", Vector3(shoe_x, 0.285, 5.30), Vector3(0.13, 0.075, 0.17), loafer_leather)
+		_sphere(root, "WardrobeLoaferQuarter", Vector3(shoe_x, 0.305, 5.57), Vector3(0.125, 0.105, 0.14), loafer_leather)
+		_sphere(root, "WardrobeLoaferOpening", Vector3(shoe_x, 0.365, 5.57), Vector3(0.072, 0.030, 0.085), charcoal)
+		var loafer_tongue := _box(root, "WardrobeLoaferTongue", Vector3(shoe_x, 0.365, 5.43), Vector3(0.13, 0.025, 0.15), loafer_leather)
+		loafer_tongue.rotation_degrees.x = -12.0
+		_box(root, "WardrobeLoaferPennyStrap", Vector3(shoe_x, 0.387, 5.39), Vector3(0.17, 0.025, 0.055), champagne)
+		_box(root, "WardrobeLoaferHeel", Vector3(shoe_x, 0.255, 5.72), Vector3(0.17, 0.075, 0.105), shoe_welt)
+
+	var heel_suede := StandardMaterial3D.new()
+	heel_suede.albedo_color = Color("835f62")
+	heel_suede.roughness = 0.78
+	for shoe_x in [-12.84, -12.49]:
+		_sphere(root, "WardrobeHeelSole", Vector3(shoe_x, 0.590, 5.47), Vector3(0.105, 0.022, 0.29), shoe_welt)
+		var heel_toe := _sphere(root, "WardrobeHeelToeUpper", Vector3(shoe_x, 0.642, 5.29), Vector3(0.11, 0.070, 0.15), heel_suede)
+		heel_toe.rotation_degrees.x = -7.0
+		_sphere(root, "WardrobeHeelRearQuarter", Vector3(shoe_x, 0.680, 5.61), Vector3(0.105, 0.12, 0.12), heel_suede)
+		var heel_post := _cylinder(root, "WardrobeTaperedHeelPost", Vector3(shoe_x, 0.615, 5.67), 0.025, 0.045, 0.26, heel_suede)
+		heel_post.rotation_degrees.x = -7.0
+		_box(root, "WardrobeHeelLift", Vector3(shoe_x, 0.485, 5.685), Vector3(0.075, 0.025, 0.075), shoe_welt)
+		var ankle_strap := MeshInstance3D.new()
+		ankle_strap.name = "WardrobeHeelAnkleStrap"
+		var ankle_strap_mesh := TorusMesh.new()
+		ankle_strap_mesh.inner_radius = 0.082
+		ankle_strap_mesh.outer_radius = 0.098
+		ankle_strap_mesh.rings = 24
+		ankle_strap_mesh.ring_segments = 8
+		ankle_strap_mesh.material = heel_suede
+		ankle_strap.mesh = ankle_strap_mesh
+		ankle_strap.position = Vector3(shoe_x, 0.785, 5.61)
+		ankle_strap.rotation_degrees.x = 90.0
+		root.add_child(ankle_strap)
+		_sphere(root, "WardrobeHeelStrapBuckle", Vector3(shoe_x + 0.095, 0.785, 5.61), Vector3(0.024, 0.022, 0.018), champagne)
+
+
 	# The dressing stool now has an oval upholstered crown, timber shadow collar
 	# and four tapered legs instead of a padded rectangular block.
 	_sphere(root, "DressingStoolCushion", Vector3(-11.45, 0.50, 5.15), Vector3(0.47, 0.14, 0.30), cream)
