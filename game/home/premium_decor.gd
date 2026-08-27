@@ -461,10 +461,68 @@ func _build_dining_room() -> void:
 	# A pair of pendants keeps the dining zone distinct from the adjacent bar.
 	living_detail_lights.append(_add_pendant(root, Vector3(5.35, 3.10, -1.15)))
 	living_detail_lights.append(_add_pendant(root, Vector3(6.95, 3.10, -1.15)))
-	_cylinder(root, "DiningCenterpiece", center + Vector3(0.0, 0.91, 0.0), 0.19, 0.24, 0.18, ceramic)
-	_sphere(root, "DiningStem", center + Vector3(0.0, 1.14, 0.0), Vector3(0.035, 0.28, 0.035), leaf_dark)
-	_sphere(root, "DiningLeaf", center + Vector3(-0.12, 1.31, 0.0), Vector3(0.18, 0.07, 0.10), leaf_light)
-	_sphere(root, "DiningLeaf", center + Vector3(0.13, 1.40, 0.02), Vector3(0.16, 0.06, 0.09), leaf_dark)
+	# A transparent layered vase and individually modeled bouquet replace the
+	# former pot-and-two-leaves placeholder.
+	var vase_water := StandardMaterial3D.new()
+	vase_water.albedo_color = Color(0.30, 0.58, 0.62, 0.34)
+	vase_water.roughness = 0.08
+	vase_water.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var petal_blush := StandardMaterial3D.new()
+	petal_blush.albedo_color = Color("d6a5a0")
+	petal_blush.roughness = 0.74
+	_cylinder(root, "DiningVaseFoot", center + Vector3(0.0, 0.89, 0.0), 0.14, 0.18, 0.07, crystal)
+	_cylinder(root, "DiningVaseBowl", center + Vector3(0.0, 1.02, 0.0), 0.11, 0.18, 0.22, crystal)
+	_cylinder(root, "DiningVaseNeck", center + Vector3(0.0, 1.17, 0.0), 0.075, 0.11, 0.10, crystal)
+	_cylinder(root, "DiningVaseWater", center + Vector3(0.0, 1.00, 0.0), 0.105, 0.15, 0.16, vase_water)
+	var vase_rim := MeshInstance3D.new()
+	vase_rim.name = "DiningVaseRolledRim"
+	var vase_rim_mesh := TorusMesh.new()
+	vase_rim_mesh.inner_radius = 0.070
+	vase_rim_mesh.outer_radius = 0.083
+	vase_rim_mesh.rings = 36
+	vase_rim_mesh.ring_segments = 10
+	vase_rim_mesh.material = champagne
+	vase_rim.mesh = vase_rim_mesh
+	vase_rim.position = center + Vector3(0.0, 1.225, 0.0)
+	root.add_child(vase_rim)
+
+	var blooms := [
+		Vector4(-0.16, -0.04, 1.53, 0.0),
+		Vector4(0.14, -0.06, 1.61, 1.0),
+		Vector4(-0.05, 0.13, 1.70, 0.0),
+		Vector4(0.18, 0.10, 1.48, 1.0),
+		Vector4(0.02, -0.15, 1.78, 0.0)
+	]
+	for bloom_index in range(blooms.size()):
+		var bloom: Vector4 = blooms[bloom_index]
+		var stem_center := center + Vector3(bloom.x * 0.45, (1.21 + bloom.z) * 0.5, bloom.y * 0.45)
+		var stem_height := bloom.z - 1.21
+		var stem := _cylinder(root, "DiningFlowerStem", stem_center, 0.012, 0.015, stem_height, leaf_dark)
+		stem.rotation_degrees.z = -bloom.x * 28.0
+		stem.rotation_degrees.x = bloom.y * 24.0
+		var bloom_center := center + Vector3(bloom.x, bloom.z, bloom.y)
+		var petal_material: Material = cream if bloom.w < 0.5 else petal_blush
+		for petal_index in range(6):
+			var petal_angle := float(petal_index) * 60.0
+			var petal_radians := deg_to_rad(petal_angle)
+			var petal := _sphere(
+				root,
+				"DiningFlowerPetal",
+				bloom_center + Vector3(cos(petal_radians) * 0.065, sin(petal_radians * 2.0) * 0.014, sin(petal_radians) * 0.065),
+				Vector3(0.070, 0.026, 0.040),
+				petal_material
+			)
+			petal.rotation_degrees.y = -petal_angle
+		_sphere(root, "DiningFlowerCenter", bloom_center + Vector3(0.0, 0.018, 0.0), Vector3(0.034, 0.030, 0.034), champagne)
+		if bloom_index < 4:
+			var leaf := _sphere(
+				root,
+				"DiningBouquetLeaf",
+				center + Vector3(bloom.x * 0.62, 1.34 + float(bloom_index % 2) * 0.08, bloom.y * 0.62),
+				Vector3(0.15, 0.035, 0.065),
+				leaf_light if bloom_index % 2 == 0 else leaf_dark
+			)
+			leaf.rotation_degrees.y = float(bloom_index) * 42.0 - 64.0
 
 
 func _add_place_setting(parent: Node3D, origin: Vector3, rotation_y: float) -> void:
