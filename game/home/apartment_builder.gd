@@ -16,6 +16,7 @@ var warm_light_material: StandardMaterial3D
 var water_material: StandardMaterial3D
 var harbour_boats: Array[Node3D] = []
 var harbour_birds: Array[Node3D] = []
+var harbour_clouds: Array[Node3D] = []
 var harbour_motion_time := 0.0
 
 
@@ -64,6 +65,16 @@ func _process(delta: float) -> void:
 			left_wing.rotation_degrees.x = flap
 		if right_wing:
 			right_wing.rotation_degrees.x = -flap
+	# Three cloud banks travel at different depths and speeds. Their silhouettes
+	# shift against both the near towers and skyline when viewed through the glass.
+	for cloud in harbour_clouds:
+		var cloud_speed := float(cloud.get_meta("cloud_speed", 0.18))
+		var cloud_phase := float(cloud.get_meta("cloud_phase", 0.0))
+		var cloud_base_y := float(cloud.get_meta("cloud_base_y", cloud.position.y))
+		cloud.position.x += cloud_speed * delta
+		if cloud.position.x > 112.0:
+			cloud.position.x = -112.0
+		cloud.position.y = cloud_base_y + sin(harbour_motion_time * 0.075 + cloud_phase) * 0.28
 
 
 func _create_materials() -> void:
@@ -857,6 +868,37 @@ void fragment() {
 		_ellipsoid(ferry, "FerryNavigationLight", light_data, Vector3(0.07, 0.07, 0.07), ferry_light)
 	_box(ferry, "FerryBroadWake", Vector3(6.2, -0.38, 0.0), Vector3(7.4, 0.035, 1.20), wake_material, false)
 	harbour_boats.append(ferry)
+
+	# Layered moving cloud banks occupy real positions above the harbour. Each
+	# bank is a cluster of offset volumes rather than a sky texture, so nearer
+	# clouds visibly overtake distant ones and occlude parts of the skyline.
+	var cloud_material := _material(Color(0.86, 0.88, 0.87, 0.52), 0.94)
+	cloud_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	cloud_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var cloud_shadow_material := _material(Color(0.44, 0.52, 0.55, 0.24), 0.98)
+	cloud_shadow_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	for cloud_data in [
+		Vector4(-72.0, 17.0, 48.0, 0.32),
+		Vector4(-8.0, 29.0, 82.0, 0.19),
+		Vector4(58.0, 22.0, 108.0, 0.13)
+	]:
+		var cloud_bank := Node3D.new()
+		cloud_bank.name = "MovingVolumetricCloudBank"
+		cloud_bank.position = Vector3(cloud_data.x, cloud_data.y, cloud_data.z)
+		cloud_bank.set_meta("cloud_speed", cloud_data.w)
+		cloud_bank.set_meta("cloud_phase", float(harbour_clouds.size()) * 1.73)
+		cloud_bank.set_meta("cloud_base_y", cloud_data.y)
+		city.add_child(cloud_bank)
+		for puff_data in [
+			Vector4(-4.2, 0.0, 1.9, 1.0),
+			Vector4(-2.1, 0.8, 2.6, 1.2),
+			Vector4(0.0, 1.2, 3.3, 1.4),
+			Vector4(2.5, 0.7, 2.7, 1.1),
+			Vector4(4.7, 0.0, 1.8, 0.9)
+		]:
+			_ellipsoid(cloud_bank, "CloudSunlitPuff", Vector3(puff_data.x, puff_data.y, 0.0), Vector3(puff_data.z, 1.15 * puff_data.w, 1.35 * puff_data.w), cloud_material)
+			_ellipsoid(cloud_bank, "CloudSoftUnderside", Vector3(puff_data.x, puff_data.y - 0.72, 0.12), Vector3(puff_data.z * 0.86, 0.55 * puff_data.w, 1.18 * puff_data.w), cloud_shadow_material)
+		harbour_clouds.append(cloud_bank)
 
 	# Small modeled gulls cross at nearer depths. Their independent flight arcs
 	# and wing beats add another moving parallax layer above the marina.
