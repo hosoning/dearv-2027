@@ -278,15 +278,71 @@ func _build_study() -> void:
 			_box(root, "LibraryLowerPull", Vector3(17.028, 0.43, z + door_z * 0.22), Vector3(0.025, 0.025, 0.24), champagne)
 		_box(root, "LibraryCrown", Vector3(17.14, 2.87, z), Vector3(0.16, 0.11, 2.12), walnut)
 
-	# Abstract book spines with restrained palette.
-	var book_colors := [Color("7e6655"), Color("c2b09a"), Color("36312d"), Color("9a7a5d")]
-	var index := 0
-	for z in [-3.15, -2.75, -2.35, -1.95, 5.35, 5.75, 6.15, 6.55]:
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = book_colors[index % book_colors.size()]
-		mat.roughness = 0.82
-		_box(root, "BookSpine", Vector3(17.08, 1.42 + float(index % 3) * 0.12, z), Vector3(0.16, 0.48, 0.22), mat)
-		index += 1
+	# Tailored library styling: varied book heights, subtle lean, raised cover
+	# lips and spine bands replace the sparse row of identical cuboids.
+	var book_colors := [Color("7e6655"), Color("c2b09a"), Color("36312d"), Color("9a7a5d"), Color("52616a")]
+	var page_material := StandardMaterial3D.new()
+	page_material.albedo_color = Color("d8cdbb")
+	page_material.roughness = 0.92
+	var label_material := StandardMaterial3D.new()
+	label_material.albedo_color = Color("b7935f")
+	label_material.roughness = 0.30
+	label_material.metallic = 0.62
+	var book_clusters := [
+		[-3.48, 0.58, 7],
+		[-2.28, 1.18, 6],
+		[-3.26, 1.78, 5],
+		[5.20, 0.58, 7],
+		[5.38, 1.78, 6],
+		[6.08, 2.38, 5]
+	]
+	var book_index := 0
+	for cluster_data in book_clusters:
+		var start_z: float = cluster_data[0]
+		var shelf_y: float = cluster_data[1]
+		var count: int = cluster_data[2]
+		var cursor_z := start_z
+		for local_index in range(count):
+			var book_height := 0.36 + float((book_index * 3) % 5) * 0.035
+			var book_width := 0.13 + float((book_index * 7) % 4) * 0.018
+			var cover_material := StandardMaterial3D.new()
+			cover_material.albedo_color = book_colors[book_index % book_colors.size()]
+			cover_material.roughness = 0.78
+			var book := Node3D.new()
+			book.name = "TailoredLibraryBook"
+			book.position = Vector3(17.00, shelf_y + book_height * 0.5 + 0.055, cursor_z)
+			book.rotation_degrees.x = -7.0 + float((book_index * 5) % 15)
+			root.add_child(book)
+			_box(book, "BookCoverBlock", Vector3.ZERO, Vector3(0.17, book_height, book_width), cover_material)
+			_box(book, "BookPageForeEdge", Vector3(-0.091, 0.0, 0.0), Vector3(0.018, book_height - 0.055, book_width - 0.025), page_material)
+			for lip_y in [-1.0, 1.0]:
+				_box(book, "BookCoverLip", Vector3(-0.010, lip_y * book_height * 0.49, 0.0), Vector3(0.19, 0.018, book_width + 0.025), cover_material)
+			for band_y in [-0.28, 0.22]:
+				_box(book, "BookSpineBand", Vector3(-0.101, band_y * book_height, 0.0), Vector3(0.014, 0.022, book_width * 0.78), label_material)
+			if book_index % 3 == 0:
+				_box(book, "BookSpineLabel", Vector3(-0.104, 0.0, 0.0), Vector3(0.012, 0.075, book_width * 0.62), label_material)
+			cursor_z += book_width + 0.035
+			book_index += 1
+
+	# Horizontal folio stacks fill the wider shelves with page blocks and
+	# raised covers, while sculptural bookends prevent every bay repeating.
+	for stack_data in [
+		Vector3(-2.45, 2.405, -2.55),
+		Vector3(5.55, 1.205, 6.45),
+		Vector3(6.05, 2.405, 5.35)
+	]:
+		for layer in range(3):
+			var folio_material := StandardMaterial3D.new()
+			folio_material.albedo_color = book_colors[(layer + int(abs(stack_data.z))) % book_colors.size()]
+			folio_material.roughness = 0.80
+			var layer_y := stack_data.y + float(layer) * 0.075
+			_box(root, "HorizontalFolioCover", Vector3(17.00, layer_y, stack_data.z), Vector3(0.18, 0.065, 0.62 - float(layer) * 0.035), folio_material)
+			_box(root, "HorizontalFolioPages", Vector3(16.90, layer_y, stack_data.z), Vector3(0.025, 0.038, 0.56 - float(layer) * 0.035), page_material)
+			_box(root, "HorizontalFolioLabel", Vector3(16.882, layer_y, stack_data.z), Vector3(0.012, 0.022, 0.17), label_material)
+
+	_cylinder(root, "LibrarySculpturePlinth", Vector3(17.00, 1.245, -1.73), 0.15, 0.19, 0.09, champagne)
+	_sphere(root, "LibrarySculptureBody", Vector3(17.00, 1.52, -1.73), Vector3(0.16, 0.25, 0.13), ceramic)
+	_sphere(root, "LibrarySculptureCutout", Vector3(16.90, 1.57, -1.73), Vector3(0.055, 0.11, 0.055), charcoal)
 
 	# Desk accessories and a pool of task light make the authored GLB feel inhabited.
 	_box(root, "DeskPad", Vector3(14.35, 0.855, 3.0), Vector3(1.65, 0.025, 0.72), charcoal)
