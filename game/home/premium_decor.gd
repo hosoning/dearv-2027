@@ -505,6 +505,71 @@ func _build_entry_gallery() -> void:
 	_add_seat_interaction(root, "entry_bench_seat", "entry bench", Vector3(14.55, 0.02, -9.18), 0.0, Vector3(2.15, 1.25, 0.82))
 	_add_plant(root, Vector3(16.65, 0.0, -9.35), 0.66)
 
+	# A slatted umbrella stand and two fully modeled folded umbrellas give the
+	# entrance practical scale: shafts, tapered canopies, rib bands, ferrules and
+	# loop handles remain separate rather than collapsing into vertical sticks.
+	_cylinder(root, "EntryUmbrellaStandFoot", Vector3(16.62, 0.07, -12.42), 0.20, 0.23, 0.10, charcoal)
+	_cylinder(root, "EntryUmbrellaStandBasin", Vector3(16.62, 0.16, -12.42), 0.18, 0.20, 0.09, ceramic)
+	var umbrella_stand_rim := MeshInstance3D.new()
+	umbrella_stand_rim.name = "EntryUmbrellaStandRim"
+	var umbrella_stand_rim_mesh := TorusMesh.new()
+	umbrella_stand_rim_mesh.inner_radius = 0.205
+	umbrella_stand_rim_mesh.outer_radius = 0.225
+	umbrella_stand_rim_mesh.rings = 36
+	umbrella_stand_rim_mesh.ring_segments = 8
+	umbrella_stand_rim_mesh.material = champagne
+	umbrella_stand_rim.mesh = umbrella_stand_rim_mesh
+	umbrella_stand_rim.position = Vector3(16.62, 0.76, -12.42)
+	root.add_child(umbrella_stand_rim)
+	for slat_angle in range(0, 360, 45):
+		var slat_radians := deg_to_rad(float(slat_angle))
+		_cylinder(
+			root,
+			"EntryUmbrellaStandSlat",
+			Vector3(16.62 + cos(slat_radians) * 0.205, 0.47, -12.42 + sin(slat_radians) * 0.205),
+			0.012,
+			0.016,
+			0.58,
+			champagne
+		)
+
+	var umbrella_materials := [textile, cream]
+	for umbrella_index in range(2):
+		var umbrella_x := 16.54 + float(umbrella_index) * 0.17
+		var umbrella_z := -12.44 + float(umbrella_index) * 0.05
+		var umbrella_material: Material = umbrella_materials[umbrella_index]
+		_cylinder(root, "EntryUmbrellaShaft", Vector3(umbrella_x, 0.86, umbrella_z), 0.014, 0.017, 1.30, charcoal)
+		_cylinder(root, "EntryUmbrellaFoldedCanopy", Vector3(umbrella_x, 0.68, umbrella_z), 0.045, 0.145, 0.72, umbrella_material)
+		_cylinder(root, "EntryUmbrellaRibBand", Vector3(umbrella_x, 0.68, umbrella_z), 0.155, 0.155, 0.028, champagne)
+		_sphere(root, "EntryUmbrellaGatheredTip", Vector3(umbrella_x, 1.045, umbrella_z), Vector3(0.065, 0.075, 0.065), umbrella_material)
+		_cylinder(root, "EntryUmbrellaFerrule", Vector3(umbrella_x, 0.27, umbrella_z), 0.012, 0.025, 0.12, champagne)
+		for rib_angle in range(0, 360, 60):
+			var rib_radians := deg_to_rad(float(rib_angle))
+			var rib := _cylinder(
+				root,
+				"EntryUmbrellaCanopyRib",
+				Vector3(umbrella_x + cos(rib_radians) * 0.10, 0.68, umbrella_z + sin(rib_radians) * 0.10),
+				0.006,
+				0.008,
+				0.64,
+				champagne
+			)
+			rib.rotation_degrees.z = cos(rib_radians) * 8.0
+			rib.rotation_degrees.x = sin(rib_radians) * 8.0
+		var umbrella_handle := MeshInstance3D.new()
+		umbrella_handle.name = "EntryUmbrellaLoopHandle"
+		var umbrella_handle_mesh := TorusMesh.new()
+		umbrella_handle_mesh.inner_radius = 0.070
+		umbrella_handle_mesh.outer_radius = 0.090
+		umbrella_handle_mesh.rings = 28
+		umbrella_handle_mesh.ring_segments = 8
+		umbrella_handle_mesh.material = walnut
+		umbrella_handle.mesh = umbrella_handle_mesh
+		umbrella_handle.position = Vector3(umbrella_x, 1.57, umbrella_z)
+		umbrella_handle.rotation_degrees.x = 90.0
+		umbrella_handle.scale = Vector3(0.82, 1.15, 1.0)
+		root.add_child(umbrella_handle)
+
 	living_detail_lights.append(_add_warm_spot(root, Vector3(16.85, 3.02, -11.20), Vector3(17.20, 1.15, -11.20), 1.20, 4.0))
 	living_detail_lights.append(_add_warm_spot(root, Vector3(14.55, 3.02, -9.40), Vector3(14.55, 0.55, -8.88), 1.05, 4.2))
 
