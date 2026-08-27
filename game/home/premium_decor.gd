@@ -757,6 +757,49 @@ func _build_living_details() -> void:
 	_add_collision_box(root, "CoffeeTableCollision", Vector3(0.25, 0.35, 6.15), Vector3(2.35, 0.70, 1.15))
 	_cylinder(root, "CeramicTray", Vector3(0.05, 0.455, 6.1), 0.28, 0.30, 0.045, ceramic, Vector3(1.35, 1.0, 0.72))
 	_sphere(root, "DecorativeStone", Vector3(0.02, 0.54, 6.08), Vector3(0.12, 0.08, 0.10), charcoal)
+
+	# Layered reading and coffee service make the table usable at close range.
+	var coffee_material := StandardMaterial3D.new()
+	coffee_material.albedo_color = Color(0.24, 0.10, 0.045, 0.72)
+	coffee_material.roughness = 0.18
+	coffee_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_cylinder(root, "CoffeeCarafeFoot", Vector3(-0.32, 0.485, 6.12), 0.075, 0.095, 0.025, crystal)
+	_cylinder(root, "CoffeeCarafeBody", Vector3(-0.32, 0.595, 6.12), 0.065, 0.105, 0.20, crystal)
+	_cylinder(root, "CoffeeCarafeDrink", Vector3(-0.32, 0.565, 6.12), 0.055, 0.088, 0.11, coffee_material)
+	_cylinder(root, "CoffeeCarafeNeck", Vector3(-0.32, 0.715, 6.12), 0.040, 0.060, 0.08, crystal)
+	_cylinder(root, "CoffeeCarafeStopper", Vector3(-0.32, 0.775, 6.12), 0.050, 0.042, 0.045, champagne)
+	for cup_data in [
+		Vector3(-0.08, 0.505, 5.92),
+		Vector3(0.12, 0.505, 5.88)
+	]:
+		_cylinder(root, "CoffeeCup", cup_data, 0.065, 0.055, 0.095, ceramic)
+		_cylinder(root, "CoffeeCupDrink", cup_data + Vector3(0.0, 0.051, 0.0), 0.053, 0.053, 0.008, coffee_material)
+		var cup_handle := MeshInstance3D.new()
+		cup_handle.name = "CoffeeCupHandle"
+		var cup_handle_mesh := TorusMesh.new()
+		cup_handle_mesh.inner_radius = 0.030
+		cup_handle_mesh.outer_radius = 0.043
+		cup_handle_mesh.rings = 24
+		cup_handle_mesh.ring_segments = 8
+		cup_handle_mesh.material = ceramic
+		cup_handle.mesh = cup_handle_mesh
+		cup_handle.position = cup_data + Vector3(0.072, 0.0, 0.0)
+		cup_handle.rotation_degrees.x = 90.0
+		root.add_child(cup_handle)
+
+	# Two detailed art books expose page blocks, raised covers and a bookmark.
+	var coffee_book_colors := [textile, walnut]
+	for layer in range(2):
+		var book_y := 0.475 + float(layer) * 0.075
+		var book_z := 6.20 - float(layer) * 0.035
+		_box(root, "CoffeeTableBookCover", Vector3(0.82, book_y, book_z), Vector3(0.78 - float(layer) * 0.06, 0.065, 0.52), coffee_book_colors[layer])
+		_box(root, "CoffeeTableBookPages", Vector3(0.82, book_y, book_z - 0.275), Vector3(0.70 - float(layer) * 0.06, 0.038, 0.025), cream)
+		_box(root, "CoffeeTableBookSpine", Vector3(0.42 + float(layer) * 0.03, book_y, book_z), Vector3(0.028, 0.075, 0.52), champagne)
+	_box(root, "CoffeeTableBookmark", Vector3(0.98, 0.588, 6.46), Vector3(0.035, 0.012, 0.24), champagne)
+
+	_cylinder(root, "CoffeeTableCandleCup", Vector3(0.56, 0.515, 5.72), 0.085, 0.095, 0.12, crystal)
+	_cylinder(root, "CoffeeTableCandleWax", Vector3(0.56, 0.555, 5.72), 0.070, 0.078, 0.075, cream)
+	_sphere(root, "CoffeeTableCandleFlame", Vector3(0.56, 0.655, 5.72), Vector3(0.026, 0.055, 0.026), warm_glow)
 	_add_plant(root, Vector3(3.35, 0.0, 5.9), 1.05)
 	living_detail_lights.append(_add_floor_lamp(root, Vector3(-3.4, 0.0, 5.4)))
 
