@@ -659,11 +659,62 @@ func _build_kitchen_details() -> void:
 	for x in [-1.55, 0.25, 2.05]:
 		kitchen_detail_lights.append(_add_pendant(root, Vector3(x, 3.10, -6.0)))
 
-	# A compact still life adds scale while keeping the working surface clear.
-	_cylinder(root, "BarServingTray", Vector3(1.62, 1.115, -6.02), 0.30, 0.32, 0.035, champagne, Vector3(1.48, 1.0, 0.72))
-	_sphere(root, "BarFruit", Vector3(1.47, 1.21, -6.02), Vector3(0.095, 0.095, 0.095), ceramic)
-	_sphere(root, "BarFruit", Vector3(1.67, 1.20, -5.97), Vector3(0.085, 0.085, 0.085), leaf_light)
-	_sphere(root, "BarFruit", Vector3(1.82, 1.19, -6.05), Vector3(0.075, 0.075, 0.075), walnut)
+	# A proper raised fruit bowl replaces the former three generic spheres.
+	# Recognisable apples, pear and a segmented curved banana provide close-range
+	# stems, leaves, colour variation and asymmetric silhouettes.
+	var apple_material := StandardMaterial3D.new()
+	apple_material.albedo_color = Color("8f3f35")
+	apple_material.roughness = 0.52
+	var pear_material := StandardMaterial3D.new()
+	pear_material.albedo_color = Color("8a9460")
+	pear_material.roughness = 0.68
+	var banana_material := StandardMaterial3D.new()
+	banana_material.albedo_color = Color("c7a34e")
+	banana_material.roughness = 0.60
+	_cylinder(root, "BarFruitBowlFoot", Vector3(1.62, 1.115, -6.02), 0.115, 0.16, 0.055, champagne)
+	_sphere(root, "BarFruitBowlBasin", Vector3(1.62, 1.175, -6.02), Vector3(0.42, 0.11, 0.25), ceramic)
+	var bowl_rim := MeshInstance3D.new()
+	bowl_rim.name = "BarFruitBowlRolledRim"
+	var bowl_rim_mesh := TorusMesh.new()
+	bowl_rim_mesh.inner_radius = 0.285
+	bowl_rim_mesh.outer_radius = 0.315
+	bowl_rim_mesh.rings = 40
+	bowl_rim_mesh.ring_segments = 10
+	bowl_rim_mesh.material = champagne
+	bowl_rim.mesh = bowl_rim_mesh
+	bowl_rim.position = Vector3(1.62, 1.245, -6.02)
+	bowl_rim.scale = Vector3(1.34, 0.65, 0.78)
+	root.add_child(bowl_rim)
+
+	for apple_data in [
+		Vector3(1.45, 1.31, -6.03),
+		Vector3(1.66, 1.33, -5.94)
+	]:
+		_sphere(root, "BarAppleLowerLobe", apple_data, Vector3(0.105, 0.090, 0.095), apple_material)
+		_sphere(root, "BarAppleUpperLobe", apple_data + Vector3(0.0, 0.065, 0.0), Vector3(0.095, 0.070, 0.090), apple_material)
+		var apple_stem := _cylinder(root, "BarAppleStem", apple_data + Vector3(0.0, 0.145, 0.0), 0.010, 0.013, 0.075, walnut)
+		apple_stem.rotation_degrees.z = 8.0
+		var apple_leaf := _sphere(root, "BarAppleLeaf", apple_data + Vector3(0.055, 0.145, 0.0), Vector3(0.075, 0.015, 0.032), leaf_dark)
+		apple_leaf.rotation_degrees.z = -18.0
+
+	_sphere(root, "BarPearBody", Vector3(1.81, 1.31, -6.08), Vector3(0.105, 0.115, 0.095), pear_material)
+	_sphere(root, "BarPearNeck", Vector3(1.81, 1.43, -6.08), Vector3(0.070, 0.100, 0.065), pear_material)
+	var pear_stem := _cylinder(root, "BarPearStem", Vector3(1.84, 1.54, -6.08), 0.010, 0.014, 0.090, walnut)
+	pear_stem.rotation_degrees.z = -16.0
+
+	for banana_index in range(6):
+		var banana_angle := -34.0 + float(banana_index) * 13.0
+		var banana_radians := deg_to_rad(banana_angle)
+		var banana_piece := _sphere(
+			root,
+			"BarBananaSegment",
+			Vector3(1.62 + sin(banana_radians) * 0.28, 1.39 + cos(banana_radians) * 0.05, -6.16),
+			Vector3(0.085, 0.040, 0.055),
+			banana_material
+		)
+		banana_piece.rotation_degrees.z = -banana_angle
+	_sphere(root, "BarBananaStemTip", Vector3(1.47, 1.43, -6.16), Vector3(0.035, 0.030, 0.040), walnut)
+	_sphere(root, "BarBananaFlowerTip", Vector3(1.77, 1.43, -6.16), Vector3(0.025, 0.024, 0.032), charcoal)
 
 	# A sculpted kettle and breakfast toaster give the long worktop real close-range
 	# appliance detail. Curved shells, separate hardware and visible contents
