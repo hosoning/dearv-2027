@@ -327,6 +327,51 @@ func _build_walk_in_wardrobe() -> void:
 	for pleat_x in [-10.86, -10.70, -10.54, -10.38]:
 		_box(root, "EveningDressPleatHighlight", Vector3(pleat_x, 1.12, 1.695), Vector3(0.016, 1.05, 0.016), dress_lining)
 
+	# A freestanding valet carries a complete tailored suit and folded trousers.
+	# Rounded shoulder structure, separated sleeves, lapels, buttons, waistband,
+	# twin legs and pressed creases give it unmistakable garment anatomy.
+	var suit_material := StandardMaterial3D.new()
+	suit_material.albedo_color = Color("303943")
+	suit_material.roughness = 0.84
+	var suit_lining := StandardMaterial3D.new()
+	suit_lining.albedo_color = Color("8a7769")
+	suit_lining.roughness = 0.72
+	_cylinder(root, "ValetStandFoot", Vector3(-9.18, 0.08, 4.30), 0.26, 0.32, 0.10, charcoal, Vector3(1.28, 1.0, 0.74))
+	_cylinder(root, "ValetStandPost", Vector3(-9.18, 1.18, 4.30), 0.025, 0.040, 2.20, champagne)
+	_sphere(root, "ValetStandShoulderRail", Vector3(-9.18, 2.16, 4.30), Vector3(0.48, 0.09, 0.10), walnut)
+	for shoulder_side in [-1.0, 1.0]:
+		_sphere(root, "ValetStandShoulderCap", Vector3(-9.18 + shoulder_side * 0.44, 2.12, 4.30), Vector3(0.12, 0.09, 0.11), walnut)
+	_box(root, "ValetTrouserRail", Vector3(-9.18, 1.44, 4.30), Vector3(0.76, 0.035, 0.035), champagne)
+
+	_sphere(root, "ValetSuitJacketShoulders", Vector3(-9.18, 2.02, 4.32), Vector3(0.48, 0.18, 0.13), suit_material)
+	_sphere(root, "ValetSuitJacketLeftBody", Vector3(-9.38, 1.66, 4.32), Vector3(0.28, 0.44, 0.13), suit_material)
+	_sphere(root, "ValetSuitJacketRightBody", Vector3(-8.98, 1.66, 4.32), Vector3(0.28, 0.44, 0.13), suit_material)
+	var valet_left_sleeve := _sphere(root, "ValetSuitLeftSleeve", Vector3(-9.64, 1.65, 4.31), Vector3(0.14, 0.45, 0.12), suit_material)
+	valet_left_sleeve.rotation_degrees.z = 8.0
+	var valet_right_sleeve := _sphere(root, "ValetSuitRightSleeve", Vector3(-8.72, 1.65, 4.31), Vector3(0.14, 0.45, 0.12), suit_material)
+	valet_right_sleeve.rotation_degrees.z = -8.0
+	_sphere(root, "ValetSuitLeftCuff", Vector3(-9.70, 1.26, 4.31), Vector3(0.15, 0.07, 0.13), suit_lining)
+	_sphere(root, "ValetSuitRightCuff", Vector3(-8.66, 1.26, 4.31), Vector3(0.15, 0.07, 0.13), suit_lining)
+	var valet_left_lapel := _box(root, "ValetSuitLeftLapel", Vector3(-9.33, 1.81, 4.175), Vector3(0.13, 0.58, 0.025), suit_lining)
+	valet_left_lapel.rotation_degrees.z = -24.0
+	var valet_right_lapel := _box(root, "ValetSuitRightLapel", Vector3(-9.03, 1.81, 4.175), Vector3(0.13, 0.58, 0.025), suit_lining)
+	valet_right_lapel.rotation_degrees.z = 24.0
+	for button_y in [1.55, 1.42]:
+		_sphere(root, "ValetSuitButton", Vector3(-9.18, button_y, 4.16), Vector3(0.025, 0.025, 0.014), champagne)
+	for pocket_x in [-9.43, -8.93]:
+		_sphere(root, "ValetSuitPocketFlap", Vector3(pocket_x, 1.50, 4.17), Vector3(0.15, 0.035, 0.025), suit_lining)
+
+	# Trousers fold over the rail, separate below the knee and terminate at
+	# slightly different hems so the pair never reads as one rectangular strip.
+	_sphere(root, "ValetTrouserWaistband", Vector3(-9.18, 1.48, 4.12), Vector3(0.37, 0.075, 0.10), suit_material)
+	for leg_data in [
+		Vector3(-9.34, 0.99, 4.13),
+		Vector3(-9.02, 0.95, 4.13)
+	]:
+		_sphere(root, "ValetTrouserLeg", leg_data, Vector3(0.17, 0.48, 0.105), suit_material)
+		_box(root, "ValetTrouserPressedCrease", Vector3(leg_data.x, leg_data.y, 4.015), Vector3(0.014, 0.72, 0.014), suit_lining)
+		_sphere(root, "ValetTrouserHem", Vector3(leg_data.x, leg_data.y - 0.43, 4.13), Vector3(0.18, 0.07, 0.11), suit_lining)
+
 	# Fine jewellery and a watch occupy the dressing top at human scale.
 	_box(root, "WatchStrap", Vector3(-11.18, 1.088, 3.82), Vector3(0.10, 0.016, 0.42), charcoal)
 	_cylinder(root, "WatchCase", Vector3(-11.18, 1.112, 3.82), 0.085, 0.085, 0.025, champagne)
