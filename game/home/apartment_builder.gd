@@ -589,6 +589,68 @@ func _build_distant_city_view() -> void:
 	city_glow.emission = Color("ffc77d")
 	city_glow.emission_energy_multiplier = 2.15
 
+	# The harbour is a real animated surface, not a horizon image. Dense mesh
+	# subdivision lets two wave systems displace the water in depth, while
+	# view-dependent colour and whitecap bands change as the player walks.
+	var harbour_water_shader := Shader.new()
+	harbour_water_shader.code = """
+shader_type spatial;
+render_mode blend_mix, depth_draw_alpha_prepass, cull_disabled, diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+varying float wave_height;
+
+void vertex() {
+	float broad = sin(VERTEX.x * 0.105 + TIME * 0.42) * 0.18;
+	float cross = sin(VERTEX.z * 0.165 - TIME * 0.31 + VERTEX.x * 0.022) * 0.11;
+	float chop = sin((VERTEX.x + VERTEX.z) * 0.31 + TIME * 0.68) * 0.045;
+	wave_height = broad + cross + chop;
+	VERTEX.y += wave_height;
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
+void fragment() {
+	float facing = clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0);
+	float fresnel = pow(1.0 - facing, 2.6);
+	float shimmer = sin(world_position.x * 0.42 - world_position.z * 0.29 + TIME * 0.55) * 0.5 + 0.5;
+	float crossing = sin(world_position.x * 0.17 + world_position.z * 0.38 - TIME * 0.36) * 0.5 + 0.5;
+	float crest = smoothstep(0.80, 0.98, shimmer * 0.66 + crossing * 0.34 + wave_height * 0.85);
+	vec3 deep_water = vec3(0.055, 0.205, 0.270);
+	vec3 sky_reflection = vec3(0.35, 0.58, 0.66);
+	vec3 water_color = mix(deep_water, sky_reflection, 0.20 + fresnel * 0.66 + shimmer * 0.10);
+	ALBEDO = mix(water_color, vec3(0.78, 0.88, 0.89), crest * 0.48);
+	ROUGHNESS = mix(0.22, 0.075, fresnel);
+	METALLIC = 0.03;
+	SPECULAR = 1.0;
+	ALPHA = 0.92;
+}
+"""
+	var harbour_water_material := ShaderMaterial.new()
+	harbour_water_material.shader = harbour_water_shader
+	var harbour_surface := MeshInstance3D.new()
+	harbour_surface.name = "AnimatedHarbourSurface"
+	var harbour_mesh := PlaneMesh.new()
+	harbour_mesh.size = Vector2(230.0, 78.0)
+	harbour_mesh.subdivide_width = 180
+	harbour_mesh.subdivide_depth = 96
+	harbour_mesh.material = harbour_water_material
+	harbour_surface.mesh = harbour_mesh
+	harbour_surface.position = Vector3(0.0, -57.62, 43.5)
+	city.add_child(harbour_surface)
+
+	# Raised foam streaks sit on the displaced surface at several distances,
+	# preserving depth cues even when viewed at a shallow angle through glass.
+	var foam_material := _material(Color(0.66, 0.80, 0.83, 0.46), 0.20)
+	foam_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	for foam_data in [
+		Vector4(-34.0, 30.0, 12.0, 0.18),
+		Vector4(15.0, 42.0, 18.0, 0.12),
+		Vector4(-8.0, 56.0, 10.0, 0.15),
+		Vector4(42.0, 64.0, 15.0, 0.10)
+	]:
+		var foam_strip := _box(city, "HarbourFoamStreak", Vector3(foam_data.x, -57.34, foam_data.y), Vector3(foam_data.z, 0.025, foam_data.w), foam_material, false)
+		foam_strip.rotation_degrees.y = -8.0 + foam_data.y * 0.08
+
 	_box(city, "CoastalShore", Vector3(0.0, -57.45, 91.0), Vector3(230.0, 1.1, 27.0), shore_mat, false)
 	_box(city, "WaterfrontPromenade", Vector3(0.0, -56.72, 77.8), Vector3(230.0, 0.38, 2.8), pale_stone_material, false)
 
