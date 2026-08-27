@@ -372,6 +372,64 @@ func _build_walk_in_wardrobe() -> void:
 		_box(root, "ValetTrouserPressedCrease", Vector3(leg_data.x, leg_data.y, 4.015), Vector3(0.014, 0.72, 0.014), suit_lining)
 		_sphere(root, "ValetTrouserHem", Vector3(leg_data.x, leg_data.y - 0.43, 4.13), Vector3(0.18, 0.07, 0.11), suit_lining)
 
+
+	# A soft leather weekender introduces a genuinely rounded luggage silhouette.
+	# Domed end panels, raised piping, twin carry handles, buckled straps, zipper
+	# teeth and a hanging tag keep it from reading as another storage cuboid.
+	var weekender_leather := StandardMaterial3D.new()
+	weekender_leather.albedo_color = Color("71513e")
+	weekender_leather.roughness = 0.80
+	var weekender_edge := StandardMaterial3D.new()
+	weekender_edge.albedo_color = Color("3c2a23")
+	weekender_edge.roughness = 0.68
+	var weekender_canvas := StandardMaterial3D.new()
+	weekender_canvas.albedo_color = Color("c9b594")
+	weekender_canvas.roughness = 0.92
+	var weekender_body := _sphere(root, "WardrobeWeekenderBody", Vector3(-12.42, 0.42, 2.23), Vector3(0.64, 0.34, 0.33), weekender_leather)
+	weekender_body.rotation_degrees.y = -8.0
+	for end_side in [-1.0, 1.0]:
+		_sphere(root, "WardrobeWeekenderDomedEnd", Vector3(-12.42 + end_side * 0.54, 0.42, 2.23), Vector3(0.18, 0.31, 0.31), weekender_leather)
+		var end_pipe := MeshInstance3D.new()
+		end_pipe.name = "WardrobeWeekenderEndPiping"
+		var end_pipe_mesh := TorusMesh.new()
+		end_pipe_mesh.inner_radius = 0.275
+		end_pipe_mesh.outer_radius = 0.292
+		end_pipe_mesh.rings = 32
+		end_pipe_mesh.ring_segments = 8
+		end_pipe_mesh.material = weekender_edge
+		end_pipe.mesh = end_pipe_mesh
+		end_pipe.position = Vector3(-12.42 + end_side * 0.585, 0.42, 2.23)
+		end_pipe.rotation_degrees.z = 90.0
+		root.add_child(end_pipe)
+	for strap_x in [-12.70, -12.14]:
+		var luggage_strap := _box(root, "WardrobeWeekenderStrap", Vector3(strap_x, 0.43, 1.915), Vector3(0.085, 0.48, 0.025), weekender_edge)
+		luggage_strap.rotation_degrees.z = 5.0 if strap_x < -12.4 else -5.0
+		_box(root, "WardrobeWeekenderBuckle", Vector3(strap_x, 0.47, 1.885), Vector3(0.12, 0.13, 0.025), champagne)
+		_box(root, "WardrobeWeekenderBuckleCutout", Vector3(strap_x, 0.47, 1.866), Vector3(0.060, 0.070, 0.012), charcoal)
+		var carry_handle := MeshInstance3D.new()
+		carry_handle.name = "WardrobeWeekenderCarryHandle"
+		var carry_handle_mesh := TorusMesh.new()
+		carry_handle_mesh.inner_radius = 0.145
+		carry_handle_mesh.outer_radius = 0.172
+		carry_handle_mesh.rings = 28
+		carry_handle_mesh.ring_segments = 8
+		carry_handle_mesh.material = weekender_edge
+		carry_handle.mesh = carry_handle_mesh
+		carry_handle.position = Vector3(strap_x, 0.72, 2.23)
+		carry_handle.rotation_degrees.x = 90.0
+		carry_handle.scale = Vector3(0.75, 1.0, 1.18)
+		root.add_child(carry_handle)
+	_box(root, "WardrobeWeekenderZipperTrack", Vector3(-12.42, 0.745, 2.23), Vector3(0.92, 0.018, 0.025), champagne)
+	for tooth_index in range(13):
+		_box(root, "WardrobeWeekenderZipperTooth", Vector3(-12.84 + float(tooth_index) * 0.070, 0.760, 2.225), Vector3(0.025, 0.014, 0.035), champagne)
+	_sphere(root, "WardrobeWeekenderZipperPull", Vector3(-11.94, 0.77, 2.23), Vector3(0.050, 0.018, 0.026), champagne)
+	var luggage_tag_cord := _cylinder(root, "WardrobeWeekenderTagCord", Vector3(-12.09, 0.58, 1.89), 0.010, 0.010, 0.25, weekender_edge)
+	luggage_tag_cord.rotation_degrees.z = 30.0
+	var luggage_tag := _box(root, "WardrobeWeekenderTag", Vector3(-12.02, 0.47, 1.86), Vector3(0.16, 0.22, 0.025), weekender_canvas)
+	luggage_tag.rotation_degrees.z = -12.0
+	_box(root, "WardrobeWeekenderTagInset", Vector3(-12.02, 0.47, 1.844), Vector3(0.105, 0.115, 0.010), cream)
+
+
 	# Fine jewellery and a watch occupy the dressing top at human scale.
 	_box(root, "WatchStrap", Vector3(-11.18, 1.088, 3.82), Vector3(0.10, 0.016, 0.42), charcoal)
 	_cylinder(root, "WatchCase", Vector3(-11.18, 1.112, 3.82), 0.085, 0.085, 0.025, champagne)
