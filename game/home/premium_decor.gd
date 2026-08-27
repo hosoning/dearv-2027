@@ -577,6 +577,59 @@ func _build_dining_room() -> void:
 			leaf.rotation_degrees.y = float(bloom_index) * 42.0 - 64.0
 
 
+	# A fluted dining sideboard and relief artwork complete the wall opposite the
+	# table. Rounded ends, lifted legs and glass service avoid a monolithic cabinet.
+	var sideboard := Node3D.new()
+	sideboard.name = "DiningFlutedSideboard"
+	sideboard.position = Vector3(10.48, 0.0, -3.25)
+	root.add_child(sideboard)
+	_box(sideboard, "SideboardCenterCarcass", Vector3(0.0, 0.50, 0.0), Vector3(0.62, 0.72, 2.25), walnut)
+	_sphere(sideboard, "SideboardRoundedNorthEnd", Vector3(0.0, 0.50, -1.14), Vector3(0.31, 0.36, 0.34), walnut)
+	_sphere(sideboard, "SideboardRoundedSouthEnd", Vector3(0.0, 0.50, 1.14), Vector3(0.31, 0.36, 0.34), walnut)
+	_box(sideboard, "SideboardStoneTop", Vector3(-0.03, 0.90, 0.0), Vector3(0.72, 0.075, 2.75), pale_stone())
+	_box(sideboard, "SideboardShadowPlinth", Vector3(0.03, 0.19, 0.0), Vector3(0.48, 0.12, 2.28), charcoal)
+	for leg_z in [-1.03, 1.03]:
+		for leg_x in [-0.20, 0.20]:
+			_cylinder(sideboard, "SideboardTaperedLeg", Vector3(leg_x, 0.22, leg_z), 0.020, 0.040, 0.42, champagne)
+	for flute_z in [-1.04, -0.82, -0.60, -0.38, -0.16, 0.06, 0.28, 0.50, 0.72, 0.94]:
+		_cylinder(sideboard, "SideboardDoorFlute", Vector3(-0.325, 0.54, flute_z), 0.028, 0.028, 0.55, champagne)
+	for pull_z in [-0.56, 0.56]:
+		_box(sideboard, "SideboardInsetPull", Vector3(-0.365, 0.56, pull_z), Vector3(0.025, 0.26, 0.055), charcoal)
+	_add_collision_box(sideboard, "DiningSideboardCollision", Vector3(0.0, 0.48, 0.0), Vector3(0.72, 0.96, 2.75))
+
+	# A transparent decanter with visible liquid and two stemmed tasting glasses.
+	var amber_service := StandardMaterial3D.new()
+	amber_service.albedo_color = Color(0.46, 0.20, 0.075, 0.66)
+	amber_service.roughness = 0.16
+	amber_service.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_cylinder(sideboard, "SideboardServingTray", Vector3(-0.04, 0.96, -0.34), 0.26, 0.28, 0.030, champagne, Vector3(1.28, 1.0, 0.74))
+	_sphere(sideboard, "CrystalDecanterBody", Vector3(-0.06, 1.13, -0.48), Vector3(0.14, 0.16, 0.14), crystal)
+	_sphere(sideboard, "CrystalDecanterLiquid", Vector3(-0.06, 1.09, -0.48), Vector3(0.115, 0.085, 0.115), amber_service)
+	_cylinder(sideboard, "CrystalDecanterNeck", Vector3(-0.06, 1.31, -0.48), 0.045, 0.065, 0.18, crystal)
+	_sphere(sideboard, "CrystalDecanterStopper", Vector3(-0.06, 1.43, -0.48), Vector3(0.065, 0.075, 0.065), champagne)
+	for glass_z in [-0.16, 0.08]:
+		_cylinder(sideboard, "TastingGlassFoot", Vector3(-0.06, 0.98, glass_z), 0.060, 0.060, 0.012, crystal)
+		_cylinder(sideboard, "TastingGlassStem", Vector3(-0.06, 1.08, glass_z), 0.009, 0.009, 0.19, crystal)
+		_sphere(sideboard, "TastingGlassBowl", Vector3(-0.06, 1.22, glass_z), Vector3(0.075, 0.105, 0.075), crystal)
+		_sphere(sideboard, "TastingGlassPour", Vector3(-0.06, 1.18, glass_z), Vector3(0.060, 0.045, 0.060), amber_service)
+
+	# Wall relief projects into the room, so it reacts to grazing light rather
+	# than behaving as another flat framed image.
+	_box(root, "DiningReliefBack", Vector3(10.82, 2.05, -3.25), Vector3(0.055, 1.55, 2.20), charcoal)
+	_box(root, "DiningReliefFrameNorth", Vector3(10.76, 2.05, -4.38), Vector3(0.12, 1.68, 0.07), champagne)
+	_box(root, "DiningReliefFrameSouth", Vector3(10.76, 2.05, -2.12), Vector3(0.12, 1.68, 0.07), champagne)
+	_box(root, "DiningReliefFrameTop", Vector3(10.76, 2.86, -3.25), Vector3(0.12, 0.07, 2.20), champagne)
+	_box(root, "DiningReliefFrameBottom", Vector3(10.76, 1.24, -3.25), Vector3(0.12, 0.07, 2.20), champagne)
+	for relief_data in [
+		Vector4(-3.72, 2.28, 0.42, 0.0),
+		Vector4(-3.15, 1.84, 0.32, 1.0),
+		Vector4(-2.68, 2.34, 0.27, 0.0)
+	]:
+		var relief_material: Material = ceramic if relief_data.w < 0.5 else champagne
+		var relief_disc := _cylinder(root, "DiningWallReliefDisc", Vector3(10.70, relief_data.y, relief_data.x), relief_data.z, relief_data.z, 0.10, relief_material)
+		relief_disc.rotation_degrees.z = 90.0
+
+
 func _add_place_setting(parent: Node3D, origin: Vector3, rotation_y: float) -> void:
 	var setting := Node3D.new()
 	setting.name = "DiningPlaceSetting"
