@@ -948,6 +948,42 @@ func _build_living_details() -> void:
 	_add_plant(root, Vector3(3.35, 0.0, 5.9), 1.05)
 	living_detail_lights.append(_add_floor_lamp(root, Vector3(-3.4, 0.0, 5.4)))
 
+	# A sculptural reading chair gives the window side an organic furniture
+	# silhouette. The embracing shell, separate cushions, wings, piping and
+	# matching ottoman are layered curved volumes, never a chair-shaped box.
+	var reading_chair := Node3D.new()
+	reading_chair.name = "SculpturalWindowReadingChair"
+	reading_chair.position = Vector3(5.55, 0.0, 7.75)
+	reading_chair.rotation_degrees.y = -48.0
+	root.add_child(reading_chair)
+	_cylinder(reading_chair, "ReadingChairDiscBase", Vector3(0.0, 0.14, 0.0), 0.37, 0.46, 0.09, charcoal)
+	_cylinder(reading_chair, "ReadingChairSwivelStem", Vector3(0.0, 0.33, 0.0), 0.065, 0.085, 0.34, champagne)
+	_sphere(reading_chair, "ReadingChairUnderShell", Vector3(0.0, 0.58, 0.05), Vector3(0.52, 0.22, 0.48), walnut)
+	_sphere(reading_chair, "ReadingChairSeatCushion", Vector3(0.0, 0.67, -0.08), Vector3(0.45, 0.15, 0.39), cream)
+	_sphere(reading_chair, "ReadingChairCurvedBackShell", Vector3(0.0, 1.04, 0.32), Vector3(0.54, 0.48, 0.16), walnut)
+	_sphere(reading_chair, "ReadingChairBackCushion", Vector3(0.0, 1.04, 0.23), Vector3(0.43, 0.39, 0.16), textile)
+	_sphere(reading_chair, "ReadingChairLeftWing", Vector3(-0.43, 0.93, 0.12), Vector3(0.18, 0.35, 0.22), cream)
+	_sphere(reading_chair, "ReadingChairRightWing", Vector3(0.43, 0.93, 0.12), Vector3(0.18, 0.35, 0.22), cream)
+	_sphere(reading_chair, "ReadingChairLumbarCushion", Vector3(0.0, 0.90, 0.08), Vector3(0.31, 0.15, 0.12), cream)
+	for piping_x in [-0.46, 0.46]:
+		_cylinder(reading_chair, "ReadingChairSidePiping", Vector3(piping_x, 1.00, 0.12), 0.012, 0.012, 0.58, champagne)
+	_sphere(reading_chair, "ReadingChairHeadrest", Vector3(0.0, 1.39, 0.28), Vector3(0.30, 0.12, 0.11), cream)
+	_add_collision_box(reading_chair, "ReadingChairCollision", Vector3(0.0, 0.65, 0.10), Vector3(1.05, 1.30, 0.95))
+	_add_seat_interaction(reading_chair, "window_reading_chair_seat", "reading chair", Vector3(0.0, 0.02, -0.10), 180.0, Vector3(1.12, 1.35, 1.05))
+
+	var reading_ottoman := Node3D.new()
+	reading_ottoman.name = "ReadingChairOttoman"
+	reading_ottoman.position = Vector3(4.75, 0.0, 7.02)
+	reading_ottoman.rotation_degrees.y = -48.0
+	root.add_child(reading_ottoman)
+	_cylinder(reading_ottoman, "OttomanDiscBase", Vector3(0.0, 0.12, 0.0), 0.26, 0.32, 0.07, charcoal)
+	_cylinder(reading_ottoman, "OttomanStem", Vector3(0.0, 0.25, 0.0), 0.045, 0.060, 0.24, champagne)
+	_sphere(reading_ottoman, "OttomanUnderShell", Vector3(0.0, 0.40, 0.0), Vector3(0.40, 0.13, 0.31), walnut)
+	_sphere(reading_ottoman, "OttomanCushion", Vector3(0.0, 0.49, -0.02), Vector3(0.37, 0.14, 0.29), cream)
+	for tuft_x in [-0.16, 0.0, 0.16]:
+		_sphere(reading_ottoman, "OttomanTuft", Vector3(tuft_x, 0.625, -0.02), Vector3(0.022, 0.010, 0.022), champagne)
+	_add_collision_box(reading_ottoman, "OttomanCollision", Vector3(0.0, 0.38, 0.0), Vector3(0.82, 0.76, 0.65))
+
 
 func _build_private_light_switches() -> void:
 	_add_decor_switch("suite_detail_lights", Vector3(-5.13, 1.18, 4.90), Vector3(0.035, 0.24, 0.16), Vector3(0.45, 0.75, 0.65), suite_detail_lights)
