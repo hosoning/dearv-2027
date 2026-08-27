@@ -1083,6 +1083,38 @@ func _build_bathroom_details() -> void:
 	for fold_x in [-13.88, -13.66, -13.44, -13.22]:
 		_box(root, "BathrobeLowerFold", Vector3(fold_x, 0.79, 8.045), Vector3(0.018, 0.62, 0.020), textile)
 
+	# The vanity top now has a complete grooming set at hand scale: soap pump,
+	# toothbrush cup with individual brushes, lidded jars and a folded face cloth.
+	_cylinder(root, "VanitySoapTray", Vector3(-11.86, 1.265, 10.08), 0.16, 0.17, 0.025, champagne, Vector3(1.30, 1.0, 0.72))
+	_cylinder(root, "VanitySoapBottle", Vector3(-11.86, 1.39, 10.08), 0.065, 0.078, 0.22, crystal)
+	_cylinder(root, "VanitySoapFill", Vector3(-11.86, 1.355, 10.08), 0.055, 0.065, 0.12, cream)
+	_cylinder(root, "VanitySoapPumpStem", Vector3(-11.86, 1.535, 10.08), 0.018, 0.024, 0.09, champagne)
+	_box(root, "VanitySoapPumpSpout", Vector3(-11.80, 1.575, 10.08), Vector3(0.14, 0.025, 0.030), champagne)
+
+	_cylinder(root, "VanityToothbrushCupFoot", Vector3(-11.50, 1.275, 10.08), 0.075, 0.085, 0.025, champagne)
+	_cylinder(root, "VanityToothbrushCup", Vector3(-11.50, 1.385, 10.08), 0.085, 0.070, 0.20, ceramic)
+	var brush_colors := [cream, textile, champagne]
+	for brush_index in range(3):
+		var brush_x := -11.56 + float(brush_index) * 0.06
+		var brush := _cylinder(root, "VanityToothbrushHandle", Vector3(brush_x, 1.58, 10.08), 0.010, 0.013, 0.40, brush_colors[brush_index])
+		brush.rotation_degrees.z = -5.0 + float(brush_index) * 5.0
+		_box(root, "VanityToothbrushHead", Vector3(brush_x, 1.78, 10.08), Vector3(0.045, 0.08, 0.025), cream)
+		for bristle_y in [1.79, 1.815]:
+			_box(root, "VanityToothbrushBristle", Vector3(brush_x - 0.026, bristle_y, 10.08), Vector3(0.018, 0.008, 0.020), textile)
+
+	for jar_data in [
+		Vector3(-11.17, 1.31, 10.04),
+		Vector3(-10.98, 1.30, 10.12)
+	]:
+		_cylinder(root, "VanityCreamJar", jar_data, 0.075, 0.085, 0.08, ceramic)
+		_cylinder(root, "VanityCreamJarLid", jar_data + Vector3(0.0, 0.055, 0.0), 0.080, 0.080, 0.025, champagne)
+		_sphere(root, "VanityJarKnob", jar_data + Vector3(0.0, 0.083, 0.0), Vector3(0.018, 0.015, 0.018), crystal)
+
+	_sphere(root, "VanityFaceClothMainFold", Vector3(-10.70, 1.29, 10.08), Vector3(0.23, 0.035, 0.15), cream)
+	_sphere(root, "VanityFaceClothUpperFold", Vector3(-10.76, 1.335, 10.05), Vector3(0.17, 0.025, 0.12), textile)
+	for cloth_x in [-10.85, -10.72, -10.59]:
+		_box(root, "VanityFaceClothHem", Vector3(cloth_x, 1.355, 9.94), Vector3(0.012, 0.012, 0.08), champagne)
+
 	# A warm wash over the vanity balances the cooler translucent glazing.
 	bathroom_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4))
 
