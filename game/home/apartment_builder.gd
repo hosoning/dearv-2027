@@ -496,9 +496,38 @@ func _add_sheer_curtain(
 	curtain.position = origin
 	curtain.rotation_degrees.y = rotation_y
 
-	var sheer := _material(Color(0.92, 0.90, 0.85, 0.42), 0.90)
-	sheer.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	sheer.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# A translucent cloth shader bends the already-rippled mesh with two gentle
+	# breeze frequencies. The heading remains fixed while the hem moves most,
+	# creating real changing geometry and highlight flow beside the glazing.
+	var sheer_shader := Shader.new()
+	sheer_shader.code = """
+shader_type spatial;
+render_mode blend_mix, depth_draw_alpha_prepass, cull_disabled, diffuse_burley, specular_schlick_ggx;
+
+varying vec3 world_position;
+varying float fold_light;
+
+void vertex() {
+	float free_edge = smoothstep(0.05, 1.0, UV.y);
+	float broad_sway = sin(TIME * 0.52 + UV.y * 3.4 + VERTEX.x * 1.65) * 0.020;
+	float fine_sway = sin(TIME * 0.83 - UV.y * 5.2 + VERTEX.x * 3.1) * 0.007;
+	VERTEX.z += (broad_sway + fine_sway) * free_edge;
+	VERTEX.x += sin(TIME * 0.31 + UV.y * 2.2) * 0.006 * free_edge;
+	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	fold_light = sin(VERTEX.x * 22.0 + VERTEX.z * 14.0) * 0.5 + 0.5;
+}
+
+void fragment() {
+	float weave = sin(world_position.y * 172.0 + world_position.x * 84.0) * 0.5 + 0.5;
+	vec3 warm_sheer = vec3(0.92, 0.90, 0.85);
+	ALBEDO = warm_sheer * mix(0.93, 1.05, fold_light * 0.72 + weave * 0.28);
+	ROUGHNESS = 0.90;
+	SPECULAR = 0.18;
+	ALPHA = mix(0.28, 0.50, fold_light) + weave * 0.025;
+}
+"""
+	var sheer := ShaderMaterial.new()
+	sheer.shader = sheer_shader
 
 	# Dense horizontal subdivision produces a true sinusoidal cross-section.
 	# Vertical easing gathers the heading and lets the lower cloth open slightly.
