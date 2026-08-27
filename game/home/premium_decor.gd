@@ -740,6 +740,48 @@ func _build_bathroom_details() -> void:
 	for x in [-15.68, -15.52, -15.36, -15.20]:
 		_box(root, "HangingTowelFold", Vector3(x, 1.03, 8.145), Vector3(0.018, 0.60, 0.014), textile)
 
+	# A hanging spa robe is assembled from crowned cloth volumes instead of a
+	# flat rectangle: padded shoulders, separated sleeves, overlapping lapels,
+	# pockets, belt and uneven lower folds remain readable from the bathroom door.
+	var robe_hook := _cylinder(root, "BathrobeWallHook", Vector3(-13.55, 2.36, 8.10), 0.045, 0.060, 0.16, champagne)
+	robe_hook.rotation_degrees.x = 90.0
+	_sphere(root, "BathrobeHookCap", Vector3(-13.55, 2.36, 8.02), Vector3(0.065, 0.065, 0.045), champagne)
+	_sphere(root, "BathrobeShoulderYoke", Vector3(-13.55, 2.14, 8.16), Vector3(0.50, 0.18, 0.10), cream)
+	_sphere(root, "BathrobeTorsoLeft", Vector3(-13.77, 1.59, 8.17), Vector3(0.30, 0.62, 0.10), cream)
+	_sphere(root, "BathrobeTorsoRight", Vector3(-13.33, 1.59, 8.17), Vector3(0.30, 0.62, 0.10), cream)
+	_sphere(root, "BathrobeSkirtLeft", Vector3(-13.78, 0.94, 8.17), Vector3(0.32, 0.55, 0.11), cream)
+	_sphere(root, "BathrobeSkirtRight", Vector3(-13.31, 0.90, 8.17), Vector3(0.33, 0.58, 0.11), cream)
+	var robe_left_sleeve := _sphere(root, "BathrobeLeftSleeve", Vector3(-14.03, 1.55, 8.16), Vector3(0.17, 0.57, 0.11), cream)
+	robe_left_sleeve.rotation_degrees.z = 10.0
+	var robe_right_sleeve := _sphere(root, "BathrobeRightSleeve", Vector3(-13.07, 1.58, 8.16), Vector3(0.17, 0.55, 0.11), cream)
+	robe_right_sleeve.rotation_degrees.z = -9.0
+	_sphere(root, "BathrobeLeftCuff", Vector3(-14.13, 1.04, 8.15), Vector3(0.18, 0.09, 0.12), textile)
+	_sphere(root, "BathrobeRightCuff", Vector3(-12.98, 1.09, 8.15), Vector3(0.18, 0.09, 0.12), textile)
+	var left_lapel := _box(root, "BathrobeLeftLapel", Vector3(-13.70, 1.78, 8.045), Vector3(0.14, 0.70, 0.025), textile)
+	left_lapel.rotation_degrees.z = -22.0
+	var right_lapel := _box(root, "BathrobeRightLapel", Vector3(-13.40, 1.78, 8.042), Vector3(0.14, 0.70, 0.025), textile)
+	right_lapel.rotation_degrees.z = 22.0
+	var robe_belt := MeshInstance3D.new()
+	robe_belt.name = "BathrobeTiedBelt"
+	var robe_belt_mesh := TorusMesh.new()
+	robe_belt_mesh.inner_radius = 0.315
+	robe_belt_mesh.outer_radius = 0.345
+	robe_belt_mesh.rings = 48
+	robe_belt_mesh.ring_segments = 10
+	robe_belt_mesh.material = textile
+	robe_belt.mesh = robe_belt_mesh
+	robe_belt.position = Vector3(-13.55, 1.34, 8.17)
+	robe_belt.scale = Vector3(1.0, 0.55, 0.34)
+	root.add_child(robe_belt)
+	_sphere(root, "BathrobeBeltKnot", Vector3(-13.55, 1.32, 8.035), Vector3(0.09, 0.07, 0.04), textile)
+	for knot_side in [-1.0, 1.0]:
+		var belt_tail := _box(root, "BathrobeBeltTail", Vector3(-13.55 + knot_side * 0.075, 1.12, 8.035), Vector3(0.075, 0.40, 0.024), textile)
+		belt_tail.rotation_degrees.z = knot_side * 11.0
+	for pocket_x in [-13.82, -13.28]:
+		_sphere(root, "BathrobePatchPocket", Vector3(pocket_x, 1.02, 8.045), Vector3(0.17, 0.15, 0.035), cream)
+	for fold_x in [-13.88, -13.66, -13.44, -13.22]:
+		_box(root, "BathrobeLowerFold", Vector3(fold_x, 0.79, 8.045), Vector3(0.018, 0.62, 0.020), textile)
+
 	# A warm wash over the vanity balances the cooler translucent glazing.
 	bathroom_detail_lights.append(_add_warm_spot(root, Vector3(-11.45, 3.02, 11.10), Vector3(-11.45, 1.05, 10.35), 1.25, 4.4))
 
