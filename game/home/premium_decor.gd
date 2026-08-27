@@ -226,6 +226,58 @@ func _build_walk_in_wardrobe() -> void:
 	_cylinder(root, "PerfumeBottleRound", Vector3(-11.50, 1.16, 3.78), 0.085, 0.095, 0.16, ceramic)
 	_sphere(root, "PerfumeCapRound", Vector3(-11.50, 1.27, 3.78), Vector3(0.042, 0.042, 0.042), champagne)
 
+	# A draped evening dress gives the wardrobe a full garment silhouette.
+	# Separate bodice, waist, layered skirt gores, straps and hem folds replace
+	# any single hanging rectangle and catch light differently as the player moves.
+	var dress_satin := StandardMaterial3D.new()
+	dress_satin.albedo_color = Color("76545d")
+	dress_satin.roughness = 0.30
+	dress_satin.metallic = 0.10
+	var dress_lining := StandardMaterial3D.new()
+	dress_lining.albedo_color = Color("c8a9a4")
+	dress_lining.roughness = 0.56
+	# Jewellery-like hanger and hook.
+	var dress_hook := MeshInstance3D.new()
+	dress_hook.name = "EveningDressHangerHook"
+	var dress_hook_mesh := TorusMesh.new()
+	dress_hook_mesh.inner_radius = 0.060
+	dress_hook_mesh.outer_radius = 0.075
+	dress_hook_mesh.rings = 28
+	dress_hook_mesh.ring_segments = 8
+	dress_hook_mesh.material = champagne
+	dress_hook.mesh = dress_hook_mesh
+	dress_hook.position = Vector3(-10.62, 2.65, 1.82)
+	dress_hook.rotation_degrees.x = 90.0
+	root.add_child(dress_hook)
+	for shoulder_side in [-1.0, 1.0]:
+		var hanger_arm := _cylinder(root, "EveningDressHangerArm", Vector3(-10.62 + shoulder_side * 0.17, 2.50, 1.82), 0.012, 0.015, 0.40, champagne)
+		hanger_arm.rotation_degrees.z = shoulder_side * 57.0
+	_box(root, "EveningDressHangerBar", Vector3(-10.62, 2.34, 1.82), Vector3(0.56, 0.025, 0.025), champagne)
+
+	for strap_side in [-1.0, 1.0]:
+		var strap := _cylinder(root, "EveningDressShoulderStrap", Vector3(-10.62 + strap_side * 0.17, 2.28, 1.80), 0.014, 0.016, 0.38, dress_satin)
+		strap.rotation_degrees.z = strap_side * 8.0
+	_sphere(root, "EveningDressBodice", Vector3(-10.62, 2.03, 1.82), Vector3(0.31, 0.36, 0.105), dress_satin)
+	_sphere(root, "EveningDressNecklineLeft", Vector3(-10.76, 2.30, 1.74), Vector3(0.17, 0.070, 0.035), dress_lining)
+	_sphere(root, "EveningDressNecklineRight", Vector3(-10.48, 2.30, 1.74), Vector3(0.17, 0.070, 0.035), dress_lining)
+	_sphere(root, "EveningDressWaist", Vector3(-10.62, 1.72, 1.82), Vector3(0.30, 0.085, 0.11), dress_lining)
+
+	# Overlapping gores widen toward the hem and alternate depth, producing
+	# highlights and shadow folds instead of one flat skirt panel.
+	for gore_data in [
+		Vector4(-0.31, 1.20, 0.24, -8.0),
+		Vector4(-0.15, 1.13, 0.30, -4.0),
+		Vector4(0.0, 1.08, 0.34, 0.0),
+		Vector4(0.16, 1.12, 0.30, 4.0),
+		Vector4(0.32, 1.18, 0.24, 8.0)
+	]:
+		var skirt_gore := _sphere(root, "EveningDressSkirtGore", Vector3(-10.62 + gore_data.x, gore_data.y, 1.82 + abs(gore_data.x) * 0.045), Vector3(gore_data.z, 0.66, 0.115), dress_satin)
+		skirt_gore.rotation_degrees.z = gore_data.w
+	for hem_x in [-10.94, -10.78, -10.62, -10.45, -10.29]:
+		_sphere(root, "EveningDressSoftHem", Vector3(hem_x, 0.50 + abs(hem_x + 10.62) * 0.06, 1.82), Vector3(0.19, 0.075, 0.13), dress_lining)
+	for pleat_x in [-10.86, -10.70, -10.54, -10.38]:
+		_box(root, "EveningDressPleatHighlight", Vector3(pleat_x, 1.12, 1.695), Vector3(0.016, 1.05, 0.016), dress_lining)
+
 	# Fine jewellery and a watch occupy the dressing top at human scale.
 	_box(root, "WatchStrap", Vector3(-11.18, 1.088, 3.82), Vector3(0.10, 0.016, 0.42), charcoal)
 	_cylinder(root, "WatchCase", Vector3(-11.18, 1.112, 3.82), 0.085, 0.085, 0.025, champagne)
