@@ -179,6 +179,55 @@ func _build_master_bedroom() -> void:
 	for x in [-13.45, -9.45]:
 		suite_detail_lights.append(_add_table_lamp(root, Vector3(x, 0.78, -7.72)))
 
+	# Bedside objects are individually modeled at hand scale. The left table
+	# carries a page-built book and spectacles; the right carries a water carafe,
+	# drinking glass, slim phone and visible charging lead.
+	_box(root, "BedsideBookCover", Vector3(-13.69, 0.772, -7.48), Vector3(0.30, 0.035, 0.22), walnut)
+	_box(root, "BedsideBookPages", Vector3(-13.69, 0.798, -7.48), Vector3(0.27, 0.025, 0.19), cream)
+	_box(root, "BedsideBookSpine", Vector3(-13.85, 0.812, -7.48), Vector3(0.025, 0.055, 0.22), champagne)
+	_box(root, "BedsideBookRibbon", Vector3(-13.62, 0.820, -7.58), Vector3(0.028, 0.010, 0.12), textile)
+	for lens_x in [-13.76, -13.61]:
+		var lens_ring := MeshInstance3D.new()
+		lens_ring.name = "BedsideReadingGlassLens"
+		var lens_ring_mesh := TorusMesh.new()
+		lens_ring_mesh.inner_radius = 0.050
+		lens_ring_mesh.outer_radius = 0.058
+		lens_ring_mesh.rings = 24
+		lens_ring_mesh.ring_segments = 8
+		lens_ring_mesh.material = champagne
+		lens_ring.mesh = lens_ring_mesh
+		lens_ring.position = Vector3(lens_x, 0.840, -7.48)
+		lens_ring.scale = Vector3(1.25, 0.55, 0.86)
+		root.add_child(lens_ring)
+	_box(root, "BedsideReadingGlassBridge", Vector3(-13.685, 0.842, -7.48), Vector3(0.055, 0.010, 0.012), champagne)
+	for arm_x in [-13.84, -13.53]:
+		var glass_arm := _box(root, "BedsideReadingGlassArm", Vector3(arm_x, 0.838, -7.40), Vector3(0.012, 0.010, 0.18), champagne)
+		glass_arm.rotation_degrees.y = -8.0 if arm_x < -13.7 else 8.0
+
+	var bedside_water := StandardMaterial3D.new()
+	bedside_water.albedo_color = Color(0.34, 0.66, 0.74, 0.38)
+	bedside_water.roughness = 0.08
+	bedside_water.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_cylinder(root, "BedsideWaterCarafeFoot", Vector3(-9.68, 0.805, -7.50), 0.075, 0.090, 0.025, crystal)
+	_sphere(root, "BedsideWaterCarafeBody", Vector3(-9.68, 0.925, -7.50), Vector3(0.105, 0.15, 0.105), crystal)
+	_sphere(root, "BedsideWaterCarafeFill", Vector3(-9.68, 0.900, -7.50), Vector3(0.085, 0.095, 0.085), bedside_water)
+	_cylinder(root, "BedsideWaterCarafeNeck", Vector3(-9.68, 1.075, -7.50), 0.040, 0.060, 0.16, crystal)
+	_cylinder(root, "BedsideWaterGlass", Vector3(-9.46, 0.855, -7.48), 0.060, 0.050, 0.14, crystal)
+	_cylinder(root, "BedsideWaterGlassFill", Vector3(-9.46, 0.825, -7.48), 0.048, 0.045, 0.065, bedside_water)
+
+	_box(root, "BedsidePhoneBody", Vector3(-9.25, 0.784, -7.50), Vector3(0.14, 0.025, 0.25), charcoal)
+	_box(root, "BedsidePhoneScreen", Vector3(-9.25, 0.801, -7.50), Vector3(0.125, 0.010, 0.22), mirror)
+	_sphere(root, "BedsidePhoneCamera", Vector3(-9.29, 0.812, -7.58), Vector3(0.012, 0.006, 0.012), champagne)
+	for cable_index in range(7):
+		var cable_angle := float(cable_index) * 0.45
+		_sphere(
+			root,
+			"BedsideChargingCable",
+			Vector3(-9.25 + float(cable_index) * 0.035, 0.790, -7.63 + sin(cable_angle) * 0.055),
+			Vector3(0.022, 0.008, 0.022),
+			charcoal
+		)
+
 	# A rounded upholstered bench with a recessed timber plinth and tapered
 	# champagne legs replaces the previous rectangular cushion block.
 	_sphere(root, "BedroomBenchCushion", Vector3(-11.45, 0.47, -5.34), Vector3(1.08, 0.19, 0.32), cream)
