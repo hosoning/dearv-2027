@@ -17,6 +17,7 @@ var water_material: StandardMaterial3D
 var harbour_boats: Array[Node3D] = []
 var harbour_birds: Array[Node3D] = []
 var harbour_clouds: Array[Node3D] = []
+var harbour_traffic: Array[Node3D] = []
 var harbour_motion_time := 0.0
 
 
@@ -75,6 +76,18 @@ func _process(delta: float) -> void:
 		if cloud.position.x > 112.0:
 			cloud.position.x = -112.0
 		cloud.position.y = cloud_base_y + sin(harbour_motion_time * 0.075 + cloud_phase) * 0.28
+	# Tiny but fully modeled promenade vehicles move in two opposing lanes,
+	# providing grounded scale and motion below the towers.
+	for vehicle in harbour_traffic:
+		var traffic_speed := float(vehicle.get_meta("traffic_speed", 0.8))
+		var traffic_phase := float(vehicle.get_meta("traffic_phase", 0.0))
+		var traffic_base_y := float(vehicle.get_meta("traffic_base_y", vehicle.position.y))
+		vehicle.position.x += traffic_speed * delta
+		if traffic_speed > 0.0 and vehicle.position.x > 112.0:
+			vehicle.position.x = -112.0
+		elif traffic_speed < 0.0 and vehicle.position.x < -112.0:
+			vehicle.position.x = 112.0
+		vehicle.position.y = traffic_base_y + sin(harbour_motion_time * 2.8 + traffic_phase) * 0.012
 
 
 func _create_materials() -> void:
@@ -770,6 +783,51 @@ void fragment() {
 		city.add_child(lamp_post)
 		var lamp_globe := _ellipsoid(city, "PromenadeLampGlow", Vector3(promenade_x + 4.2, -53.46, 77.2), Vector3(0.22, 0.16, 0.22), city_glow)
 		lamp_globe.add_to_group("city_night_emissive")
+
+	# Two-lane promenade traffic consists of complete small vehicles rather than
+	# luminous dots: curved bodies, glass cabins, wheels, bumpers and lamps remain
+	# visible while the cars cross independently beneath the skyline.
+	var traffic_red := _material(Color("87423b"), 0.44, 0.14)
+	var traffic_blue := _material(Color("405a68"), 0.42, 0.16)
+	var traffic_cream := _material(Color("c4b9a7"), 0.48, 0.10)
+	var traffic_lamp := _material(Color("ffd49a"), 0.16)
+	traffic_lamp.emission_enabled = true
+	traffic_lamp.emission = Color("ffd49a")
+	traffic_lamp.emission_energy_multiplier = 2.2
+	var traffic_tail := _material(Color("b63f34"), 0.20)
+	traffic_tail.emission_enabled = true
+	traffic_tail.emission = Color("d94b3e")
+	traffic_tail.emission_energy_multiplier = 1.6
+	var traffic_colors := [traffic_red, traffic_blue, traffic_cream]
+	var traffic_data := [
+		Vector4(-88.0, -56.47, 76.85, 0.95),
+		Vector4(-28.0, -56.47, 76.85, 0.72),
+		Vector4(42.0, -56.47, 76.85, 1.08),
+		Vector4(84.0, -56.47, 78.55, -0.82),
+		Vector4(18.0, -56.47, 78.55, -1.00),
+		Vector4(-54.0, -56.47, 78.55, -0.68)
+	]
+	for index in range(traffic_data.size()):
+		var car_data: Vector4 = traffic_data[index]
+		var car := Node3D.new()
+		car.name = "MovingPromenadeCar"
+		car.position = Vector3(car_data.x, car_data.y, car_data.z)
+		car.rotation_degrees.y = 180.0 if car_data.w < 0.0 else 0.0
+		car.set_meta("traffic_speed", car_data.w)
+		car.set_meta("traffic_phase", float(index) * 0.93)
+		car.set_meta("traffic_base_y", car_data.y)
+		city.add_child(car)
+		var car_material: Material = traffic_colors[index % traffic_colors.size()]
+		_ellipsoid(car, "PromenadeCarLowerBody", Vector3(0.0, 0.34, 0.0), Vector3(1.16, 0.28, 0.46), car_material)
+		_ellipsoid(car, "PromenadeCarCabin", Vector3(-0.12, 0.66, 0.0), Vector3(0.62, 0.30, 0.39), glass_material)
+		_box(car, "PromenadeCarFrontBumper", Vector3(-1.08, 0.28, 0.0), Vector3(0.12, 0.10, 0.78), dark_metal_material, false)
+		_box(car, "PromenadeCarRearBumper", Vector3(1.08, 0.28, 0.0), Vector3(0.12, 0.10, 0.78), dark_metal_material, false)
+		for side in [-1.0, 1.0]:
+			for wheel_x in [-0.66, 0.66]:
+				_ellipsoid(car, "PromenadeCarWheel", Vector3(wheel_x, 0.18, side * 0.43), Vector3(0.22, 0.22, 0.10), dark_metal_material)
+			_ellipsoid(car, "PromenadeCarHeadlamp", Vector3(-1.08, 0.39, side * 0.27), Vector3(0.07, 0.07, 0.06), traffic_lamp)
+			_ellipsoid(car, "PromenadeCarTailLamp", Vector3(1.08, 0.39, side * 0.27), Vector3(0.07, 0.065, 0.055), traffic_tail)
+		harbour_traffic.append(car)
 
 	# Mid- and foreground neighbours sit at genuinely different distances.
 	# Their side faces, balcony slabs and roof equipment create visible parallax
