@@ -896,7 +896,13 @@ void fragment() {
 		city.add_child(boat)
 		_ellipsoid(boat, "HarbourBoatHull", Vector3.ZERO, Vector3(1.30, 0.275, 0.36), boat_material)
 		_ellipsoid(boat, "HarbourBoatCabin", Vector3(-0.28, 0.54, 0.0), Vector3(0.48, 0.27, 0.28), glass_material)
-		_box(boat, "HarbourWake", Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
+		for wake_side in [-1.0, 1.0]:
+			var wake_arm := _ellipsoid(boat, "HarbourWakeArm", Vector3(2.45, -0.19, wake_side * 0.28), Vector3(2.35, 0.032, 0.14), wake_material)
+			wake_arm.rotation_degrees.y = wake_side * 7.5
+		for bubble_index in range(5):
+			var bubble_x := 1.20 + float(bubble_index) * 0.55
+			var bubble_side := -1.0 if bubble_index % 2 == 0 else 1.0
+			_ellipsoid(boat, "HarbourWakeBubble", Vector3(bubble_x, -0.16, bubble_side * (0.08 + float(bubble_index) * 0.035)), Vector3(0.18, 0.024, 0.08), wake_material)
 		harbour_boats.append(boat)
 
 	# A foreground sailing yacht adds a tall changing silhouette to the water.
@@ -963,7 +969,15 @@ void fragment() {
 	back_stay.rotation_degrees.z = 25.0
 	for cleat_x in [-1.55, 1.35]:
 		_box(sailing_yacht, "SailingYachtDeckCleat", Vector3(cleat_x, 0.52, -0.44), Vector3(0.18, 0.07, 0.06), dark_metal_material, false)
-	_box(sailing_yacht, "SailingYachtWake", Vector3(4.4, -0.30, 0.0), Vector3(5.6, 0.030, 0.72), wake_material, false)
+	# Split V wake and scattered foam beads move with the yacht, avoiding a flat
+	# rectangular trail while making its direction readable from the apartment.
+	for wake_side in [-1.0, 1.0]:
+		var yacht_wake_arm := _ellipsoid(sailing_yacht, "SailingYachtWakeArm", Vector3(4.25, -0.29, wake_side * 0.42), Vector3(3.65, 0.040, 0.18), wake_material)
+		yacht_wake_arm.rotation_degrees.y = wake_side * 8.5
+	for bubble_index in range(9):
+		var bubble_x := 1.55 + float(bubble_index) * 0.58
+		var bubble_side := -1.0 if bubble_index % 2 == 0 else 1.0
+		_ellipsoid(sailing_yacht, "SailingYachtWakeFoam", Vector3(bubble_x, -0.245, bubble_side * (0.12 + float(bubble_index % 4) * 0.09)), Vector3(0.20 + float(bubble_index % 3) * 0.045, 0.028, 0.075), wake_material)
 	harbour_boats.append(sailing_yacht)
 
 	# A larger multi-deck harbour ferry crosses the middle distance. Separate
@@ -1020,7 +1034,15 @@ void fragment() {
 		Vector3(2.58, 0.90, -0.74), Vector3(2.58, 0.90, 0.74)
 	]:
 		_ellipsoid(ferry, "FerryNavigationLight", light_data, Vector3(0.07, 0.07, 0.07), ferry_light)
-	_box(ferry, "FerryBroadWake", Vector3(6.2, -0.38, 0.0), Vector3(7.4, 0.035, 1.20), wake_material, false)
+	# The ferry throws a broad layered V wake with a churned centreline rather
+	# than dragging one luminous rectangle across the water.
+	for wake_side in [-1.0, 1.0]:
+		var ferry_wake_arm := _ellipsoid(ferry, "FerryWakeArm", Vector3(6.1, -0.37, wake_side * 0.68), Vector3(4.85, 0.050, 0.24), wake_material)
+		ferry_wake_arm.rotation_degrees.y = wake_side * 6.5
+	for churn_index in range(12):
+		var churn_x := 2.80 + float(churn_index) * 0.52
+		var churn_side := -1.0 if churn_index % 2 == 0 else 1.0
+		_ellipsoid(ferry, "FerryWakeChurn", Vector3(churn_x, -0.32, churn_side * (0.08 + float(churn_index % 4) * 0.075)), Vector3(0.27 + float(churn_index % 3) * 0.055, 0.032, 0.11), wake_material)
 	harbour_boats.append(ferry)
 
 	# Layered moving cloud banks occupy real positions above the harbour. Each
