@@ -962,7 +962,7 @@ void fragment() {
 	var back_stay := _box(sailing_yacht, "SailingYachtBackStay", Vector3(0.76, 2.92, -0.025), Vector3(0.025, 4.35, 0.018), dark_metal_material, false)
 	back_stay.rotation_degrees.z = 25.0
 	for cleat_x in [-1.55, 1.35]:
-		_box(sailing_yacht, "SailingYachtDeckCleat", Vector3(cleat_x, 0.52, -0.44), Vector3(0.18, 0.07, 0.06), champagne, false)
+		_box(sailing_yacht, "SailingYachtDeckCleat", Vector3(cleat_x, 0.52, -0.44), Vector3(0.18, 0.07, 0.06), dark_metal_material, false)
 	_box(sailing_yacht, "SailingYachtWake", Vector3(4.4, -0.30, 0.0), Vector3(5.6, 0.030, 0.72), wake_material, false)
 	harbour_boats.append(sailing_yacht)
 
