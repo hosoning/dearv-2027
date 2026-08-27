@@ -899,6 +899,73 @@ void fragment() {
 		_box(boat, "HarbourWake", Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
 		harbour_boats.append(boat)
 
+	# A foreground sailing yacht adds a tall changing silhouette to the water.
+	# Both sails are genuine triangulated cloth surfaces with separate mast,
+	# boom, rigging, cockpit and wake rather than a boat-shaped sprite.
+	var sailing_yacht := Node3D.new()
+	sailing_yacht.name = "MovingDetailedSailingYacht"
+	sailing_yacht.position = Vector3(31.0, -56.98, 43.0)
+	sailing_yacht.set_meta("harbour_speed", 0.24)
+	sailing_yacht.set_meta("harbour_phase", 5.82)
+	sailing_yacht.set_meta("harbour_base_y", -56.98)
+	city.add_child(sailing_yacht)
+	var yacht_hull_material := _material(Color("e5e0d5"), 0.42)
+	var yacht_trim_material := _material(Color("284b5b"), 0.34, 0.16)
+	var yacht_sail_material := _material(Color(0.88, 0.87, 0.82, 0.88), 0.86)
+	yacht_sail_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	yacht_sail_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_ellipsoid(sailing_yacht, "SailingYachtKeelHull", Vector3.ZERO, Vector3(2.65, 0.42, 0.64), yacht_hull_material)
+	_ellipsoid(sailing_yacht, "SailingYachtBlueWaterline", Vector3(0.18, -0.18, 0.0), Vector3(2.45, 0.20, 0.58), yacht_trim_material)
+	_box(sailing_yacht, "SailingYachtDeck", Vector3(-0.12, 0.40, 0.0), Vector3(4.30, 0.10, 1.00), yacht_hull_material, false)
+	_ellipsoid(sailing_yacht, "SailingYachtCockpit", Vector3(0.95, 0.58, 0.0), Vector3(0.78, 0.25, 0.46), glass_material)
+	_cylinder(sailing_yacht, "SailingYachtMast", Vector3(-0.38, 2.85, 0.0), 0.035, 5.40, dark_metal_material)
+	_box(sailing_yacht, "SailingYachtBoom", Vector3(0.62, 1.18, 0.0), Vector3(2.05, 0.055, 0.055), dark_metal_material, false)
+
+	var main_sail := MeshInstance3D.new()
+	main_sail.name = "SailingYachtMainSail"
+	var main_surface := SurfaceTool.new()
+	main_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	main_surface.set_material(yacht_sail_material)
+	for sail_point in [
+		[Vector3(-0.30, 5.20, 0.02), Vector2(0.0, 0.0)],
+		[Vector3(-0.30, 1.28, 0.02), Vector2(0.0, 1.0)],
+		[Vector3(1.52, 1.28, 0.02), Vector2(1.0, 1.0)]
+	]:
+		main_surface.set_normal(Vector3(0.0, 0.0, -1.0))
+		main_surface.set_uv(sail_point[1])
+		main_surface.add_vertex(sail_point[0])
+	main_sail.mesh = main_surface.commit()
+	sailing_yacht.add_child(main_sail)
+
+	var jib_sail := MeshInstance3D.new()
+	jib_sail.name = "SailingYachtJibSail"
+	var jib_surface := SurfaceTool.new()
+	jib_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	jib_surface.set_material(yacht_sail_material)
+	for jib_point in [
+		[Vector3(-0.48, 4.55, 0.015), Vector2(0.0, 0.0)],
+		[Vector3(-0.48, 1.30, 0.015), Vector2(0.0, 1.0)],
+		[Vector3(-2.05, 1.20, 0.015), Vector2(1.0, 1.0)]
+	]:
+		jib_surface.set_normal(Vector3(0.0, 0.0, -1.0))
+		jib_surface.set_uv(jib_point[1])
+		jib_surface.add_vertex(jib_point[0])
+	jib_sail.mesh = jib_surface.commit()
+	sailing_yacht.add_child(jib_sail)
+
+	# Seams, rigging and deck hardware keep the sails readable from the apartment.
+	for seam_y in [2.10, 2.90, 3.70, 4.50]:
+		var seam_width := 1.45 * (5.20 - seam_y) / 3.92
+		_box(sailing_yacht, "SailingYachtSailSeam", Vector3(-0.18 + seam_width * 0.45, seam_y, -0.005), Vector3(max(0.18, seam_width), 0.025, 0.018), yacht_trim_material, false)
+	var bow_stay := _box(sailing_yacht, "SailingYachtBowStay", Vector3(-1.28, 2.88, -0.025), Vector3(0.025, 4.15, 0.018), dark_metal_material, false)
+	bow_stay.rotation_degrees.z = -22.0
+	var back_stay := _box(sailing_yacht, "SailingYachtBackStay", Vector3(0.76, 2.92, -0.025), Vector3(0.025, 4.35, 0.018), dark_metal_material, false)
+	back_stay.rotation_degrees.z = 25.0
+	for cleat_x in [-1.55, 1.35]:
+		_box(sailing_yacht, "SailingYachtDeckCleat", Vector3(cleat_x, 0.52, -0.44), Vector3(0.18, 0.07, 0.06), champagne, false)
+	_box(sailing_yacht, "SailingYachtWake", Vector3(4.4, -0.30, 0.0), Vector3(5.6, 0.030, 0.72), wake_material, false)
+	harbour_boats.append(sailing_yacht)
+
 	# A larger multi-deck harbour ferry crosses the middle distance. Separate
 	# hull, decks, bridge glazing, rails, lifesaving gear and mast keep it from
 	# reading as another tiny ellipsoid on the water.
