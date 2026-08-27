@@ -929,19 +929,58 @@ func _register_zone_lights(switch_id: String, lights: Array[Light3D]) -> void:
 
 
 func _add_plant(parent: Node3D, origin: Vector3, scale_factor := 1.0) -> void:
-	_cylinder(parent, "Planter", origin + Vector3(0.0, 0.30, 0.0) * scale_factor, 0.30 * scale_factor, 0.24 * scale_factor, 0.60 * scale_factor, ceramic)
-	_cylinder(parent, "PlantStem", origin + Vector3(0.0, 0.94, 0.0) * scale_factor, 0.025 * scale_factor, 0.035 * scale_factor, 0.82 * scale_factor, leaf_dark)
+	# Layered ceramic planter with rolled rim, visible soil and a tapered trunk.
+	_cylinder(parent, "PlanterFoot", origin + Vector3(0.0, 0.08, 0.0) * scale_factor, 0.20 * scale_factor, 0.23 * scale_factor, 0.10 * scale_factor, champagne)
+	_cylinder(parent, "Planter", origin + Vector3(0.0, 0.32, 0.0) * scale_factor, 0.30 * scale_factor, 0.24 * scale_factor, 0.52 * scale_factor, ceramic)
+	_cylinder(parent, "PlanterSoil", origin + Vector3(0.0, 0.585, 0.0) * scale_factor, 0.245 * scale_factor, 0.245 * scale_factor, 0.025 * scale_factor, charcoal)
+	var planter_rim := MeshInstance3D.new()
+	planter_rim.name = "PlanterRolledRim"
+	var planter_rim_mesh := TorusMesh.new()
+	planter_rim_mesh.inner_radius = 0.255 * scale_factor
+	planter_rim_mesh.outer_radius = 0.305 * scale_factor
+	planter_rim_mesh.rings = 40
+	planter_rim_mesh.ring_segments = 10
+	planter_rim_mesh.material = champagne
+	planter_rim.mesh = planter_rim_mesh
+	planter_rim.position = origin + Vector3(0.0, 0.60, 0.0) * scale_factor
+	parent.add_child(planter_rim)
+
+	_cylinder(parent, "PlantTrunk", origin + Vector3(0.0, 1.02, 0.0) * scale_factor, 0.026 * scale_factor, 0.045 * scale_factor, 0.88 * scale_factor, leaf_dark)
+	# Four angled branches give the canopy true depth instead of a single pole.
+	for branch_data in [
+		[Vector3(-0.10, 1.12, 0.02), Vector3(0.0, 0.0, -34.0), 0.42],
+		[Vector3(0.10, 1.28, -0.04), Vector3(12.0, 0.0, 31.0), 0.38],
+		[Vector3(-0.06, 1.46, 0.08), Vector3(-18.0, 0.0, -27.0), 0.34],
+		[Vector3(0.05, 1.61, -0.03), Vector3(10.0, 0.0, 21.0), 0.28]
+	]:
+		var branch_position: Vector3 = branch_data[0]
+		var branch_rotation: Vector3 = branch_data[1]
+		var branch_height: float = branch_data[2]
+		var branch := _cylinder(parent, "PlantBranch", origin + branch_position * scale_factor, 0.012 * scale_factor, 0.020 * scale_factor, branch_height * scale_factor, leaf_dark)
+		branch.rotation_degrees = branch_rotation
+
+	# Alternating leaves fan toward and away from the glazing. A separate midrib
+	# catches highlights and makes each blade legible at close range.
 	var leaves := [
-		[Vector3(-0.22, 1.03, 0.02), Vector3(0.34, 0.12, 0.18), Vector3(0, 0, -24)],
-		[Vector3(0.20, 1.20, -0.06), Vector3(0.30, 0.11, 0.17), Vector3(0, 0, 28)],
-		[Vector3(-0.12, 1.39, 0.08), Vector3(0.28, 0.10, 0.16), Vector3(8, 0, -18)],
-		[Vector3(0.14, 1.54, 0.02), Vector3(0.25, 0.09, 0.14), Vector3(-6, 0, 24)],
-		[Vector3(0.02, 1.70, -0.04), Vector3(0.20, 0.08, 0.12), Vector3(0, 0, 4)]
+		[Vector3(-0.30, 0.96, 0.08), Vector3(0.36, 0.065, 0.17), Vector3(10, -12, -22)],
+		[Vector3(0.28, 1.08, -0.14), Vector3(0.34, 0.060, 0.16), Vector3(-8, 18, 26)],
+		[Vector3(-0.36, 1.22, -0.10), Vector3(0.32, 0.058, 0.15), Vector3(-12, 24, -28)],
+		[Vector3(0.34, 1.34, 0.12), Vector3(0.31, 0.055, 0.15), Vector3(14, -20, 31)],
+		[Vector3(-0.27, 1.46, 0.16), Vector3(0.29, 0.052, 0.14), Vector3(18, -30, -18)],
+		[Vector3(0.25, 1.56, -0.16), Vector3(0.28, 0.050, 0.13), Vector3(-16, 28, 22)],
+		[Vector3(-0.20, 1.68, -0.08), Vector3(0.25, 0.045, 0.12), Vector3(-10, 18, -15)],
+		[Vector3(0.18, 1.77, 0.10), Vector3(0.24, 0.043, 0.11), Vector3(12, -18, 19)],
+		[Vector3(-0.10, 1.86, 0.02), Vector3(0.21, 0.040, 0.10), Vector3(6, 6, -8)]
 	]
 	for index in range(leaves.size()):
 		var data: Array = leaves[index]
-		var leaf := _sphere(parent, "PlantLeaf", origin + data[0] * scale_factor, data[1] * scale_factor, leaf_dark if index % 2 == 0 else leaf_light)
-		leaf.rotation_degrees = data[2]
+		var leaf_position: Vector3 = data[0]
+		var leaf_scale: Vector3 = data[1]
+		var leaf_rotation: Vector3 = data[2]
+		var leaf := _sphere(parent, "PlantLeaf", origin + leaf_position * scale_factor, leaf_scale * scale_factor, leaf_dark if index % 2 == 0 else leaf_light)
+		leaf.rotation_degrees = leaf_rotation
+		var midrib := _box(parent, "PlantLeafMidrib", origin + (leaf_position + Vector3(0.0, -0.012, 0.0)) * scale_factor, Vector3(leaf_scale.x * 1.35, 0.008, 0.010) * scale_factor, champagne)
+		midrib.rotation_degrees = leaf_rotation
 
 
 func _add_pendant(parent: Node3D, ceiling_origin: Vector3) -> OmniLight3D:
