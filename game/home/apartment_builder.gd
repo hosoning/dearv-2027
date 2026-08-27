@@ -739,6 +739,63 @@ func _build_distant_city_view() -> void:
 		_box(boat, "HarbourWake", Vector3(2.6, -0.18, 0.0), Vector3(3.8, 0.025, 0.42), wake_material, false)
 		harbour_boats.append(boat)
 
+	# A larger multi-deck harbour ferry crosses the middle distance. Separate
+	# hull, decks, bridge glazing, rails, lifesaving gear and mast keep it from
+	# reading as another tiny ellipsoid on the water.
+	var ferry := Node3D.new()
+	ferry.name = "MovingDetailedHarbourFerry"
+	ferry.position = Vector3(-56.0, -56.95, 58.0)
+	ferry.set_meta("harbour_speed", 0.34)
+	ferry.set_meta("harbour_phase", 4.65)
+	ferry.set_meta("harbour_base_y", -56.95)
+	city.add_child(ferry)
+	var ferry_hull := _material(Color("ded9cf"), 0.46)
+	var ferry_lower := _material(Color("21465d"), 0.32, 0.20)
+	var ferry_window := _material(Color(0.12, 0.28, 0.36, 0.68), 0.08, 0.18)
+	ferry_window.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var ferry_red := _material(Color("ad4c3d"), 0.52)
+	var ferry_light := _material(Color("ffd293"), 0.20)
+	ferry_light.emission_enabled = true
+	ferry_light.emission = Color("ffd293")
+	ferry_light.emission_energy_multiplier = 1.7
+	_ellipsoid(ferry, "FerryDisplacementHull", Vector3.ZERO, Vector3(3.80, 0.55, 0.92), ferry_lower)
+	_ellipsoid(ferry, "FerryWhiteUpperHull", Vector3(-0.18, 0.42, 0.0), Vector3(3.25, 0.46, 0.84), ferry_hull)
+	_box(ferry, "FerryMainDeck", Vector3(-0.18, 0.76, 0.0), Vector3(5.90, 0.12, 1.55), ferry_hull, false)
+	_box(ferry, "FerryPassengerCabin", Vector3(-0.30, 1.18, 0.0), Vector3(3.65, 0.78, 1.38), ferry_hull, false)
+	_box(ferry, "FerryBridge", Vector3(-1.28, 1.72, 0.0), Vector3(1.35, 0.42, 1.24), ferry_hull, false)
+	_box(ferry, "FerryBridgeGlassFront", Vector3(-1.965, 1.73, 0.0), Vector3(0.035, 0.30, 1.08), ferry_window, false)
+	for side in [-1.0, 1.0]:
+		for window_x in [-1.25, -0.65, -0.05, 0.55, 1.15]:
+			_box(ferry, "FerryPassengerWindow", Vector3(window_x, 1.23, side * 0.706), Vector3(0.38, 0.30, 0.025), ferry_window, false)
+		_box(ferry, "FerrySideRail", Vector3(-0.15, 0.98, side * 0.86), Vector3(5.85, 0.055, 0.055), dark_metal_material, false)
+		for rail_x in [-2.7, -1.8, -0.9, 0.0, 0.9, 1.8, 2.7]:
+			_box(ferry, "FerryRailPost", Vector3(rail_x, 0.91, side * 0.86), Vector3(0.04, 0.30, 0.04), dark_metal_material, false)
+		for ring_x in [-2.25, 2.05]:
+			var life_ring := MeshInstance3D.new()
+			life_ring.name = "FerryLifeRing"
+			var life_ring_mesh := TorusMesh.new()
+			life_ring_mesh.inner_radius = 0.14
+			life_ring_mesh.outer_radius = 0.22
+			life_ring_mesh.rings = 32
+			life_ring_mesh.ring_segments = 10
+			life_ring_mesh.material = ferry_red
+			life_ring.mesh = life_ring_mesh
+			life_ring.position = Vector3(ring_x, 1.13, side * 0.88)
+			life_ring.rotation_degrees.x = 90.0
+			ferry.add_child(life_ring)
+	_cylinder(ferry, "FerryMast", Vector3(-0.95, 2.35, 0.0), 0.035, 1.25, dark_metal_material)
+	_cylinder(ferry, "FerryRadarPod", Vector3(-0.95, 2.98, 0.0), 0.16, 0.10, ferry_hull)
+	_box(ferry, "FerryRadarBar", Vector3(-0.95, 3.08, 0.0), Vector3(0.72, 0.055, 0.055), dark_metal_material, false)
+	_cylinder(ferry, "FerryFunnel", Vector3(0.78, 2.05, 0.0), 0.19, 0.52, ferry_red)
+	_box(ferry, "FerryFunnelCap", Vector3(0.78, 2.32, 0.0), Vector3(0.48, 0.06, 0.48), dark_metal_material, false)
+	for light_data in [
+		Vector3(-2.65, 0.98, -0.76), Vector3(-2.65, 0.98, 0.76),
+		Vector3(2.58, 0.90, -0.74), Vector3(2.58, 0.90, 0.74)
+	]:
+		_ellipsoid(ferry, "FerryNavigationLight", light_data, Vector3(0.07, 0.07, 0.07), ferry_light)
+	_box(ferry, "FerryBroadWake", Vector3(6.2, -0.38, 0.0), Vector3(7.4, 0.035, 1.20), wake_material, false)
+	harbour_boats.append(ferry)
+
 	# Small modeled gulls cross at nearer depths. Their independent flight arcs
 	# and wing beats add another moving parallax layer above the marina.
 	var bird_material := _material(Color("ddd9cf"), 0.62)
