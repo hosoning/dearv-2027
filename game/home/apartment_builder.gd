@@ -18,6 +18,7 @@ var harbour_boats: Array[Node3D] = []
 var harbour_birds: Array[Node3D] = []
 var harbour_clouds: Array[Node3D] = []
 var harbour_traffic: Array[Node3D] = []
+var harbour_beacons: Array[Node3D] = []
 var harbour_motion_time := 0.0
 
 
