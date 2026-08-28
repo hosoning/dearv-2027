@@ -1544,6 +1544,70 @@ func _build_living_details() -> void:
 	_add_collision_box(reading_ottoman, "OttomanCollision", Vector3(0.0, 0.38, 0.0), Vector3(0.82, 0.76, 0.65))
 
 
+	# A brass floor telescope gives the window promenade a close-range focal
+	# object. Tripod, geared mount, tapered optical tube, focus knobs, eyepiece,
+	# rolled lens hood and real glass objective are all separate geometry.
+	var telescope := Node3D.new()
+	telescope.name = "DetailedHarbourFloorTelescope"
+	telescope.position = Vector3(10.15, 0.0, 12.28)
+	telescope.rotation_degrees.y = -8.0
+	root.add_child(telescope)
+	_cylinder(telescope, "TelescopeTripodHub", Vector3(0.0, 1.02, 0.0), 0.15, 0.18, 0.18, champagne)
+	_cylinder(telescope, "TelescopeAzimuthPost", Vector3(0.0, 1.25, 0.0), 0.055, 0.080, 0.34, charcoal)
+	for leg_data in [
+		[Vector3(-0.26, 0.54, 0.04), Vector3(0.0, 0.0, -19.0)],
+		[Vector3(0.26, 0.54, 0.04), Vector3(0.0, 0.0, 19.0)],
+		[Vector3(0.0, 0.54, -0.24), Vector3(-19.0, 0.0, 0.0)]
+	]:
+		var tripod_position: Vector3 = leg_data[0]
+		var tripod_rotation: Vector3 = leg_data[1]
+		var telescope_leg := _cylinder(telescope, "TelescopeTripodLeg", tripod_position, 0.030, 0.046, 1.10, champagne)
+		telescope_leg.rotation_degrees = tripod_rotation
+		_sphere(telescope, "TelescopeTripodFoot", Vector3(tripod_position.x * 1.72, 0.045, tripod_position.z * 1.72), Vector3(0.10, 0.035, 0.10), charcoal)
+	_sphere(telescope, "TelescopeDeclinationHousing", Vector3(0.0, 1.49, 0.0), Vector3(0.18, 0.16, 0.18), charcoal)
+	_cylinder(telescope, "TelescopeDeclinationAxis", Vector3(0.0, 1.49, 0.0), 0.045, 0.58, champagne, Vector3(0.0, 0.0, 90.0))
+	for focus_side in [-1.0, 1.0]:
+		_cylinder(telescope, "TelescopeFocusKnob", Vector3(focus_side * 0.23, 1.49, -0.18), 0.065, 0.055, walnut, Vector3(0.0, 0.0, 90.0))
+		for grip_index in range(8):
+			var grip_angle := float(grip_index) * 45.0
+			var grip_radians := deg_to_rad(grip_angle)
+			_sphere(telescope, "TelescopeFocusKnurl", Vector3(focus_side * 0.26, 1.49 + cos(grip_radians) * 0.055, -0.18 + sin(grip_radians) * 0.055), Vector3(0.012, 0.012, 0.012), champagne)
+
+	var optical_tube := _cylinder(telescope, "TelescopeOpticalTube", Vector3(0.0, 1.62, 0.08), 0.13, 0.16, 1.40, champagne, Vector3(80.0, 0.0, 0.0))
+	_sphere(telescope, "TelescopeTubeBodyHighlight", Vector3(0.0, 1.62, 0.08), Vector3(0.145, 0.18, 0.58), champagne)
+	for ring_z in [-0.42, 0.05, 0.49]:
+		var tube_ring := MeshInstance3D.new()
+		tube_ring.name = "TelescopeTubeRing"
+		var tube_ring_mesh := TorusMesh.new()
+		tube_ring_mesh.inner_radius = 0.132
+		tube_ring_mesh.outer_radius = 0.158
+		tube_ring_mesh.rings = 36
+		tube_ring_mesh.ring_segments = 10
+		tube_ring_mesh.material = charcoal
+		tube_ring.mesh = tube_ring_mesh
+		tube_ring.position = Vector3(0.0, 1.62 + ring_z * 0.17, 0.08 + ring_z)
+		tube_ring.rotation_degrees.x = 90.0
+		telescope.add_child(tube_ring)
+	_cylinder(telescope, "TelescopeLensHood", Vector3(0.0, 1.74, 0.72), 0.17, 0.28, charcoal, Vector3(90.0, 0.0, 0.0))
+	var objective_rim := MeshInstance3D.new()
+	objective_rim.name = "TelescopeObjectiveRim"
+	var objective_rim_mesh := TorusMesh.new()
+	objective_rim_mesh.inner_radius = 0.135
+	objective_rim_mesh.outer_radius = 0.168
+	objective_rim_mesh.rings = 40
+	objective_rim_mesh.ring_segments = 10
+	objective_rim_mesh.material = champagne
+	objective_rim.mesh = objective_rim_mesh
+	objective_rim.position = Vector3(0.0, 1.77, 0.86)
+	objective_rim.rotation_degrees.x = 90.0
+	telescope.add_child(objective_rim)
+	_sphere(telescope, "TelescopeObjectiveGlass", Vector3(0.0, 1.77, 0.865), Vector3(0.132, 0.132, 0.025), crystal)
+	_cylinder(telescope, "TelescopeEyepieceBarrel", Vector3(0.0, 1.51, -0.68), 0.075, 0.26, charcoal, Vector3(90.0, 0.0, 0.0))
+	_sphere(telescope, "TelescopeEyecup", Vector3(0.0, 1.48, -0.83), Vector3(0.095, 0.070, 0.055), walnut)
+	_box(telescope, "TelescopeMakerPlate", Vector3(0.0, 1.49, -0.02), Vector3(0.12, 0.045, 0.012), cream)
+	_add_collision_box(telescope, "TelescopeCollision", Vector3(0.0, 0.78, 0.0), Vector3(0.95, 1.56, 0.95))
+
+
 func _build_private_light_switches() -> void:
 	_add_decor_switch("suite_detail_lights", Vector3(-5.13, 1.18, 4.90), Vector3(0.035, 0.24, 0.16), Vector3(0.45, 0.75, 0.65), suite_detail_lights)
 	_add_decor_switch("bathroom_detail_lights", Vector3(-10.85, 1.18, 8.13), Vector3(0.16, 0.24, 0.035), Vector3(0.65, 0.75, 0.45), bathroom_detail_lights)
