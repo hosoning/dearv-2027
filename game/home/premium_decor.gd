@@ -356,6 +356,27 @@ func _build_walk_in_wardrobe() -> void:
 	valet_left_lapel.rotation_degrees.z = -24.0
 	var valet_right_lapel := _box(root, "ValetSuitRightLapel", Vector3(-9.03, 1.81, 4.175), Vector3(0.13, 0.58, 0.025), suit_lining)
 	valet_right_lapel.rotation_degrees.z = 24.0
+	# A separate shirt front, collar and tied neckwear create real layer order
+	# beneath the lapels instead of painting formalwear detail onto the jacket.
+	var shirt_material := StandardMaterial3D.new()
+	shirt_material.albedo_color = Color("d7d2c8")
+	shirt_material.roughness = 0.76
+	var tie_material := StandardMaterial3D.new()
+	tie_material.albedo_color = Color("6a3c3c")
+	tie_material.roughness = 0.58
+	_box(root, "ValetSuitShirtFront", Vector3(-9.18, 1.85, 4.188), Vector3(0.18, 0.50, 0.018), shirt_material)
+	var shirt_collar_left := _box(root, "ValetSuitShirtCollarLeft", Vector3(-9.24, 2.075, 4.168), Vector3(0.10, 0.18, 0.020), shirt_material)
+	shirt_collar_left.rotation_degrees.z = -27.0
+	var shirt_collar_right := _box(root, "ValetSuitShirtCollarRight", Vector3(-9.12, 2.075, 4.168), Vector3(0.10, 0.18, 0.020), shirt_material)
+	shirt_collar_right.rotation_degrees.z = 27.0
+	_sphere(root, "ValetSuitTieKnot", Vector3(-9.18, 2.00, 4.142), Vector3(0.065, 0.060, 0.018), tie_material)
+	var tie_blade := _box(root, "ValetSuitTieBlade", Vector3(-9.18, 1.76, 4.142), Vector3(0.075, 0.39, 0.018), tie_material)
+	tie_blade.rotation_degrees.z = -2.0
+	_sphere(root, "ValetSuitTiePoint", Vector3(-9.17, 1.56, 4.142), Vector3(0.055, 0.055, 0.018), tie_material)
+	for sleeve_button_x in [-9.745, -8.615]:
+		for sleeve_button_y in [1.24, 1.28, 1.32]:
+			_sphere(root, "ValetSuitSleeveButton", Vector3(sleeve_button_x, sleeve_button_y, 4.165), Vector3(0.014, 0.014, 0.010), champagne)
+	_box(root, "ValetTrouserFlyStitch", Vector3(-9.18, 1.33, 4.010), Vector3(0.012, 0.22, 0.010), suit_lining)
 	for button_y in [1.55, 1.42]:
 		_sphere(root, "ValetSuitButton", Vector3(-9.18, button_y, 4.16), Vector3(0.025, 0.025, 0.014), champagne)
 	for pocket_x in [-9.43, -8.93]:
