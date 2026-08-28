@@ -844,6 +844,83 @@ void fragment() {
 			_ellipsoid(car, "PromenadeCarTailLamp", Vector3(1.08, 0.39, side * 0.27), Vector3(0.07, 0.065, 0.055), traffic_tail)
 		harbour_traffic.append(car)
 
+
+	# A curved rock breakwater and working-scale lighthouse establish a unique
+	# middle-distance landmark. Every boulder, gallery rail, lantern room and
+	# navigation beacon is real geometry, reinforcing parallax beside the boats.
+	var breakwater_rock := _material(Color("5d625f"), 0.92)
+	var breakwater_rock_light := _material(Color("777970"), 0.90)
+	var lighthouse_white := _material(Color("d7d2c7"), 0.62)
+	var lighthouse_red := _material(Color("9d4038"), 0.48, 0.08)
+	var lighthouse_glass := _material(Color(0.18, 0.34, 0.40, 0.52), 0.08, 0.12)
+	lighthouse_glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var lighthouse_beacon := _material(Color("ffd89b"), 0.16)
+	lighthouse_beacon.emission_enabled = true
+	lighthouse_beacon.emission = Color("ffd89b")
+	lighthouse_beacon.emission_energy_multiplier = 3.2
+	for rock_index in range(23):
+		var rock_x := -54.0 + float(rock_index) * 1.28
+		var curve := sin(float(rock_index) * 0.22) * 2.1
+		var rock_z := 51.8 + curve + sin(float(rock_index) * 1.37) * 0.38
+		var rock_scale := 0.68 + float((rock_index * 7) % 5) * 0.11
+		var breakwater_boulder := _ellipsoid(
+			city,
+			"BreakwaterBoulder",
+			Vector3(rock_x, -56.95 + float(rock_index % 3) * 0.10, rock_z),
+			Vector3(rock_scale * 1.35, rock_scale * 0.70, rock_scale),
+			breakwater_rock if rock_index % 2 == 0 else breakwater_rock_light
+		)
+		breakwater_boulder.rotation_degrees = Vector3(
+			float((rock_index * 11) % 23) - 11.0,
+			float((rock_index * 29) % 61) - 30.0,
+			float((rock_index * 17) % 19) - 9.0
+		)
+
+	var lighthouse_origin := Vector3(-25.1, -56.15, 49.8)
+	_cylinder(city, "LighthouseFoundation", lighthouse_origin, 1.25, 0.70, breakwater_rock)
+	_cylinder(city, "LighthouseLowerTower", lighthouse_origin + Vector3(0.0, 1.65, 0.0), 0.76, 3.30, lighthouse_white)
+	_cylinder(city, "LighthouseMiddleTower", lighthouse_origin + Vector3(0.0, 3.62, 0.0), 0.63, 0.68, lighthouse_red)
+	_cylinder(city, "LighthouseUpperTower", lighthouse_origin + Vector3(0.0, 4.75, 0.0), 0.54, 1.60, lighthouse_white)
+	_cylinder(city, "LighthouseGalleryDeck", lighthouse_origin + Vector3(0.0, 5.68, 0.0), 0.82, 0.16, lighthouse_red)
+	var gallery_rail := MeshInstance3D.new()
+	gallery_rail.name = "LighthouseGalleryRail"
+	var gallery_rail_mesh := TorusMesh.new()
+	gallery_rail_mesh.inner_radius = 0.70
+	gallery_rail_mesh.outer_radius = 0.74
+	gallery_rail_mesh.rings = 48
+	gallery_rail_mesh.ring_segments = 8
+	gallery_rail_mesh.material = dark_metal_material
+	gallery_rail.mesh = gallery_rail_mesh
+	gallery_rail.position = lighthouse_origin + Vector3(0.0, 6.05, 0.0)
+	city.add_child(gallery_rail)
+	for rail_angle in range(0, 360, 45):
+		var rail_radians := deg_to_rad(float(rail_angle))
+		_cylinder(
+			city,
+			"LighthouseGalleryPost",
+			lighthouse_origin + Vector3(cos(rail_radians) * 0.72, 5.87, sin(rail_radians) * 0.72),
+			0.025,
+			0.42,
+			dark_metal_material
+		)
+	_cylinder(city, "LighthouseLanternRoom", lighthouse_origin + Vector3(0.0, 6.16, 0.0), 0.48, 0.86, lighthouse_glass)
+	for lantern_angle in range(0, 360, 60):
+		var lantern_radians := deg_to_rad(float(lantern_angle))
+		_cylinder(
+			city,
+			"LighthouseLanternMullion",
+			lighthouse_origin + Vector3(cos(lantern_radians) * 0.46, 6.16, sin(lantern_radians) * 0.46),
+			0.018,
+			0.82,
+			dark_metal_material
+		)
+	_cylinder(city, "LighthouseRoof", lighthouse_origin + Vector3(0.0, 6.68, 0.0), 0.62, 0.18, lighthouse_red)
+	_ellipsoid(city, "LighthouseRoofDome", lighthouse_origin + Vector3(0.0, 6.82, 0.0), Vector3(0.60, 0.18, 0.60), lighthouse_red)
+	_cylinder(city, "LighthouseFinial", lighthouse_origin + Vector3(0.0, 7.05, 0.0), 0.035, 0.34, dark_metal_material)
+	var beacon_glow := _ellipsoid(city, "LighthouseNavigationBeacon", lighthouse_origin + Vector3(0.0, 6.18, 0.0), Vector3(0.18, 0.13, 0.18), lighthouse_beacon)
+	beacon_glow.add_to_group("city_night_emissive")
+
+
 	# Mid- and foreground neighbours sit at genuinely different distances.
 	# Their side faces, balcony slabs and roof equipment create visible parallax
 	# while walking along the glazing, so the view cannot read as a flat backdrop.
