@@ -154,12 +154,41 @@ func _build_master_bedroom() -> void:
 	root.name = "MasterBedroomLayer"
 	add_child(root)
 
-	# Oversized textile rug anchors the bed instead of leaving it floating on the timber floor.
-	_box(root, "BedroomRug", Vector3(-11.45, 0.018, -6.75), Vector3(5.6, 0.028, 4.5), textile)
-	_box(root, "BedroomRugBindingNorth", Vector3(-11.45, 0.038, -4.505), Vector3(5.56, 0.018, 0.035), charcoal)
-	_box(root, "BedroomRugBindingSouth", Vector3(-11.45, 0.038, -8.995), Vector3(5.56, 0.018, 0.035), charcoal)
-	_box(root, "BedroomRugBindingWest", Vector3(-14.23, 0.038, -6.75), Vector3(0.035, 0.018, 4.48), charcoal)
-	_box(root, "BedroomRugBindingEast", Vector3(-8.67, 0.038, -6.75), Vector3(0.035, 0.018, 4.48), charcoal)
+	# An oversized elliptical woven rug anchors the bed without adding another
+	# rectangular slab. Rolled binding, inset ring and scattered pile crowns make
+	# the textile edge readable where it projects beyond the bed.
+	_cylinder(root, "BedroomEllipticalRugPile", Vector3(-11.45, 0.020, -6.75), 1.0, 1.0, 0.032, textile, Vector3(2.80, 1.0, 2.25))
+	var bedroom_rug_binding := MeshInstance3D.new()
+	bedroom_rug_binding.name = "BedroomRugRolledBinding"
+	var bedroom_binding_mesh := TorusMesh.new()
+	bedroom_binding_mesh.inner_radius = 0.962
+	bedroom_binding_mesh.outer_radius = 1.0
+	bedroom_binding_mesh.rings = 80
+	bedroom_binding_mesh.ring_segments = 12
+	bedroom_binding_mesh.material = charcoal
+	bedroom_rug_binding.mesh = bedroom_binding_mesh
+	bedroom_rug_binding.position = Vector3(-11.45, 0.045, -6.75)
+	bedroom_rug_binding.scale = Vector3(2.80, 0.68, 2.25)
+	root.add_child(bedroom_rug_binding)
+	var bedroom_rug_inset := MeshInstance3D.new()
+	bedroom_rug_inset.name = "BedroomRugInsetWeave"
+	var bedroom_inset_mesh := TorusMesh.new()
+	bedroom_inset_mesh.inner_radius = 0.79
+	bedroom_inset_mesh.outer_radius = 0.81
+	bedroom_inset_mesh.rings = 80
+	bedroom_inset_mesh.ring_segments = 10
+	bedroom_inset_mesh.material = champagne
+	bedroom_rug_inset.mesh = bedroom_inset_mesh
+	bedroom_rug_inset.position = Vector3(-11.45, 0.048, -6.75)
+	bedroom_rug_inset.scale = Vector3(2.80, 0.48, 2.25)
+	root.add_child(bedroom_rug_inset)
+	for tuft_data in [
+		Vector3(-13.82, 0.0, -5.92), Vector3(-13.24, 0.0, -7.84),
+		Vector3(-12.48, 0.0, -4.86), Vector3(-10.44, 0.0, -4.78),
+		Vector3(-9.52, 0.0, -5.58), Vector3(-9.26, 0.0, -7.55),
+		Vector3(-10.08, 0.0, -8.62), Vector3(-12.72, 0.0, -8.62)
+	]:
+		_sphere(root, "BedroomRugPileCrown", Vector3(tuft_data.x, 0.048, tuft_data.z), Vector3(0.18, 0.010, 0.13), cream)
 
 	# Tailored upholstered wall panels sit within a walnut surround. Deep seams,
 	# perimeter metal trim and varied nap replace the former single slab.
