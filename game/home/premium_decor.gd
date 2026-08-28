@@ -278,10 +278,27 @@ func _build_walk_in_wardrobe() -> void:
 	# A draped evening dress gives the wardrobe a full garment silhouette.
 	# Separate bodice, waist, layered skirt gores, straps and hem folds replace
 	# any single hanging rectangle and catch light differently as the player moves.
-	var dress_satin := StandardMaterial3D.new()
-	dress_satin.albedo_color = Color("76545d")
-	dress_satin.roughness = 0.30
-	dress_satin.metallic = 0.10
+	# Procedural satin shifts sheen across folds as the player moves; fine warp
+	# variation prevents the dress reading as uniformly coloured plastic.
+	var dress_satin_shader := Shader.new()
+	dress_satin_shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+void fragment() {
+	float warp = sin(UV.y * 260.0 + sin(UV.x * 24.0) * 2.4) * 0.5 + 0.5;
+	float cross_thread = sin(UV.x * 190.0) * 0.5 + 0.5;
+	float weave = warp * 0.72 + cross_thread * 0.28;
+	float fresnel = pow(1.0 - clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0), 2.2);
+	vec3 base = vec3(0.463, 0.329, 0.365);
+	ALBEDO = base * (0.92 + weave * 0.10) + vec3(0.09, 0.055, 0.065) * fresnel;
+	ROUGHNESS = 0.24 + weave * 0.09;
+	METALLIC = 0.08;
+	SPECULAR = 0.86;
+}
+"""
+	var dress_satin := ShaderMaterial.new()
+	dress_satin.shader = dress_satin_shader
 	var dress_lining := StandardMaterial3D.new()
 	dress_lining.albedo_color = Color("c8a9a4")
 	dress_lining.roughness = 0.56
@@ -330,9 +347,28 @@ func _build_walk_in_wardrobe() -> void:
 	# A freestanding valet carries a complete tailored suit and folded trousers.
 	# Rounded shoulder structure, separated sleeves, lapels, buttons, waistband,
 	# twin legs and pressed creases give it unmistakable garment anatomy.
-	var suit_material := StandardMaterial3D.new()
-	suit_material.albedo_color = Color("303943")
-	suit_material.roughness = 0.84
+	# Fine herringbone weave modulates both tone and roughness across the suit.
+	# The material remains restrained at room scale but resolves when approached.
+	var suit_weave_shader := Shader.new()
+	suit_weave_shader.code = """
+shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx;
+
+void fragment() {
+	float diagonal_a = sin((UV.x + UV.y * 0.72) * 220.0);
+	float diagonal_b = sin((UV.x - UV.y * 0.72) * 220.0);
+	float herringbone = abs(diagonal_a - diagonal_b) * 0.5;
+	float fine_thread = sin(UV.y * 420.0) * 0.5 + 0.5;
+	float weave = clamp(herringbone * 0.72 + fine_thread * 0.28, 0.0, 1.0);
+	vec3 base = vec3(0.188, 0.224, 0.263);
+	ALBEDO = base * (0.90 + weave * 0.12);
+	ROUGHNESS = 0.76 + weave * 0.12;
+	METALLIC = 0.0;
+	SPECULAR = 0.34;
+}
+"""
+	var suit_material := ShaderMaterial.new()
+	suit_material.shader = suit_weave_shader
 	var suit_lining := StandardMaterial3D.new()
 	suit_lining.albedo_color = Color("8a7769")
 	suit_lining.roughness = 0.72
