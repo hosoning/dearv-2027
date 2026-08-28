@@ -1,0 +1,157 @@
+name: Export Godot Web home
+
+on:
+  push:
+    branches:
+      - claude/memory-house-3d-handoff-a0d0e1
+    paths:
+      - "game/**"
+      - ".github/workflows/godot-web-export.yml"
+  # The Blender asset pipeline dispatches this after publishing fresh GLBs.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: godot-web-export
+  cancel-in-progress: true
+
+jobs:
+  export-web:
+    # Generated Blender assets are committed by github-actions[bot]. The path
+    # filters already prevent exported Web files from looping back here, so bot
+    # commits under game/assets must be allowed through to reach the live build.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: 4.7.1
+      GODOT_RELEASE: 4.7.1-stable
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+        with:
+          ref: claude/memory-house-3d-handoff-a0d0e1
+
+      - name: Download Godot editor
+        run: |
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_linux.x86_64.zip" \
+            --output /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64"
+
+      - name: Install official export templates
+        run: |
+          curl --fail --location --retry 3 \
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_RELEASE}/Godot_v${GODOT_RELEASE}_export_templates.tpz" \
+            --output /tmp/templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          unzip -q /tmp/templates.tpz -d /tmp/templates
+          cp -R /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          test -s "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_release.zip"
+          test -s "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/web_nothreads_debug.zip"
+
+      - name: Bind the official non-dlink single-thread Web templates
+        run: |
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          RELEASE_TEMPLATE="$TEMPLATE_DIR/web_nothreads_release.zip"
+          DEBUG_TEMPLATE="$TEMPLATE_DIR/web_nothreads_debug.zip"
+          python3 - "$RELEASE_TEMPLATE" "$DEBUG_TEMPLATE" <<'PY'
+          from pathlib import Path
+          import sys
+          release = sys.argv[1].replace('\\', '/')
+          debug = sys.argv[2].replace('\\', '/')
+          path = Path('game/export_presets.cfg')
+          source = path.read_text()
+          source = source.replace('custom_template/release=""', f'custom_template/release="{release}"')
+          source = source.replace('custom_template/debug=""', f'custom_template/debug="{debug}"')
+          path.write_text(source)
+          PY
+          grep -E 'custom_template/(debug|release)' game/export_presets.cfg
+
+      - name: Import project and export single-threaded Web build
+        run: |
+          rm -rf public/native
+          mkdir -p public/native
+          "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --path game --editor --quit
+          "/tmp/godot/Godot_v${GODOT_RELEASE}_linux.x86_64" --headless --verbose --path game --export-release Web ../public/native/index.html
+          test -s public/native/index.html
+          test -s public/native/index.wasm
+          test -s public/native/index.pck
+          touch public/native/.nojekyll
+
+      - name: Version large runtime files to prevent stale mobile caches
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          root = Path("public/native")
+          tag = os.environ["GITHUB_SHA"][:12]
+          for extension in ("js", "wasm", "pck"):
+              source = root / f"index.{extension}"
+              target = root / f"index-{tag}.{extension}"
+              source.rename(target)
+
+          html_path = root / "index.html"
+          html = html_path.read_text()
+          html = html.replace('src="index.js"', f'src="index-{tag}.js"')
+          html = html.replace('"executable":"index"', f'"executable":"index-{tag}"')
+          html = html.replace('"index.pck":', f'"index-{tag}.pck":')
+          html = html.replace('"index.wasm":', f'"index-{tag}.wasm":')
+          html_path.write_text(html)
+          PY
+          grep -F "index-${GITHUB_SHA:0:12}" public/native/index.html
+          test -s "public/native/index-${GITHUB_SHA:0:12}.js"
+          test -s "public/native/index-${GITHUB_SHA:0:12}.wasm"
+          test -s "public/native/index-${GITHUB_SHA:0:12}.pck"
+
+      - name: Mirror native build into the legacy Pages source
+        run: |
+          rm -rf site/native
+          mkdir -p site/native
+          cp -R public/native/. site/native/
+          test -s site/native/index.html
+          test -s "site/native/index-${GITHUB_SHA:0:12}.wasm"
+          test -s "site/native/index-${GITHUB_SHA:0:12}.pck"
+
+      - name: Publish Web build back to branch
+        run: |
+          # Keep the freshly exported bundle outside the checkout while syncing.
+          # This avoids rebase conflicts when the Pages workflow commits first.
+          rm -rf /tmp/dearv-public-native /tmp/dearv-site-native
+          mv public/native /tmp/dearv-public-native
+          mv site/native /tmp/dearv-site-native
+          git restore game/export_presets.cfg public/native site/native
+          git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
+          rm -rf public/native site/native
+          mv /tmp/dearv-public-native public/native
+          mv /tmp/dearv-site-native site/native
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f public/native site/native
+          if git diff --cached --quiet; then
+            echo "No Godot Web changes"
+          else
+            git commit -m "Publish Godot Web home"
+            for attempt in 1 2 3; do
+              if git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1; then
+                break
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                echo "Unable to publish Godot Web build after 3 attempts"
+                exit 1
+              fi
+              echo "Branch advanced while publishing; rebasing exported build"
+              git fetch origin claude/memory-house-3d-handoff-a0d0e1
+              git rebase origin/claude/memory-house-3d-handoff-a0d0e1
+            done
+          fi
+
+      - name: Rebuild Pages from the final exported home
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref claude/memory-house-3d-handoff-a0d0e1

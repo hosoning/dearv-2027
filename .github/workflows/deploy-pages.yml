@@ -1,0 +1,58 @@
+name: Build Pages site
+
+on:
+  push:
+    branches:
+      - claude/memory-house-3d-handoff-a0d0e1
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: legacy-pages-build
+  cancel-in-progress: true
+
+jobs:
+  build-site:
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]' || github.event.head_commit.message == 'Publish Godot Web home'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/memory-house-3d-handoff-a0d0e1
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build exported app for /site
+        run: npm run build
+        env:
+          GITHUB_PAGES: 'true'
+          GITHUB_PAGES_SUBDIR: 'site'
+          NEXT_PUBLIC_SUPABASE_URL: 'https://qndiibbjadhgtapuonco.supabase.co'
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_-idhgIzi_uUs5cv68qp7wQ_W0PlamxT'
+          NEXT_PUBLIC_DOOR_CODE: ${{ secrets.NEXT_PUBLIC_DOOR_CODE }}
+          NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
+      - name: Publish exported files without clobbering Godot native build
+        run: |
+          # Replace only PWA-owned files. The Godot exporter exclusively owns
+          # site/native, so a concurrent PWA build can never restore a stale bundle.
+          mkdir -p site
+          find site -mindepth 1 -maxdepth 1 ! -name native -exec rm -rf {} +
+          cp -R out/. site/
+          touch .nojekyll
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site .nojekyll
+          if git diff --cached --quiet; then
+            echo "No generated site changes"
+          else
+            git commit -m "Publish generated Pages site"
+            git fetch origin claude/memory-house-3d-handoff-a0d0e1
+            git rebase origin/claude/memory-house-3d-handoff-a0d0e1
+            git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
+          fi

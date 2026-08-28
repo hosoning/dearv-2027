@@ -1,19 +1,31 @@
-+  1 {
-+  2   "name": "3d-memory-house",
-+  3   "version": "1.0.0",
-+  4   "description": "一個珍藏回憶的3D互動空間",
-+  5   "main": "index.html",
-+  6   "scripts": {
-+  7     "dev": "python -m http.server 8000",
-+  8     "start": "python -m http.server 8000"
-+  9   },
-+ 10   "keywords": [
-+ 11     "3d",
-+ 12     "threejs",
-+ 13     "pwa",
-+ 14     "memory",
-+ 15     "interactive"
-+ 16   ],
-+ 17   "author": "",
-+ 18   "license": "MIT"
-+ 19 }
+{
+  "name": "dearv-2027",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@supabase/supabase-js": "^2.112.3",
+    "next": "14.2.35",
+    "react": "^18",
+    "react-dom": "^18",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/three": "^0.185.4",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
