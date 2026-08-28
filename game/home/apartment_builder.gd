@@ -88,6 +88,10 @@ func _process(delta: float) -> void:
 		elif traffic_speed < 0.0 and vehicle.position.x < -112.0:
 			vehicle.position.x = 112.0
 		vehicle.position.y = traffic_base_y + sin(harbour_motion_time * 2.8 + traffic_phase) * 0.012
+	# The lighthouse optics sweep the harbour independently of the scenery.
+	for beacon in harbour_beacons:
+		var beacon_speed := float(beacon.get_meta("beacon_speed", 8.0))
+		beacon.rotation_degrees.y = fmod(beacon.rotation_degrees.y + beacon_speed * delta, 360.0)
 
 
 func _create_materials() -> void:
@@ -919,6 +923,36 @@ void fragment() {
 	_cylinder(city, "LighthouseFinial", lighthouse_origin + Vector3(0.0, 7.05, 0.0), 0.035, 0.34, dark_metal_material)
 	var beacon_glow := _ellipsoid(city, "LighthouseNavigationBeacon", lighthouse_origin + Vector3(0.0, 6.18, 0.0), Vector3(0.18, 0.13, 0.18), lighthouse_beacon)
 	beacon_glow.add_to_group("city_night_emissive")
+
+	# A softly transparent tapered beam rotates from the lantern room. Because
+	# the cone is attached to a real pivot, it crosses boats, rocks and buildings
+	# in depth rather than flashing a flat texture over the skyline.
+	var beam_material := _material(Color(1.0, 0.82, 0.56, 0.12), 0.10)
+	beam_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	beam_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	beam_material.emission_enabled = true
+	beam_material.emission = Color("ffd89b")
+	beam_material.emission_energy_multiplier = 1.35
+	var beacon_pivot := Node3D.new()
+	beacon_pivot.name = "LighthouseRotatingBeaconPivot"
+	beacon_pivot.position = lighthouse_origin + Vector3(0.0, 6.18, 0.0)
+	beacon_pivot.set_meta("beacon_speed", 8.5)
+	city.add_child(beacon_pivot)
+	var lighthouse_beam_mesh := CylinderMesh.new()
+	lighthouse_beam_mesh.bottom_radius = 0.06
+	lighthouse_beam_mesh.top_radius = 2.10
+	lighthouse_beam_mesh.height = 18.0
+	lighthouse_beam_mesh.radial_segments = 28
+	lighthouse_beam_mesh.rings = 2
+	lighthouse_beam_mesh.material = beam_material
+	var lighthouse_beam := MeshInstance3D.new()
+	lighthouse_beam.name = "LighthouseSweepingBeam"
+	lighthouse_beam.mesh = lighthouse_beam_mesh
+	lighthouse_beam.position = Vector3(9.0, 0.0, 0.0)
+	lighthouse_beam.rotation_degrees.z = -90.0
+	lighthouse_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	beacon_pivot.add_child(lighthouse_beam)
+	harbour_beacons.append(beacon_pivot)
 
 
 	# Mid- and foreground neighbours sit at genuinely different distances.
