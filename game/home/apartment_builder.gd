@@ -850,6 +850,75 @@ void fragment() {
 		harbour_traffic.append(car)
 
 
+
+	# Paired channel buoys occupy the foreground water as bobbing navigation
+	# structures. Layered floats, collars, masts, cages and lamps give the eye
+	# small-scale depth references between the glazing and breakwater.
+	var buoy_red := _material(Color("a43f38"), 0.42, 0.10)
+	var buoy_green := _material(Color("32715c"), 0.42, 0.10)
+	var buoy_red_light := _material(Color("ff5b48"), 0.14)
+	buoy_red_light.emission_enabled = true
+	buoy_red_light.emission = Color("ff5b48")
+	buoy_red_light.emission_energy_multiplier = 2.6
+	var buoy_green_light := _material(Color("63d5a5"), 0.14)
+	buoy_green_light.emission_enabled = true
+	buoy_green_light.emission = Color("63d5a5")
+	buoy_green_light.emission_energy_multiplier = 2.6
+	var buoy_data := [
+		Vector4(-15.0, 42.0, 0.0, 0.70),
+		Vector4(12.0, 48.0, 1.0, 2.85)
+	]
+	for index in range(buoy_data.size()):
+		var data: Vector4 = buoy_data[index]
+		var buoy := Node3D.new()
+		buoy.name = "BobbingChannelBuoy"
+		buoy.position = Vector3(data.x, -57.36, data.y)
+		buoy.set_meta("harbour_speed", 0.0)
+		buoy.set_meta("harbour_phase", data.w)
+		buoy.set_meta("harbour_base_y", -57.36)
+		city.add_child(buoy)
+		var buoy_body_material: Material = buoy_red if data.z < 0.5 else buoy_green
+		var buoy_lamp_material: Material = buoy_red_light if data.z < 0.5 else buoy_green_light
+		_ellipsoid(buoy, "BuoyLowerFloat", Vector3(0.0, 0.10, 0.0), Vector3(0.42, 0.30, 0.42), buoy_body_material)
+		_cylinder(buoy, "BuoyUpperFloat", Vector3(0.0, 0.42, 0.0), 0.28, 0.42, buoy_body_material)
+		var buoy_collar := MeshInstance3D.new()
+		buoy_collar.name = "BuoyRubberCollar"
+		var buoy_collar_mesh := TorusMesh.new()
+		buoy_collar_mesh.inner_radius = 0.34
+		buoy_collar_mesh.outer_radius = 0.42
+		buoy_collar_mesh.rings = 40
+		buoy_collar_mesh.ring_segments = 10
+		buoy_collar_mesh.material = dark_metal_material
+		buoy_collar.mesh = buoy_collar_mesh
+		buoy_collar.position = Vector3(0.0, 0.30, 0.0)
+		buoy.add_child(buoy_collar)
+		_cylinder(buoy, "BuoySignalMast", Vector3(0.0, 1.08, 0.0), 0.045, 1.20, dark_metal_material)
+		_cylinder(buoy, "BuoyLampHousing", Vector3(0.0, 1.70, 0.0), 0.16, 0.22, buoy_body_material)
+		_ellipsoid(buoy, "BuoySignalLamp", Vector3(0.0, 1.73, 0.0), Vector3(0.105, 0.10, 0.105), buoy_lamp_material)
+		_cylinder(buoy, "BuoyLampCap", Vector3(0.0, 1.87, 0.0), 0.18, 0.055, dark_metal_material)
+		for cage_angle in range(0, 360, 90):
+			var cage_radians := deg_to_rad(float(cage_angle))
+			var cage_x := cos(cage_radians) * 0.23
+			var cage_z := sin(cage_radians) * 0.23
+			_cylinder(buoy, "BuoyCagePost", Vector3(cage_x, 1.40, cage_z), 0.018, 0.80, dark_metal_material)
+		for cage_height in [1.12, 1.58]:
+			var cage_ring := MeshInstance3D.new()
+			cage_ring.name = "BuoyCageRing"
+			var cage_ring_mesh := TorusMesh.new()
+			cage_ring_mesh.inner_radius = 0.22
+			cage_ring_mesh.outer_radius = 0.245
+			cage_ring_mesh.rings = 32
+			cage_ring_mesh.ring_segments = 8
+			cage_ring_mesh.material = dark_metal_material
+			cage_ring.mesh = cage_ring_mesh
+			cage_ring.position = Vector3(0.0, cage_height, 0.0)
+			buoy.add_child(cage_ring)
+		var buoy_light_node := buoy.get_node_or_null("BuoySignalLamp")
+		if buoy_light_node:
+			buoy_light_node.add_to_group("city_night_emissive")
+		harbour_boats.append(buoy)
+
+
 	# A curved rock breakwater and working-scale lighthouse establish a unique
 	# middle-distance landmark. Every boulder, gallery rail, lantern room and
 	# navigation beacon is real geometry, reinforcing parallax beside the boats.
