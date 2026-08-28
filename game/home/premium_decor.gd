@@ -430,6 +430,72 @@ void fragment() {
 		_sphere(root, "ValetTrouserHem", Vector3(leg_data.x, leg_data.y - 0.43, 4.13), Vector3(0.18, 0.07, 0.11), suit_lining)
 
 
+
+	# A wall-hung trench coat occupies the remaining wardrobe bay as a complete
+	# garment: shaped shoulders, articulated sleeves, storm collar, double front,
+	# epaulettes, belt, buckle, pockets and separated hem panels.
+	var trench_material := StandardMaterial3D.new()
+	trench_material.albedo_color = Color("a48b6c")
+	trench_material.roughness = 0.82
+	var trench_edge := StandardMaterial3D.new()
+	trench_edge.albedo_color = Color("5d4b3b")
+	trench_edge.roughness = 0.74
+	var trench_coat := Node3D.new()
+	trench_coat.name = "SculptedWardrobeTrenchCoat"
+	trench_coat.position = Vector3(-13.67, 0.0, 3.43)
+	trench_coat.rotation_degrees.y = 90.0
+	root.add_child(trench_coat)
+	var trench_hook := MeshInstance3D.new()
+	trench_hook.name = "TrenchCoatHook"
+	var trench_hook_mesh := TorusMesh.new()
+	trench_hook_mesh.inner_radius = 0.055
+	trench_hook_mesh.outer_radius = 0.072
+	trench_hook_mesh.rings = 28
+	trench_hook_mesh.ring_segments = 8
+	trench_hook_mesh.material = champagne
+	trench_hook.mesh = trench_hook_mesh
+	trench_hook.position = Vector3(0.0, 2.69, 0.0)
+	trench_hook.rotation_degrees.x = 90.0
+	trench_coat.add_child(trench_hook)
+	for hanger_side in [-1.0, 1.0]:
+		var trench_hanger_arm := _cylinder(trench_coat, "TrenchHangerArm", Vector3(hanger_side * 0.18, 2.48, 0.0), 0.012, 0.015, 0.40, champagne)
+		trench_hanger_arm.rotation_degrees.z = hanger_side * 58.0
+	_sphere(trench_coat, "TrenchShoulderYoke", Vector3(0.0, 2.22, 0.0), Vector3(0.46, 0.18, 0.13), trench_material)
+	_sphere(trench_coat, "TrenchLeftBodyPanel", Vector3(-0.19, 1.68, 0.0), Vector3(0.27, 0.58, 0.13), trench_material)
+	_sphere(trench_coat, "TrenchRightBodyPanel", Vector3(0.19, 1.68, 0.0), Vector3(0.27, 0.58, 0.13), trench_material)
+	for sleeve_side in [-1.0, 1.0]:
+		var trench_upper_sleeve := _sphere(trench_coat, "TrenchUpperSleeve", Vector3(sleeve_side * 0.48, 1.90, 0.0), Vector3(0.15, 0.36, 0.12), trench_material)
+		trench_upper_sleeve.rotation_degrees.z = sleeve_side * 12.0
+		var trench_lower_sleeve := _sphere(trench_coat, "TrenchLowerSleeve", Vector3(sleeve_side * 0.56, 1.42, 0.0), Vector3(0.13, 0.30, 0.11), trench_material)
+		trench_lower_sleeve.rotation_degrees.z = sleeve_side * 7.0
+		_sphere(trench_coat, "TrenchCuffBand", Vector3(sleeve_side * 0.59, 1.16, -0.015), Vector3(0.145, 0.065, 0.125), trench_edge)
+		var epaulette := _box(trench_coat, "TrenchEpaulette", Vector3(sleeve_side * 0.34, 2.27, -0.135), Vector3(0.27, 0.045, 0.035), trench_edge)
+		epaulette.rotation_degrees.z = sleeve_side * -9.0
+
+	var trench_left_collar := _box(trench_coat, "TrenchLeftStormCollar", Vector3(-0.17, 2.13, -0.145), Vector3(0.20, 0.42, 0.030), trench_edge)
+	trench_left_collar.rotation_degrees.z = -31.0
+	var trench_right_collar := _box(trench_coat, "TrenchRightStormCollar", Vector3(0.17, 2.13, -0.145), Vector3(0.20, 0.42, 0.030), trench_edge)
+	trench_right_collar.rotation_degrees.z = 31.0
+	_sphere(trench_coat, "TrenchNeckOpening", Vector3(0.0, 2.31, -0.15), Vector3(0.13, 0.055, 0.025), charcoal)
+	_box(trench_coat, "TrenchBelt", Vector3(0.0, 1.53, -0.148), Vector3(0.72, 0.075, 0.025), trench_edge)
+	_box(trench_coat, "TrenchBeltBuckle", Vector3(0.18, 1.53, -0.171), Vector3(0.14, 0.13, 0.020), champagne)
+	_box(trench_coat, "TrenchBuckleCutout", Vector3(0.18, 1.53, -0.184), Vector3(0.070, 0.065, 0.010), charcoal)
+	for trench_button_x in [-0.10, 0.10]:
+		for trench_button_y in [1.96, 1.77, 1.60]:
+			_sphere(trench_coat, "TrenchDoubleBreastedButton", Vector3(trench_button_x, trench_button_y, -0.165), Vector3(0.024, 0.024, 0.013), champagne)
+	for pocket_side in [-1.0, 1.0]:
+		var trench_pocket := _box(trench_coat, "TrenchSlantedPocket", Vector3(pocket_side * 0.24, 1.34, -0.153), Vector3(0.21, 0.040, 0.025), trench_edge)
+		trench_pocket.rotation_degrees.z = pocket_side * -16.0
+	for hem_data in [
+		Vector3(-0.28, 0.91, 0.015),
+		Vector3(0.0, 0.87, -0.005),
+		Vector3(0.28, 0.93, 0.018)
+	]:
+		_sphere(trench_coat, "TrenchSeparatedHemPanel", hem_data, Vector3(0.22, 0.42, 0.13), trench_material)
+	for hem_x in [-0.28, 0.0, 0.28]:
+		_sphere(trench_coat, "TrenchSoftHemRoll", Vector3(hem_x, 0.53 + abs(hem_x) * 0.06, 0.015), Vector3(0.23, 0.060, 0.14), trench_edge)
+
+
 	# A soft leather weekender introduces a genuinely rounded luggage silhouette.
 	# Domed end panels, raised piping, twin carry handles, buckled straps, zipper
 	# teeth and a hanging tag keep it from reading as another storage cuboid.
