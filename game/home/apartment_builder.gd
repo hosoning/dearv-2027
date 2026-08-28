@@ -667,12 +667,27 @@ void fragment() {
 	float fresnel = pow(1.0 - facing, 2.6);
 	float shimmer = sin(world_position.x * 0.42 - world_position.z * 0.29 + TIME * 0.55) * 0.5 + 0.5;
 	float crossing = sin(world_position.x * 0.17 + world_position.z * 0.38 - TIME * 0.36) * 0.5 + 0.5;
-	float crest = smoothstep(0.80, 0.98, shimmer * 0.66 + crossing * 0.34 + wave_height * 0.85);
+	float fine_ripple = sin(world_position.x * 2.35 + world_position.z * 1.62 + TIME * 1.15) * 0.5 + 0.5;
+	float crest = smoothstep(0.80, 0.98, shimmer * 0.61 + crossing * 0.29 + fine_ripple * 0.10 + wave_height * 0.85);
+
+	// A diagonal sunlight column is assembled from hundreds of moving glints.
+	// It breaks across the displaced mesh, so it cannot behave like a pasted
+	// reflection and visibly changes as the player moves along the windows.
+	float column_distance = abs(world_position.x - world_position.z * 0.18 + 8.0);
+	float sun_column = exp(-column_distance * 0.085);
+	float sparkle_a = sin(world_position.x * 4.8 + world_position.z * 3.1 + TIME * 1.45);
+	float sparkle_b = sin(world_position.x * 7.2 - world_position.z * 5.4 - TIME * 1.12);
+	float sparkle = smoothstep(0.73, 0.98, sparkle_a * sparkle_b * 0.5 + 0.5);
+	float sun_glint = sun_column * sparkle * (0.28 + fresnel * 0.72);
+
 	vec3 deep_water = vec3(0.055, 0.205, 0.270);
 	vec3 sky_reflection = vec3(0.35, 0.58, 0.66);
-	vec3 water_color = mix(deep_water, sky_reflection, 0.20 + fresnel * 0.66 + shimmer * 0.10);
-	ALBEDO = mix(water_color, vec3(0.78, 0.88, 0.89), crest * 0.48);
-	ROUGHNESS = mix(0.22, 0.075, fresnel);
+	vec3 sun_colour = vec3(1.0, 0.78, 0.48);
+	float depth_shift = smoothstep(25.0, 105.0, world_position.z);
+	vec3 water_color = mix(deep_water * (1.0 - depth_shift * 0.14), sky_reflection, 0.20 + fresnel * 0.66 + shimmer * 0.10);
+	ALBEDO = mix(water_color, vec3(0.78, 0.88, 0.89), crest * 0.48) + sun_colour * sun_glint * 0.38;
+	EMISSION = sun_colour * sun_glint * 0.12;
+	ROUGHNESS = mix(0.24, 0.065, fresnel + sun_glint * 0.35);
 	METALLIC = 0.03;
 	SPECULAR = 1.0;
 	ALPHA = 0.92;
