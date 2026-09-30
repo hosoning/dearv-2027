@@ -52,6 +52,8 @@ func _build_display_zone() -> void:
 	_add_spot(Vector3(-2.85, 3.10, 6.05), Vector3(-2.85, 1.05, 6.15), 0.65)
 
 	var flower := _load_model("gift_520_flower_box.glb", Vector3(-1.15, 0.88, 6.0), 0.0)
+	if not flower:
+		flower = _build_flower_box_fallback(Vector3(-1.15, 0.88, 6.0))
 	if flower:
 		var gift := AnimatedGiftInteractable.new()
 		gift.name = "Gift520FlowerBox"
@@ -102,6 +104,94 @@ func _build_vitrine(node_name: String, center: Vector3, size: Vector3) -> void:
 	_add_box("%sGlassRight" % node_name, Vector3(center.x + half_x, glass_y, center.z), Vector3(0.025, glass_h, size.z), glass)
 	_add_box("%sGlassTop" % node_name, Vector3(center.x, 2.34, center.z), Vector3(size.x, 0.025, size.z), glass)
 	_add_collision_box("%sCollision" % node_name, Vector3(center.x, 1.56, center.z), Vector3(size.x, 1.60, size.z))
+
+
+func _build_flower_box_fallback(world_position: Vector3) -> Node3D:
+	# The authored bouquet is intentionally left out of the Web package because
+	# its hundreds of meshes block startup on mobile browsers. This lightweight
+	# version preserves the same interactive lid/reveal hierarchy and silhouette.
+	var root := Node3D.new()
+	root.name = "Gift520FlowerBoxWeb"
+	root.position = world_position
+	add_child(root)
+	var cream := _gift_material(Color("cbb79a"), 0.62)
+	var rose := _gift_material(Color("cc6c78"), 0.82)
+	var rose_shadow := _gift_material(Color("8f3544"), 0.86)
+	var gold := _gift_material(Color("d39a28"), 0.20, 0.84)
+	var velvet_red := _gift_material(Color("5c1618"), 0.78)
+	_gift_cylinder(root, "HatboxBase", Vector3(0.0, 0.31, 0.0), 0.58, 0.62, cream)
+
+	var lid := Node3D.new()
+	lid.name = "FlowerLid"
+	root.add_child(lid)
+	_gift_cylinder(lid, "FlowerTray", Vector3(0.0, 0.68, 0.0), 0.57, 0.10, cream)
+	var rose_positions := [
+		Vector3(-0.28, 0.76, -0.22), Vector3(0.0, 0.78, -0.25), Vector3(0.28, 0.76, -0.22),
+		Vector3(-0.36, 0.77, 0.02), Vector3(-0.12, 0.81, 0.0), Vector3(0.13, 0.80, 0.02), Vector3(0.36, 0.77, 0.02),
+		Vector3(-0.27, 0.76, 0.25), Vector3(0.0, 0.80, 0.27), Vector3(0.27, 0.76, 0.25)
+	]
+	for index in range(rose_positions.size()):
+		var rose_root := Node3D.new()
+		rose_root.name = "Rose"
+		rose_root.position = rose_positions[index]
+		lid.add_child(rose_root)
+		for petal_index in range(6):
+			var angle := float(petal_index) / 6.0 * TAU
+			_gift_sphere(rose_root, "Petal", Vector3(cos(angle) * 0.055, 0.0, sin(angle) * 0.055), Vector3(0.085, 0.045, 0.065), rose if (index + petal_index) % 3 else rose_shadow)
+		_gift_sphere(rose_root, "RoseHeart", Vector3(0.0, 0.025, 0.0), Vector3(0.065, 0.05, 0.065), rose_shadow)
+
+	var reveal := Node3D.new()
+	reveal.name = "CoinReveal"
+	reveal.visible = false
+	root.add_child(reveal)
+	_gift_cylinder(reveal, "VelvetCradle", Vector3(0.0, 0.65, 0.0), 0.43, 0.07, velvet_red)
+	_gift_cylinder(reveal, "GoldMedal", Vector3(0.0, 0.72, 0.0), 0.34, 0.05, gold)
+	var label := Label3D.new()
+	label.name = "Raised520"
+	label.text = "520"
+	label.font_size = 64
+	label.modulate = Color("ffe075")
+	label.position = Vector3(0.0, 0.755, 0.0)
+	label.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	reveal.add_child(label)
+	return root
+
+
+func _gift_material(color: Color, roughness: float, metallic := 0.0) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = roughness
+	material.metallic = metallic
+	return material
+
+
+func _gift_cylinder(parent: Node3D, node_name: String, position: Vector3, radius: float, height: float, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = node_name
+	node.position = position
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = 32
+	mesh.material = material
+	node.mesh = mesh
+	parent.add_child(node)
+	return node
+
+
+func _gift_sphere(parent: Node3D, node_name: String, position: Vector3, scale_value: Vector3, material: Material) -> MeshInstance3D:
+	var node := MeshInstance3D.new()
+	node.name = node_name
+	node.position = position
+	node.scale = scale_value
+	var mesh := SphereMesh.new()
+	mesh.radial_segments = 12
+	mesh.rings = 6
+	mesh.material = material
+	node.mesh = mesh
+	parent.add_child(node)
+	return node
 
 
 func _add_spot(from: Vector3, target: Vector3, energy := 1.15) -> void:

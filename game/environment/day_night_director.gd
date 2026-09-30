@@ -74,7 +74,7 @@ func _sync_clock() -> void:
 func _apply_time() -> void:
 	var day_amount := smoothstep(-0.15, 0.25, sin((time_of_day - 6.0) / 24.0 * TAU))
 	var night_amount := 1.0 - day_amount
-	var dusk_distance := min(abs(time_of_day - 18.35), abs(time_of_day - 6.35))
+	var dusk_distance: float = minf(absf(time_of_day - 18.35), absf(time_of_day - 6.35))
 	var dusk_amount := exp(-pow(dusk_distance / 1.18, 2.0))
 	if sun:
 		sun.rotation_degrees.x = remap(time_of_day, 0.0, 24.0, -90.0, 270.0)

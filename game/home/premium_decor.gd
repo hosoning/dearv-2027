@@ -743,7 +743,7 @@ func _build_study() -> void:
 			var folio_material := StandardMaterial3D.new()
 			folio_material.albedo_color = book_colors[(layer + int(abs(stack_data.z))) % book_colors.size()]
 			folio_material.roughness = 0.80
-			var layer_y := stack_data.y + float(layer) * 0.075
+			var layer_y: float = stack_data.y + float(layer) * 0.075
 			_box(root, "HorizontalFolioCover", Vector3(17.00, layer_y, stack_data.z), Vector3(0.18, 0.065, 0.62 - float(layer) * 0.035), folio_material)
 			_box(root, "HorizontalFolioPages", Vector3(16.90, layer_y, stack_data.z), Vector3(0.025, 0.038, 0.56 - float(layer) * 0.035), page_material)
 			_box(root, "HorizontalFolioLabel", Vector3(16.882, layer_y, stack_data.z), Vector3(0.012, 0.022, 0.17), label_material)
@@ -1594,9 +1594,9 @@ func _build_living_details() -> void:
 		telescope_leg.rotation_degrees = tripod_rotation
 		_sphere(telescope, "TelescopeTripodFoot", Vector3(tripod_position.x * 1.72, 0.045, tripod_position.z * 1.72), Vector3(0.10, 0.035, 0.10), charcoal)
 	_sphere(telescope, "TelescopeDeclinationHousing", Vector3(0.0, 1.49, 0.0), Vector3(0.18, 0.16, 0.18), charcoal)
-	_cylinder(telescope, "TelescopeDeclinationAxis", Vector3(0.0, 1.49, 0.0), 0.045, 0.58, champagne, Vector3(0.0, 0.0, 90.0))
+	_cylinder(telescope, "TelescopeDeclinationAxis", Vector3(0.0, 1.49, 0.0), 0.045, 0.045, 0.58, champagne, Vector3(0.0, 0.0, 90.0))
 	for focus_side in [-1.0, 1.0]:
-		_cylinder(telescope, "TelescopeFocusKnob", Vector3(focus_side * 0.23, 1.49, -0.18), 0.065, 0.055, walnut, Vector3(0.0, 0.0, 90.0))
+		_cylinder(telescope, "TelescopeFocusKnob", Vector3(focus_side * 0.23, 1.49, -0.18), 0.065, 0.055, 0.10, walnut, Vector3(0.0, 0.0, 90.0))
 		for grip_index in range(8):
 			var grip_angle := float(grip_index) * 45.0
 			var grip_radians := deg_to_rad(grip_angle)
@@ -1617,7 +1617,7 @@ func _build_living_details() -> void:
 		tube_ring.position = Vector3(0.0, 1.62 + ring_z * 0.17, 0.08 + ring_z)
 		tube_ring.rotation_degrees.x = 90.0
 		telescope.add_child(tube_ring)
-	_cylinder(telescope, "TelescopeLensHood", Vector3(0.0, 1.74, 0.72), 0.17, 0.28, charcoal, Vector3(90.0, 0.0, 0.0))
+	_cylinder(telescope, "TelescopeLensHood", Vector3(0.0, 1.74, 0.72), 0.17, 0.17, 0.28, charcoal, Vector3(90.0, 0.0, 0.0))
 	var objective_rim := MeshInstance3D.new()
 	objective_rim.name = "TelescopeObjectiveRim"
 	var objective_rim_mesh := TorusMesh.new()
@@ -1631,7 +1631,7 @@ func _build_living_details() -> void:
 	objective_rim.rotation_degrees.x = 90.0
 	telescope.add_child(objective_rim)
 	_sphere(telescope, "TelescopeObjectiveGlass", Vector3(0.0, 1.77, 0.865), Vector3(0.132, 0.132, 0.025), crystal)
-	_cylinder(telescope, "TelescopeEyepieceBarrel", Vector3(0.0, 1.51, -0.68), 0.075, 0.26, charcoal, Vector3(90.0, 0.0, 0.0))
+	_cylinder(telescope, "TelescopeEyepieceBarrel", Vector3(0.0, 1.51, -0.68), 0.075, 0.075, 0.26, charcoal, Vector3(90.0, 0.0, 0.0))
 	_sphere(telescope, "TelescopeEyecup", Vector3(0.0, 1.48, -0.83), Vector3(0.095, 0.070, 0.055), walnut)
 	_box(telescope, "TelescopeMakerPlate", Vector3(0.0, 1.49, -0.02), Vector3(0.12, 0.045, 0.012), cream)
 	_add_collision_box(telescope, "TelescopeCollision", Vector3(0.0, 0.78, 0.0), Vector3(0.95, 1.56, 0.95))

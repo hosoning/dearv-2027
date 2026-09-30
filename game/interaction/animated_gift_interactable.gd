@@ -33,7 +33,7 @@ func _bind_visual_nodes() -> void:
 	if animation_mode == "reveal":
 		var reveal := visual_root.find_child(reveal_node_name, true, false) as Node3D
 		var lid := visual_root.find_child(lid_node_name, true, false) as Node3D
-		var saved := AppState.get_interaction_state(object_id, {})
+		var saved: Variant = AppState.get_interaction_state(object_id, {})
 		_opened = saved is Dictionary and bool((saved as Dictionary).get("opened", false))
 		if reveal:
 			reveal.visible = _opened
@@ -50,7 +50,7 @@ func _bind_visual_nodes() -> void:
 		_light.position = Vector3(0.0, 1.1, 0.0)
 		visual_root.add_child(_light)
 		_setup_music_box()
-		var saved := AppState.get_interaction_state(object_id, {})
+		var saved: Variant = AppState.get_interaction_state(object_id, {})
 		_opened = saved is Dictionary and bool((saved as Dictionary).get("playing", false))
 		if _opened:
 			_light.light_energy = 2.2

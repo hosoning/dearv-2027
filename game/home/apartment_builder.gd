@@ -148,7 +148,7 @@ func _create_architectural_glass_material() -> ShaderMaterial:
 	var shader := Shader.new()
 	shader.code = """
 shader_type spatial;
-render_mode blend_mix, depth_draw_alpha_prepass, cull_disabled, diffuse_burley, specular_schlick_ggx;
+render_mode blend_mix, depth_prepass_alpha, cull_disabled, diffuse_burley, specular_schlick_ggx;
 
 varying vec3 world_position;
 
@@ -520,7 +520,7 @@ func _add_sheer_curtain(
 	var sheer_shader := Shader.new()
 	sheer_shader.code = """
 shader_type spatial;
-render_mode blend_mix, depth_draw_alpha_prepass, cull_disabled, diffuse_burley, specular_schlick_ggx;
+render_mode blend_mix, depth_prepass_alpha, cull_disabled, diffuse_burley, specular_schlick_ggx;
 
 varying vec3 world_position;
 varying float fold_light;
@@ -615,7 +615,7 @@ func _add_privacy_shade(
 	var control := OpenableInteractable.new()
 	control.name = "%sControl" % shade_name
 	control.object_id = object_id
-	control.display_name = shade_name.capitalize()
+	control.accessible_description = shade_name.capitalize()
 	control.moving_part = moving_part
 	control.motion_type = OpenableInteractable.MotionType.SLIDE
 	control.open_offset = Vector3(0.0, 3.15, 0.0)
@@ -653,7 +653,7 @@ func _build_distant_city_view() -> void:
 	var harbour_water_shader := Shader.new()
 	harbour_water_shader.code = """
 shader_type spatial;
-render_mode blend_mix, depth_draw_alpha_prepass, cull_disabled, diffuse_burley, specular_schlick_ggx;
+render_mode blend_mix, depth_prepass_alpha, cull_disabled, diffuse_burley, specular_schlick_ggx;
 
 varying vec3 world_position;
 varying float wave_height;
@@ -1055,7 +1055,7 @@ void fragment() {
 			for floor_index in range(4, int(tower.w / 3.1), 2):
 				if (floor_index + index + int((column + 0.3) * 10.0)) % 3 == 0:
 					continue
-				var window_x := tower.x + column * tower.z
+				var window_x: float = tower.x + float(column) * tower.z
 				var window_y := tower_base_y + float(floor_index) * 3.0
 				var window_panel := _box(city, "NeighbourWindow", Vector3(window_x, window_y, tower.y - tower_depth * 0.5 - 0.61), Vector3(tower.z * 0.18, 1.35, 0.06), city_glow, false)
 				window_panel.add_to_group("city_night_emissive")
@@ -1157,7 +1157,7 @@ void fragment() {
 
 	# Seams, rigging and deck hardware keep the sails readable from the apartment.
 	for seam_y in [2.10, 2.90, 3.70, 4.50]:
-		var seam_width := 1.45 * (5.20 - seam_y) / 3.92
+		var seam_width: float = 1.45 * (5.20 - float(seam_y)) / 3.92
 		_box(sailing_yacht, "SailingYachtSailSeam", Vector3(-0.18 + seam_width * 0.45, seam_y, -0.005), Vector3(max(0.18, seam_width), 0.025, 0.018), yacht_trim_material, false)
 	var bow_stay := _box(sailing_yacht, "SailingYachtBowStay", Vector3(-1.28, 2.88, -0.025), Vector3(0.025, 4.15, 0.018), dark_metal_material, false)
 	bow_stay.rotation_degrees.z = -22.0
@@ -1451,11 +1451,11 @@ func _build_ceiling_services() -> void:
 		Vector3(-11.3, 3.125, -4.2),
 		Vector3(14.1, 3.125, 4.8)
 	]:
-		_cylinder(services, "SmokeDetectorBody", detector_position, 0.095, 0.105, 0.045, detector_material)
-		_cylinder(services, "SmokeDetectorSensorRing", detector_position + Vector3(0.0, -0.030, 0.0), 0.052, 0.052, 0.016, slot_material)
+		_cylinder(services, "SmokeDetectorBody", detector_position, 0.095, 0.045, detector_material)
+		_cylinder(services, "SmokeDetectorSensorRing", detector_position + Vector3(0.0, -0.030, 0.0), 0.052, 0.016, slot_material)
 		for angle in range(0, 360, 60):
 			var radians := deg_to_rad(float(angle))
-			var vent_position := detector_position + Vector3(cos(radians) * 0.073, -0.030, sin(radians) * 0.073)
+			var vent_position: Vector3 = detector_position + Vector3(cos(radians) * 0.073, -0.030, sin(radians) * 0.073)
 			_box(services, "DetectorVent", vent_position, Vector3(0.020, 0.010, 0.010), slot_material, false)
 
 	for sprinkler_position in [
@@ -1465,8 +1465,8 @@ func _build_ceiling_services() -> void:
 		Vector3(-8.0, 3.125, 11.0),
 		Vector3(15.4, 3.125, -1.0)
 	]:
-		_cylinder(services, "SprinklerEscutcheon", sprinkler_position, 0.060, 0.060, 0.022, detector_material)
-		_cylinder(services, "SprinklerHead", sprinkler_position + Vector3(0.0, -0.038, 0.0), 0.018, 0.024, 0.055, sprinkler_material)
+		_cylinder(services, "SprinklerEscutcheon", sprinkler_position, 0.060, 0.022, detector_material)
+		_cylinder(services, "SprinklerHead", sprinkler_position + Vector3(0.0, -0.038, 0.0), 0.018, 0.055, sprinkler_material)
 		_box(services, "SprinklerDeflector", sprinkler_position + Vector3(0.0, -0.070, 0.0), Vector3(0.075, 0.010, 0.025), sprinkler_material, false)
 
 

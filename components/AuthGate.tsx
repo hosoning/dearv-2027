@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, isSupabaseReachable } from '@/lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
 type Mode = 'sign-in' | 'create';
@@ -15,21 +15,37 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cloudReachable, setCloudReachable] = useState(isSupabaseConfigured);
 
   useEffect(() => {
     if (!supabase) {
       setChecked(true);
       return;
     }
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setChecked(true);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
-    return () => sub.subscription.unsubscribe();
+    const client = supabase;
+    const checkCloud = async () => {
+      try {
+        if (!(await isSupabaseReachable())) {
+          setCloudReachable(false);
+          return;
+        }
+        const { error: sessionError, data } = await client.auth.getSession();
+        if (sessionError) throw sessionError;
+        setSession(data.session);
+      } catch {
+        setCloudReachable(false);
+      } finally {
+        setChecked(true);
+      }
+    };
+    void checkCloud();
+    const { data: sub } = client.auth.onAuthStateChange((_event, next) => setSession(next));
+    return () => {
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
-  if (!isSupabaseConfigured) return <>{children}</>;
+  if (!isSupabaseConfigured || !cloudReachable) return <>{children}</>;
   if (!checked) return <div className="fixed inset-0 bg-[#15110e]" />;
   if (session) return <>{children}</>;
 

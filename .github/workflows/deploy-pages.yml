@@ -32,8 +32,10 @@ jobs:
         env:
           GITHUB_PAGES: 'true'
           GITHUB_PAGES_SUBDIR: 'site'
-          NEXT_PUBLIC_SUPABASE_URL: 'https://qndiibbjadhgtapuonco.supabase.co'
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_-idhgIzi_uUs5cv68qp7wQ_W0PlamxT'
+          # Cloud sync is optional. Keeping these in repository secrets avoids
+          # shipping a dead project URL that blocks the entire local-first app.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_DOOR_CODE: ${{ secrets.NEXT_PUBLIC_DOOR_CODE }}
           NEXT_PUBLIC_OWNER_PIN: ${{ secrets.NEXT_PUBLIC_OWNER_PIN }}
       - name: Publish exported files without clobbering Godot native build

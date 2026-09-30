@@ -110,8 +110,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if AppState.is_inspecting:
 		return
 	if _pose_locked:
-		var pointer_exit := event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
-		var touch_exit := event is InputEventScreenTouch and not event.pressed
+		var pointer_exit: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+		var touch_exit: bool = event is InputEventScreenTouch and not event.pressed
 		if event.is_action_pressed("cancel") or event.is_action_pressed("interact") or pointer_exit or touch_exit:
 			exit_comfort_pose()
 			get_viewport().set_input_as_handled()

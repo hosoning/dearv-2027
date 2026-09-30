@@ -95,6 +95,12 @@ jobs:
               target = root / f"index-{tag}.{extension}"
               source.rename(target)
 
+          # Godot derives AudioWorklet URLs from the executable name. Once the
+          # executable is versioned, the worklets must use the same prefix.
+          for source in root.glob("index.audio*.js"):
+              suffix = source.name.removeprefix("index")
+              source.rename(root / f"index-{tag}{suffix}")
+
           html_path = root / "index.html"
           html = html_path.read_text()
           html = html.replace('src="index.js"', f'src="index-{tag}.js"')
@@ -107,6 +113,8 @@ jobs:
           test -s "public/native/index-${GITHUB_SHA:0:12}.js"
           test -s "public/native/index-${GITHUB_SHA:0:12}.wasm"
           test -s "public/native/index-${GITHUB_SHA:0:12}.pck"
+          test -s "public/native/index-${GITHUB_SHA:0:12}.audio.worklet.js"
+          test -s "public/native/index-${GITHUB_SHA:0:12}.audio.position.worklet.js"
 
       - name: Mirror native build into the legacy Pages source
         run: |
