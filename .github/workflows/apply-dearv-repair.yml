@@ -1,0 +1,30 @@
+name: Apply DearV repair
+
+on:
+  push:
+    branches:
+      - claude/memory-house-3d-handoff-a0d0e1
+    paths:
+      - ".github/dearv-repair.patch"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/memory-house-3d-handoff-a0d0e1
+          fetch-depth: 0
+      - name: Apply validated repair
+        run: |
+          git apply --check .github/dearv-repair.patch
+          git apply .github/dearv-repair.patch
+          git rm .github/dearv-repair.patch .github/workflows/apply-dearv-repair.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Repair offline entry and Godot web boot"
+          git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
