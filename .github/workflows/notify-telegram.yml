@@ -1,0 +1,44 @@
+name: Notify DearV Telegram
+
+on:
+  workflow_run:
+    workflows:
+      - Godot native game validation
+      - Build Pages site
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      BRIDGE_URL: ${{ secrets.SUPABASE_TELEGRAM_BRIDGE_URL }}
+      PROGRESS_SECRET: ${{ secrets.DEARV_PROGRESS_SECRET }}
+    steps:
+      - name: Send private progress update
+        if: ${{ env.BRIDGE_URL != '' && env.PROGRESS_SECRET != '' }}
+        env:
+          RESULT: ${{ github.event.workflow_run.conclusion || 'running' }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name || 'Manual status check' }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          DETAILS_URL: ${{ github.event.workflow_run.html_url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}
+        run: |
+          payload="$(jq -n \
+            --arg phase "$WORKFLOW_NAME" \
+            --arg summary "DearV cloud validation finished: $RESULT" \
+            --arg status "$RESULT" \
+            --arg commit_sha "$COMMIT_SHA" \
+            --arg details_url "$DETAILS_URL" \
+            '{phase:$phase,summary:$summary,status:$status,commit_sha:$commit_sha,details_url:$details_url}')"
+          curl --fail --silent --show-error \
+            --request POST "$BRIDGE_URL" \
+            --header "content-type: application/json" \
+            --header "x-dearv-progress-secret: $PROGRESS_SECRET" \
+            --data "$payload"

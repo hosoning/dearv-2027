@@ -1,0 +1,84 @@
+name: Build Blender hero furniture
+
+on:
+  push:
+    branches:
+      - claude/memory-house-3d-handoff-a0d0e1
+    paths:
+      - "game/tools/build_hero_furniture.py"
+      - "game/tools/build_memory_gifts.py"
+      - ".github/workflows/blender-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: blender-hero-assets
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      BLENDER_USER_CONFIG: /tmp/blender-config
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+        with:
+          ref: claude/memory-house-3d-handoff-a0d0e1
+
+      - name: Install Blender and headless graphics runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            blender python3-numpy \
+            libegl1 libgl1 libglx0 libgles2 \
+            libx11-6 libxext6 libxi6 libxrender1 libxfixes3 libsm6 \
+            xvfb
+          ldconfig -p | grep -E 'libEGL\.so\.1|libGL\.so\.1'
+
+      - name: Generate furniture GLBs and rendered previews
+        run: |
+          xvfb-run -a -s "-screen 0 1600x1000x24" \
+            blender --background --factory-startup --python game/tools/build_hero_furniture.py
+          test -s game/assets/models/upholstered_bed.glb
+          test -s game/assets/models/executive_study_rig.glb
+          test -s game/assets/models/walk_in_wardrobe.glb
+          test -s game/assets/models/bathroom_suite.glb
+          test -s game/assets/previews/upholstered_bed.png
+          test -s game/assets/previews/executive_study_rig.png
+          test -s game/assets/previews/walk_in_wardrobe.png
+          test -s game/assets/previews/bathroom_suite.png
+
+      - name: Generate reference-based memory gifts
+        run: |
+          xvfb-run -a -s "-screen 0 1200x1200x24" \
+            blender --background --factory-startup --python game/tools/build_memory_gifts.py
+          test -s game/assets/models/gift_520_flower_box.glb
+          test -s game/assets/models/christmas_music_lantern.glb
+          test -s game/assets/previews/gift_520_flower_box.png
+          test -s game/assets/previews/christmas_music_lantern.png
+
+      - name: Publish generated assets back to the branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/assets/models
+          git add -f game/assets/previews/*.png
+          if git diff --cached --quiet; then
+            echo "No generated asset changes"
+          else
+            git commit -m "Generate Blender hero furniture and memory gifts"
+            git pull --rebase origin claude/memory-house-3d-handoff-a0d0e1
+            git push origin HEAD:claude/memory-house-3d-handoff-a0d0e1
+          fi
+
+      - name: Export the freshly generated assets into the Web home
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run godot-web-export.yml --ref claude/memory-house-3d-handoff-a0d0e1
