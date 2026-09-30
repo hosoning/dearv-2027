@@ -1,4 +1,4 @@
-const CACHE_NAME = 'memory-house-v3';
+const CACHE_NAME = 'memory-house-v4';
 // Derived from the worker's own script location so this also works when the
 // app is served from a subpath (e.g. GitHub Pages' /<repo>/ basePath).
 const BASE = new URL('./', self.location).pathname;
@@ -24,6 +24,12 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  // The Godot runtime streams a large WASM module and PCK archive. Passing
+  // those responses through CacheStorage forces the browser to clone tens of
+  // megabytes before the engine can boot and can leave mobile/Safari builds on
+  // an indeterminate loading bar. Let the browser fetch native assets directly.
+  if (url.pathname.startsWith(`${BASE}native/`)) return;
 
   if (url.pathname.startsWith(`${BASE}_next/static/`)) {
     event.respondWith(
