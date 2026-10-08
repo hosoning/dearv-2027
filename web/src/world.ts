@@ -41,7 +41,7 @@ const LIGHTMAP_CHUNK = /* glsl */ `
     vec3 lmN = texture2D( lightMapNight, vLightMapUv ).rgb;
     lmD = lmD * lmD * lmScale.x;
     lmN = lmN * lmN * lmScale.y;
-    vec3 dayPart = lmD * uDayTint * uDayGain + lmN * uLights * 0.25;
+    vec3 dayPart = lmD * uDayTint * uDayGain + lmN * uLights * 0.7;
     vec3 nightPart = mix( lmD * uMoonTint, lmN, uLights );
     irradiance += mix( dayPart, nightPart, uNight ) * lightMapIntensity * uLmGain * PI;
   #endif

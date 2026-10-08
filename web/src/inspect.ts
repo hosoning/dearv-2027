@@ -26,14 +26,14 @@ export class Inspector {
   private onClose: (() => void) | null = null;
   private ui = document.getElementById('inspect')!;
 
-  constructor(private renderer: THREE.WebGLRenderer, private canvas: HTMLCanvasElement) {
+  constructor(private renderer: THREE.WebGLRenderer, private canvas: HTMLCanvasElement, private viewer: THREE.Camera) {
     const pmrem = new THREE.PMREMGenerator(renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     this.scene.environmentIntensity = 0.9;
     const veil = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
       transparent: true, depthTest: false, depthWrite: false,
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
-      fragmentShader: 'varying vec2 vUv; void main(){ float r = distance(vUv, vec2(0.5, 0.55)); gl_FragColor = vec4(0.03, 0.025, 0.02, mix(0.55, 0.85, smoothstep(0.1, 0.8, r))); }',
+      fragmentShader: 'varying vec2 vUv; void main(){ float r = distance(vUv, vec2(0.5, 0.55)); gl_FragColor = vec4(0.03, 0.025, 0.02, mix(0.72, 0.92, smoothstep(0.1, 0.8, r))); }',
     }));
     veil.frustumCulled = false;
     veil.renderOrder = -10;
@@ -92,8 +92,10 @@ export class Inspector {
     });
     this.holder.add(clone);
     this.setupSnow(clone);
-    this.yaw = -0.6;
-    this.pitch = 0.22;
+    // start with the side that faced the visitor turned towards the camera
+    const d = new THREE.Vector3().subVectors(this.viewer.position, center);
+    this.yaw = Math.atan2(-d.x, d.z) + 0.35;
+    this.pitch = 0.3;
     this.dist = this.targetDist = 2.3;
     this.appear = 0;
     this.idle = 0;

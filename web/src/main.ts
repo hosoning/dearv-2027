@@ -25,13 +25,13 @@ const camera = new THREE.PerspectiveCamera(isTouch ? 72 : 62, window.innerWidth 
 const fromBlender = (v: V3) => new THREE.Vector3(v[0], v[2], -v[1]);
 
 const PLACES: Record<string, { pos: V3; look: V3 }> = {
-  living: { pos: [4.0, 3.2, 1.6], look: [10.9, 3.3, 1.3] },
+  living: { pos: [4.3, 0.2, 1.6], look: [10.5, 4.6, 1.0] },
   window: { pos: [2.0, 6.3, 1.6], look: [2.0, 60, -6] },
   kitchen: { pos: [-1.5, -4.9, 1.6], look: [-2.4, -10, 1.0] },
   dining: { pos: [1.7, -0.6, 1.6], look: [-3.0, -1.5, 0.9] },
-  bedroom: { pos: [-8.3, -4.3, 1.6], look: [-14.5, -7.0, 1.0] },
+  bedroom: { pos: [-12.2, -4.6, 1.6], look: [-6.3, -7.4, 0.7] },
   closet: { pos: [-9.1, -1.3, 1.6], look: [-14.5, -1.0, 1.4] },
-  bath: { pos: [-7.1, 2.3, 1.6], look: [-11.0, 5.8, 0.6] },
+  bath: { pos: [-7.3, 2.0, 1.6], look: [-12.5, 4.6, 0.8] },
   vitrine: { pos: [-11.5, -8.0, 1.5], look: [-11.5, -10, 1.0] },
   letters: { pos: [-12.4, -5.3, 1.6], look: [-12.4, -3.5, 1.45] },
   study: { pos: [6.9, -3.0, 1.6], look: [9.5, -7.5, 1.0] },
@@ -55,7 +55,7 @@ async function boot() {
   const env = new Environment(scene, world);
   const player = new Player(camera, canvas, world.manifest.colliders, $('joy'), (x, y) => tap(x, y));
   if (world.manifest.bounds) player.bounds = world.manifest.bounds;
-  const inspector = new Inspector(renderer, canvas);
+  const inspector = new Inspector(renderer, canvas, camera);
   const home = new Home(world, player, scene, inspector);
   // scene.json spawn is already in three.js coordinates
   player.spawn(new THREE.Vector3(...world.manifest.spawn.position), new THREE.Vector3(...world.manifest.spawn.lookAt));
@@ -64,7 +64,7 @@ async function boot() {
   const saved = store.state();
   const hour = new Date().getHours();
   const clockT = hour >= 7 && hour < 17 ? 0 : hour >= 17 && hour < 19 ? 0.5 : 1;
-  const time = { t: saved.t ?? clockT, lights: saved.lights ?? (clockT > 0.4 ? 1 : 0) };
+  const time = { t: saved.t ?? clockT, lights: saved.lights ?? 1 }; // a lived-in home: lights on by default
   const goal = { ...time };
   home.lightsMaster = goal.lights;
   home.setLightsMaster(goal.lights > 0.5);
