@@ -7,8 +7,8 @@
     <title>Dear V · 海港的家</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+TC:wght@300;400;500&display=swap" />
-    <script type="module" crossorigin src="./assets/index-6Lyt9Rc0.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-C_Ugf8AG.css">
+    <script type="module" crossorigin src="./assets/index-OIxTV3NE.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-C4SEE8RP.css">
   </head>
   <body>
     <canvas id="scene"></canvas>
@@ -18,7 +18,16 @@
       <div class="loader-title">Dear V</div>
       <div class="loader-sub">正在打開我們的家</div>
       <div class="bar"><i id="bar"></i></div>
-      <button id="enter" class="enter" hidden>推門進去</button>
+      <div class="lock" id="lock" hidden>
+        <div class="lock-screen"><span class="lock-dots" id="lock-dots"></span><span class="lock-msg" id="lock-msg">輸入門鎖密碼</span></div>
+        <div class="lock-pad">
+          <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+          <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+          <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+          <button data-k="*" class="dim">✱</button><button data-k="0">0</button><button data-k="#" class="dim">#</button>
+        </div>
+      </div>
+      <button id="enter" hidden></button>
     </div>
 
     <div id="hud" hidden>

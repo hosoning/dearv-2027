@@ -3,45 +3,45 @@
   "arch": {
    "day": {
     "file": "lightmaps/arch_day.webp",
-    "scale": 2.506670022010803
+    "scale": 2.4990138888359072
    },
    "night": {
     "file": "lightmaps/arch_night.webp",
-    "scale": 1.8482473254203797
+    "scale": 1.79386745095253
    }
   },
   "furn": {
    "day": {
     "file": "lightmaps/furn_day.webp",
-    "scale": 2.5115028262138366
+    "scale": 2.5022923350334167
    },
    "night": {
     "file": "lightmaps/furn_night.webp",
-    "scale": 4.415684008598328
+    "scale": 4.114774417877197
    }
   },
   "suite": {
    "day": {
     "file": "lightmaps/suite_day.webp",
-    "scale": 1.9927262663841248
+    "scale": 2.036392736434937
    },
    "night": {
     "file": "lightmaps/suite_night.webp",
-    "scale": 10.41626443862915
+    "scale": 10.082014131546021
    }
   },
   "study": {
    "day": {
     "file": "lightmaps/study_day.webp",
-    "scale": 1.1926285564899446
+    "scale": 1.233925062417984
    },
    "night": {
     "file": "lightmaps/study_night.webp",
-    "scale": 0.8513562262058259
+    "scale": 0.8331957846879959
    }
   }
  },
- "version": 1791450402,
+ "version": 1791452072,
  "colliders": [
   {
    "min": [
