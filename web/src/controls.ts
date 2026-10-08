@@ -77,7 +77,7 @@ export class Player {
     if (!this.seated) return;
     const s = this.seated;
     this.seated = null;
-    this.pos.set(s.pos.x - 0.6, 0, s.pos.z);
+    this.pos.set(s.pos.x + 0.7, 0, s.pos.z); // step forward off the sofa, towards the coffee table
     this.faceTowards(s.look);
     this.cinematic = null;
   }
