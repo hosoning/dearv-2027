@@ -820,8 +820,8 @@ def _pajamas(n, x, y, z, p, M):
 
 def _xmas_lantern(n, x, y, z, p, M):
     """Antique-bronze flat lantern snow music box (14.5 x 8 x 22 cm): forest, cottages, lamppost."""
-    bronze = material("antique_bronze", color=(0.22, 0.13, 0.07), metal=0.8, rough=0.42)
-    gilt = material("bronze_gilt", color=(0.62, 0.42, 0.2), metal=1.0, rough=0.3)
+    bronze = material("antique_bronze", color=(0.11, 0.07, 0.045), metal=0.85, rough=0.5)
+    gilt = material("bronze_gilt", color=(0.45, 0.3, 0.15), metal=1.0, rough=0.35)
     snow = material("fake_snow", color=(0.96, 0.96, 0.98), rough=0.9, emission=(1.0, 0.85, 0.6), night_emission=0.6)
     pine = material("pine", color=(0.08, 0.24, 0.13), rough=0.7)
     W, D = 0.145, 0.08          # width along y, depth along x (front faces -x)
@@ -909,7 +909,7 @@ def _gold520(n, x, y, z, p, M):
     cream = material("hatbox_cream", color=(0.93, 0.86, 0.68), metal=0.2, rough=0.4)
     goldband = material("hatbox_gold", color=(0.8, 0.62, 0.32), metal=1.0, rough=0.3)
     satin = material("satin_dusty_pink", color=(0.72, 0.5, 0.46), rough=0.3, sheen=0.8)
-    rose = material("rose_soft_pink", color=(0.93, 0.7, 0.74), rough=0.6, sheen=0.6)
+    rose = material("rose_soft_pink", color=(0.86, 0.52, 0.6), rough=0.6, sheen=0.4)
     hy = y - 0.06
     cylinder(f"{n}_hatbox", 0.07, 0.075, (x, hy, z + 0.0375), cream, segs=48, parent=p)
     cylinder(f"{n}_hatband", 0.0705, 0.012, (x, hy, z + 0.008), goldband, segs=48, parent=p)

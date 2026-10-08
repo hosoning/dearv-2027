@@ -42,10 +42,11 @@ def main():
     sc.cycles.use_denoising = True
     sc.render.resolution_x, sc.render.resolution_y = 800, 1000
     sc.view_settings.view_transform = "AgX"
+    sc.view_settings.exposure = -1.1
     w = bpy.data.worlds.new("w")
     sc.world = w
     w.node_tree.nodes["Background"].inputs["Color"].default_value = (0.95, 0.9, 0.86, 1)
-    w.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.5
+    w.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.3
     studio = material_backdrop()
     cam = bpy.data.objects.new("cam", bpy.data.cameras.new("cam"))
     sc.collection.objects.link(cam)
@@ -100,7 +101,7 @@ def material_backdrop():
     ob = bpy.data.objects.new("sweep", me)
     bpy.context.scene.collection.objects.link(ob)
     m = bpy.data.materials.new("sweep")
-    m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.86, 0.82, 0.78, 1)
+    m.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.62, 0.58, 0.55, 1)
     m.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.9
     me.materials.append(m)
     return ob
