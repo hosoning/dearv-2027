@@ -3,25 +3,25 @@
   "arch": {
    "day": {
     "file": "lightmaps/arch_day.webp",
-    "scale": 2.4974107146263123
+    "scale": 2.4991826176643372
    },
    "night": {
     "file": "lightmaps/arch_night.webp",
-    "scale": 2.323631036281586
+    "scale": 2.2871480584144592
    }
   },
   "furn": {
    "day": {
     "file": "lightmaps/furn_day.webp",
-    "scale": 2.24833517074585
+    "scale": 2.3702923178672792
    },
    "night": {
     "file": "lightmaps/furn_night.webp",
-    "scale": 7.860757684707642
+    "scale": 7.486159157752991
    }
   }
  },
- "version": 1791437373,
+ "version": 1791437862,
  "colliders": [
   {
    "min": [
