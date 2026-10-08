@@ -3,25 +3,25 @@
   "arch": {
    "day": {
     "file": "lightmaps/arch_day.webp",
-    "scale": 2.4991826176643372
+    "scale": 2.499189126491547
    },
    "night": {
     "file": "lightmaps/arch_night.webp",
-    "scale": 2.2871480584144592
+    "scale": 2.297834551334381
    }
   },
   "furn": {
    "day": {
     "file": "lightmaps/furn_day.webp",
-    "scale": 2.3702923178672792
+    "scale": 2.366792821884155
    },
    "night": {
     "file": "lightmaps/furn_night.webp",
-    "scale": 7.486159157752991
+    "scale": 7.303458881378174
    }
   }
  },
- "version": 1791437862,
+ "version": 1791443902,
  "colliders": [
   {
    "min": [
@@ -574,49 +574,49 @@
   {
    "name": "keepsake_0",
    "kind": "keepsake",
-   "label": "戒指盒",
+   "label": "Quin's 的睡衣",
    "index": 0
   },
   {
    "name": "keepsake_1",
    "kind": "keepsake",
-   "label": "音樂盒",
+   "label": "拍立得",
    "index": 1
   },
   {
    "name": "keepsake_2",
    "kind": "keepsake",
-   "label": "香水",
+   "label": "領帶夾 · Enrico Coveri",
    "index": 2
   },
   {
    "name": "keepsake_3",
    "kind": "keepsake",
-   "label": "拍立得",
+   "label": "小熊",
    "index": 3
   },
   {
    "name": "keepsake_4",
-   "kind": "keepsake",
-   "label": "花盒",
+   "kind": "snowglobe",
+   "label": "聖誕雪屋音樂盒",
    "index": 4
   },
   {
    "name": "keepsake_5",
    "kind": "keepsake",
-   "label": "雪花球",
+   "label": "520 黃金大餅",
    "index": 5
   },
   {
    "name": "keepsake_6",
    "kind": "keepsake",
-   "label": "小熊",
+   "label": "日記本",
    "index": 6
   },
   {
    "name": "keepsake_7",
    "kind": "keepsake",
-   "label": "日記本",
+   "label": "香水",
    "index": 7
   },
   {
@@ -721,6 +721,30 @@
     0.55
    ],
    "strength": 5.0
+  },
+  "fake_snow": {
+   "color": [
+    1.0,
+    0.85,
+    0.6
+   ],
+   "strength": 0.6
+  },
+  "star_gold": {
+   "color": [
+    1.0,
+    0.8,
+    0.4
+   ],
+   "strength": 3.0
+  },
+  "cottage": {
+   "color": [
+    1.0,
+    0.7,
+    0.35
+   ],
+   "strength": 1.5
   },
   "facade_tower": {
    "color": [
