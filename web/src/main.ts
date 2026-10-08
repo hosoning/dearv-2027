@@ -48,7 +48,8 @@ async function boot() {
   const env = new Environment(scene, world);
   const player = new Player(camera, canvas, world.manifest.colliders, $('joy'), (x, y) => tap(x, y));
   const home = new Home(world, player, scene);
-  player.spawn(fromBlender(world.manifest.spawn.position), fromBlender(world.manifest.spawn.lookAt));
+  // scene.json spawn is already in three.js coordinates
+  player.spawn(new THREE.Vector3(...world.manifest.spawn.position), new THREE.Vector3(...world.manifest.spawn.lookAt));
 
   // Time of day: restore, else follow the real clock
   const saved = store.state();
@@ -245,6 +246,7 @@ async function boot() {
       info: () => renderer.info.render,
       world,
       scene,
+      camera,
     };
   }
   const at = qs.get('at');
@@ -259,5 +261,5 @@ window.addEventListener('resize', () => {
 
 boot().catch((err) => {
   console.error(err);
-  document.querySelector('.loader-sub')!.textContent = '載入失敗，請重新整理';
+  document.querySelector('.loader-sub')!.textContent = `載入失敗，請重新整理（${String(err?.message ?? err).slice(0, 80)}）`;
 });

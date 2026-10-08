@@ -126,11 +126,32 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
     onProgress(Math.min(1, t));
   };
   const loader = new GLTFLoader(manager);
+  // Decode embedded textures through <img> elements instead of fetch(blob:) +
+  // createImageBitmap: strict content-security policies (hosted previews) refuse
+  // fetches of blob: URLs but allow them as image sources.
+  loader.register((parser) => {
+    parser.textureLoader = new THREE.TextureLoader(parser.options.manager);
+    return { name: 'dearv_img_textures' };
+  });
   const texLoader = new THREE.TextureLoader(manager);
   const v = `?v=${manifest.version}`;
 
-  const loadGltf = (key: string, url: string) =>
-    new Promise<THREE.Group>((resolve, reject) =>
+  const loadGltf = (key: string, url: string) => {
+    if (url.endsWith('.b64.txt')) {
+      // Hosts that only serve text: the GLB arrives base64-encoded and is decoded here
+      // (avoids data: URIs, which strict content-security policies refuse to fetch).
+      return fetch(url + v)
+        .then((r) => { if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.text(); })
+        .then((b64) => {
+          progress.set(key, 0.8); report();
+          const bin = atob(b64.trim());
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return new Promise<THREE.Group>((resolve, reject) =>
+            loader.parse(bytes.buffer, '', (g) => { progress.set(key, 1); report(); resolve(g.scene); }, reject));
+        });
+    }
+    return new Promise<THREE.Group>((resolve, reject) =>
       loader.load(
         url + v,
         (g) => { progress.set(key, 1); report(); resolve(g.scene); },
@@ -138,6 +159,7 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
         reject,
       ),
     );
+  };
   const loadTex = (url: string) =>
     new Promise<THREE.Texture>((resolve, reject) => texLoader.load(url + v, resolve, undefined, reject));
 
