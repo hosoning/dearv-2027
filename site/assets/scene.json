@@ -1,0 +1,1357 @@
+{
+ "lightmaps": {
+  "arch": {
+   "day": {
+    "file": "lightmaps/arch_day.webp",
+    "scale": 2.506670022010803
+   },
+   "night": {
+    "file": "lightmaps/arch_night.webp",
+    "scale": 1.8482473254203797
+   }
+  },
+  "furn": {
+   "day": {
+    "file": "lightmaps/furn_day.webp",
+    "scale": 2.5115028262138366
+   },
+   "night": {
+    "file": "lightmaps/furn_night.webp",
+    "scale": 4.415684008598328
+   }
+  },
+  "suite": {
+   "day": {
+    "file": "lightmaps/suite_day.webp",
+    "scale": 1.9927262663841248
+   },
+   "night": {
+    "file": "lightmaps/suite_night.webp",
+    "scale": 10.41626443862915
+   }
+  },
+  "study": {
+   "day": {
+    "file": "lightmaps/study_day.webp",
+    "scale": 1.1926285564899446
+   },
+   "night": {
+    "file": "lightmaps/study_night.webp",
+    "scale": 0.8513562262058259
+   }
+  }
+ },
+ "version": 1791450402,
+ "colliders": [
+  {
+   "min": [
+    -15.25,
+    10.0
+   ],
+   "max": [
+    3.2,
+    10.25
+   ]
+  },
+  {
+   "min": [
+    4.4,
+    10.0
+   ],
+   "max": [
+    11.25,
+    10.25
+   ]
+  },
+  {
+   "min": [
+    -15.25,
+    9.7
+   ],
+   "max": [
+    -15.0,
+    10.25
+   ]
+  },
+  {
+   "min": [
+    -15.25,
+    -1.2
+   ],
+   "max": [
+    -15.0,
+    3.8
+   ]
+  },
+  {
+   "min": [
+    -15.25,
+    -7.0
+   ],
+   "max": [
+    -15.0,
+    -6.8
+   ]
+  },
+  {
+   "min": [
+    11.0,
+    9.7
+   ],
+   "max": [
+    11.25,
+    10.25
+   ]
+  },
+  {
+   "min": [
+    11.0,
+    -7.0
+   ],
+   "max": [
+    11.25,
+    1.0
+   ]
+  },
+  {
+   "min": [
+    -6.27,
+    1.5
+   ],
+   "max": [
+    -6.13,
+    10.0
+   ]
+  },
+  {
+   "min": [
+    -6.27,
+    -3.0
+   ],
+   "max": [
+    -6.13,
+    0.4
+   ]
+  },
+  {
+   "min": [
+    -6.27,
+    -6.88
+   ],
+   "max": [
+    -6.13,
+    -3.9
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    -0.97
+   ],
+   "max": [
+    -8.4,
+    -0.83
+   ]
+  },
+  {
+   "min": [
+    -7.4,
+    -0.97
+   ],
+   "max": [
+    -6.27,
+    -0.83
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    3.43
+   ],
+   "max": [
+    -9.6,
+    3.57
+   ]
+  },
+  {
+   "min": [
+    6.13,
+    4.4
+   ],
+   "max": [
+    6.27,
+    10.0
+   ]
+  },
+  {
+   "min": [
+    6.13,
+    0.5
+   ],
+   "max": [
+    6.27,
+    2.8
+   ]
+  },
+  {
+   "min": [
+    6.27,
+    0.43
+   ],
+   "max": [
+    11.0,
+    0.57
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    -7.2
+   ],
+   "max": [
+    11.0,
+    -6.8
+   ]
+  },
+  {
+   "min": [
+    -15.2,
+    3.8
+   ],
+   "max": [
+    -14.8,
+    9.7
+   ]
+  },
+  {
+   "min": [
+    -15.2,
+    -6.8
+   ],
+   "max": [
+    -14.8,
+    -1.2
+   ]
+  },
+  {
+   "min": [
+    10.8,
+    1.0
+   ],
+   "max": [
+    11.2,
+    9.7
+   ]
+  },
+  {
+   "min": [
+    3.2,
+    10.0
+   ],
+   "max": [
+    4.4,
+    10.4
+   ]
+  },
+  {
+   "min": [
+    1.2,
+    7.6
+   ],
+   "max": [
+    1.68,
+    9.9
+   ]
+  },
+  {
+   "min": [
+    5.73,
+    8.05
+   ],
+   "max": [
+    6.13,
+    9.75
+   ]
+  },
+  {
+   "min": [
+    -6.1,
+    9.3
+   ],
+   "max": [
+    -4.85,
+    10.0
+   ]
+  },
+  {
+   "min": [
+    -4.85,
+    9.32
+   ],
+   "max": [
+    -0.45,
+    10.0
+   ]
+  },
+  {
+   "min": [
+    -4.67,
+    7.2
+   ],
+   "max": [
+    -1.73,
+    8.3
+   ]
+  },
+  {
+   "min": [
+    -4.52,
+    6.73
+   ],
+   "max": [
+    -4.08,
+    7.17
+   ]
+  },
+  {
+   "min": [
+    -3.82,
+    6.73
+   ],
+   "max": [
+    -3.38,
+    7.17
+   ]
+  },
+  {
+   "min": [
+    -3.02,
+    6.73
+   ],
+   "max": [
+    -2.58,
+    7.17
+   ]
+  },
+  {
+   "min": [
+    -2.32,
+    6.73
+   ],
+   "max": [
+    -1.88,
+    7.17
+   ]
+  },
+  {
+   "min": [
+    -3.5,
+    0.85
+   ],
+   "max": [
+    -1.3,
+    1.95
+   ]
+  },
+  {
+   "min": [
+    5.15,
+    -5.77
+   ],
+   "max": [
+    6.23,
+    -0.58
+   ]
+  },
+  {
+   "min": [
+    6.23,
+    -5.77
+   ],
+   "max": [
+    8.13,
+    -4.52
+   ]
+  },
+  {
+   "min": [
+    7.65,
+    -4.75
+   ],
+   "max": [
+    8.8,
+    -2.05
+   ]
+  },
+  {
+   "min": [
+    10.43,
+    -5.2
+   ],
+   "max": [
+    11.0,
+    -1.6
+   ]
+  },
+  {
+   "min": [
+    9.12,
+    -6.58
+   ],
+   "max": [
+    10.08,
+    -5.62
+   ]
+  },
+  {
+   "min": [
+    9.22,
+    -0.98
+   ],
+   "max": [
+    10.18,
+    -0.02
+   ]
+  },
+  {
+   "min": [
+    10.2,
+    -6.75
+   ],
+   "max": [
+    10.8,
+    -6.15
+   ]
+  },
+  {
+   "min": [
+    3.3,
+    -6.7
+   ],
+   "max": [
+    3.9,
+    -6.1
+   ]
+  },
+  {
+   "min": [
+    -6.13,
+    -3.0
+   ],
+   "max": [
+    -5.63,
+    -0.5
+   ]
+  },
+  {
+   "min": [
+    -4.78,
+    -1.08
+   ],
+   "max": [
+    -3.82,
+    -0.12
+   ]
+  },
+  {
+   "min": [
+    -4.78,
+    -3.38
+   ],
+   "max": [
+    -3.82,
+    -2.42
+   ]
+  },
+  {
+   "min": [
+    -4.9,
+    -2.05
+   ],
+   "max": [
+    -4.3,
+    -1.45
+   ]
+  },
+  {
+   "min": [
+    -2.8,
+    -6.58
+   ],
+   "max": [
+    -0.8,
+    -5.72
+   ]
+  },
+  {
+   "min": [
+    -5.9,
+    -6.7
+   ],
+   "max": [
+    -5.3,
+    -6.1
+   ]
+  },
+  {
+   "min": [
+    8.04,
+    4.18
+   ],
+   "max": [
+    9.16,
+    7.02
+   ]
+  },
+  {
+   "min": [
+    7.43,
+    5.28
+   ],
+   "max": [
+    8.07,
+    5.92
+   ]
+  },
+  {
+   "min": [
+    6.37,
+    0.57
+   ],
+   "max": [
+    10.82,
+    0.95
+   ]
+  },
+  {
+   "min": [
+    6.27,
+    4.5
+   ],
+   "max": [
+    6.65,
+    9.6
+   ]
+  },
+  {
+   "min": [
+    10.44,
+    7.05
+   ],
+   "max": [
+    11.0,
+    9.55
+   ]
+  },
+  {
+   "min": [
+    7.18,
+    9.43
+   ],
+   "max": [
+    10.02,
+    9.93
+   ]
+  },
+  {
+   "min": [
+    9.62,
+    1.02
+   ],
+   "max": [
+    10.58,
+    1.98
+   ]
+  },
+  {
+   "min": [
+    6.45,
+    0.9
+   ],
+   "max": [
+    7.05,
+    1.5
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    -0.65
+   ],
+   "max": [
+    -14.33,
+    3.3
+   ]
+  },
+  {
+   "min": [
+    -14.35,
+    2.76
+   ],
+   "max": [
+    -9.95,
+    3.43
+   ]
+  },
+  {
+   "min": [
+    -14.35,
+    -0.83
+   ],
+   "max": [
+    -9.95,
+    -0.41
+   ]
+  },
+  {
+   "min": [
+    -13.32,
+    0.8
+   ],
+   "max": [
+    -11.28,
+    1.8
+   ]
+  },
+  {
+   "min": [
+    -10.35,
+    2.1
+   ],
+   "max": [
+    -9.65,
+    3.1
+   ]
+  },
+  {
+   "min": [
+    -11.35,
+    -0.35
+   ],
+   "max": [
+    -10.65,
+    0.35
+   ]
+  },
+  {
+   "min": [
+    -8.49,
+    5.7
+   ],
+   "max": [
+    -6.27,
+    7.8
+   ]
+  },
+  {
+   "min": [
+    -9.16,
+    5.93
+   ],
+   "max": [
+    -8.68,
+    7.57
+   ]
+  },
+  {
+   "min": [
+    -6.83,
+    5.05
+   ],
+   "max": [
+    -6.27,
+    5.61
+   ]
+  },
+  {
+   "min": [
+    -6.83,
+    7.89
+   ],
+   "max": [
+    -6.27,
+    8.45
+   ]
+  },
+  {
+   "min": [
+    -12.8,
+    9.47
+   ],
+   "max": [
+    -10.2,
+    9.93
+   ]
+  },
+  {
+   "min": [
+    -13.32,
+    3.57
+   ],
+   "max": [
+    -11.48,
+    4.07
+   ]
+  },
+  {
+   "min": [
+    -14.38,
+    8.12
+   ],
+   "max": [
+    -13.42,
+    9.08
+   ]
+  },
+  {
+   "min": [
+    -14.38,
+    4.52
+   ],
+   "max": [
+    -13.42,
+    5.48
+   ]
+  },
+  {
+   "min": [
+    -14.4,
+    6.5
+   ],
+   "max": [
+    -13.8,
+    7.1
+   ]
+  },
+  {
+   "min": [
+    -9.9,
+    9.2
+   ],
+   "max": [
+    -9.3,
+    9.8
+   ]
+  },
+  {
+   "min": [
+    -6.72,
+    1.85
+   ],
+   "max": [
+    -6.27,
+    3.35
+   ]
+  },
+  {
+   "min": [
+    -11.55,
+    -6.08
+   ],
+   "max": [
+    -9.65,
+    -5.12
+   ]
+  },
+  {
+   "min": [
+    -14.6,
+    -1.57
+   ],
+   "max": [
+    -11.2,
+    -0.97
+   ]
+  },
+  {
+   "min": [
+    -12.93,
+    -6.4
+   ],
+   "max": [
+    -12.87,
+    -3.4
+   ]
+  },
+  {
+   "min": [
+    -8.13,
+    -6.8
+   ],
+   "max": [
+    -8.07,
+    -4.9
+   ]
+  },
+  {
+   "min": [
+    -8.1,
+    -4.93
+   ],
+   "max": [
+    -7.0,
+    -4.87
+   ]
+  },
+  {
+   "min": [
+    -7.0,
+    -6.3
+   ],
+   "max": [
+    -6.2,
+    -5.7
+   ]
+  },
+  {
+   "min": [
+    -12.7,
+    -1.9
+   ],
+   "max": [
+    -12.1,
+    -1.3
+   ]
+  }
+ ],
+ "interactables": [
+  {
+   "name": "curtain_switch_living",
+   "kind": "curtains",
+   "label": "窗簾 · 客廳",
+   "target": "curtain_living"
+  },
+  {
+   "name": "curtain_switch_bed",
+   "kind": "curtains",
+   "label": "窗簾 · 睡房",
+   "target": "curtain_bed"
+  },
+  {
+   "name": "curtain_switch_bath",
+   "kind": "curtains",
+   "label": "窗簾 · 浴室",
+   "target": "curtain_bath"
+  },
+  {
+   "name": "curtain_switch_study",
+   "kind": "curtains",
+   "label": "窗簾 · 書房",
+   "target": "curtain_study"
+  },
+  {
+   "name": "bedroom_door",
+   "kind": "door",
+   "label": "主人房門",
+   "angle": -95
+  },
+  {
+   "name": "bath_door_living",
+   "kind": "door",
+   "label": "浴室門",
+   "angle": -95
+  },
+  {
+   "name": "bath_door_suite",
+   "kind": "door",
+   "label": "浴室門",
+   "angle": 95
+  },
+  {
+   "name": "study_door_s",
+   "kind": "door",
+   "label": "書房門",
+   "angle": -100
+  },
+  {
+   "name": "study_door_n",
+   "kind": "door",
+   "label": "書房門",
+   "angle": 100
+  },
+  {
+   "name": "front_door_hinge",
+   "kind": "door",
+   "label": "大門",
+   "angle": -80
+  },
+  {
+   "name": "frame_0_photo",
+   "kind": "photo",
+   "label": "回憶相框 1",
+   "index": 0
+  },
+  {
+   "name": "frame_1_photo",
+   "kind": "photo",
+   "label": "回憶相框 2",
+   "index": 1
+  },
+  {
+   "name": "frame_2_photo",
+   "kind": "photo",
+   "label": "回憶相框 3",
+   "index": 2
+  },
+  {
+   "name": "frame_3_photo",
+   "kind": "photo",
+   "label": "回憶相框 4",
+   "index": 3
+  },
+  {
+   "name": "frame_4_photo",
+   "kind": "photo",
+   "label": "回憶相框 5",
+   "index": 4
+  },
+  {
+   "name": "frame_5_photo",
+   "kind": "photo",
+   "label": "回憶相框 6",
+   "index": 5
+  },
+  {
+   "name": "frame_6_photo",
+   "kind": "photo",
+   "label": "回憶相框 7",
+   "index": 6
+  },
+  {
+   "name": "fridge_hinge",
+   "kind": "door",
+   "label": "冰箱",
+   "angle": 100
+  },
+  {
+   "name": "k_faucet_neck",
+   "kind": "faucet",
+   "label": "水龍頭",
+   "spout": "k_faucet_spout"
+  },
+  {
+   "name": "island_pendant_1_glass",
+   "kind": "lamp",
+   "label": "中島吊燈",
+   "light": "island_pendants"
+  },
+  {
+   "name": "dining_pendant_body",
+   "kind": "lamp",
+   "label": "餐桌吊燈",
+   "light": "dining_pendant"
+  },
+  {
+   "name": "sofa_seat_2",
+   "kind": "sit",
+   "label": "坐下休息",
+   "seat": "sofa_seat_point",
+   "look": "sofa_look"
+  },
+  {
+   "name": "tv_screen",
+   "kind": "tv",
+   "label": "電視 · 回憶投影"
+  },
+  {
+   "name": "arc_lamp_shade",
+   "kind": "lamp",
+   "label": "落地燈",
+   "light": "arc_lamp"
+  },
+  {
+   "name": "side_lamp_shade",
+   "kind": "lamp",
+   "label": "檯燈",
+   "light": "side_lamp"
+  },
+  {
+   "name": "turntable_platter",
+   "kind": "music",
+   "label": "黑膠唱機 · 播放音樂"
+  },
+  {
+   "name": "computer",
+   "kind": "computer",
+   "label": "電腦 · 打開"
+  },
+  {
+   "name": "desk_lamp_shade",
+   "kind": "lamp",
+   "label": "檯燈",
+   "light": "desk_lamp"
+  },
+  {
+   "name": "travel_map",
+   "kind": "travel",
+   "label": "旅行地圖 · 我們的行程"
+  },
+  {
+   "name": "travel_journals",
+   "kind": "travel",
+   "label": "旅行日記"
+  },
+  {
+   "name": "study_lamp_shade",
+   "kind": "lamp",
+   "label": "閱讀燈",
+   "light": "study_lamp"
+  },
+  {
+   "name": "his_wardrobe_door_0",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_1",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_2",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_3",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_4",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_5",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_6",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "her_wardrobe_door_0",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": -95
+  },
+  {
+   "name": "her_wardrobe_door_1",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": 95
+  },
+  {
+   "name": "her_wardrobe_door_2",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": -95
+  },
+  {
+   "name": "her_wardrobe_door_3",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": 95
+  },
+  {
+   "name": "her_wardrobe_door_4",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": -95
+  },
+  {
+   "name": "her_wardrobe_door_5",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": 95
+  },
+  {
+   "name": "her_wardrobe_door_6",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": -95
+  },
+  {
+   "name": "her_wardrobe_door_7",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": 95
+  },
+  {
+   "name": "gift_lid",
+   "kind": "gift",
+   "label": "禮物盒",
+   "angle": 110
+  },
+  {
+   "name": "bed_lamp_0_shade",
+   "kind": "lamp",
+   "label": "床頭燈",
+   "light": "bed_lamp_0"
+  },
+  {
+   "name": "bed_lamp_1_shade",
+   "kind": "lamp",
+   "label": "床頭燈",
+   "light": "bed_lamp_1"
+  },
+  {
+   "name": "keepsake_0",
+   "kind": "keepsake",
+   "label": "Quin's 的睡衣",
+   "index": 0
+  },
+  {
+   "name": "keepsake_1",
+   "kind": "keepsake",
+   "label": "拍立得",
+   "index": 1
+  },
+  {
+   "name": "keepsake_2",
+   "kind": "keepsake",
+   "label": "領帶夾 · Enrico Coveri",
+   "index": 2
+  },
+  {
+   "name": "keepsake_3",
+   "kind": "keepsake",
+   "label": "小熊",
+   "index": 3
+  },
+  {
+   "name": "keepsake_4",
+   "kind": "snowglobe",
+   "label": "聖誕雪屋音樂盒",
+   "index": 4
+  },
+  {
+   "name": "keepsake_5",
+   "kind": "keepsake",
+   "label": "520 黃金大餅",
+   "index": 5
+  },
+  {
+   "name": "keepsake_6",
+   "kind": "keepsake",
+   "label": "日記本",
+   "index": 6
+  },
+  {
+   "name": "keepsake_7",
+   "kind": "keepsake",
+   "label": "香水",
+   "index": 7
+  },
+  {
+   "name": "letter_box",
+   "kind": "letters",
+   "label": "信箱 · 寫信與全部信件"
+  },
+  {
+   "name": "pinned_letter_0",
+   "kind": "letter",
+   "label": "信 1",
+   "index": 0
+  },
+  {
+   "name": "pinned_letter_1",
+   "kind": "letter",
+   "label": "信 2",
+   "index": 1
+  },
+  {
+   "name": "pinned_letter_2",
+   "kind": "letter",
+   "label": "信 3",
+   "index": 2
+  },
+  {
+   "name": "pinned_letter_3",
+   "kind": "letter",
+   "label": "信 4",
+   "index": 3
+  },
+  {
+   "name": "pinned_letter_4",
+   "kind": "letter",
+   "label": "信 5",
+   "index": 4
+  },
+  {
+   "name": "pinned_letter_5",
+   "kind": "letter",
+   "label": "信 6",
+   "index": 5
+  },
+  {
+   "name": "bathtub",
+   "kind": "bath",
+   "label": "浴缸 · 放水"
+  },
+  {
+   "name": "vanity_spout_0",
+   "kind": "faucet",
+   "label": "水龍頭",
+   "spout": "vanity_spout_tip_0"
+  },
+  {
+   "name": "vanity_spout_1",
+   "kind": "faucet",
+   "label": "水龍頭",
+   "spout": "vanity_spout_tip_1"
+  }
+ ],
+ "emitters": {
+  "lamp_shade": {
+   "color": [
+    1.0,
+    0.78,
+    0.5
+   ],
+   "strength": 6.0
+  },
+  "lamp_bulb": {
+   "color": [
+    1.0,
+    0.82,
+    0.58
+   ],
+   "strength": 20.0
+  },
+  "led_strip": {
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "strength": 14.0
+  },
+  "downlight": {
+   "color": [
+    1.0,
+    0.86,
+    0.7
+   ],
+   "strength": 18.0
+  },
+  "mirror_halo": {
+   "color": [
+    1.0,
+    0.85,
+    0.65
+   ],
+   "strength": 6.0
+  },
+  "globe_glass": {
+   "color": [
+    1.0,
+    0.8,
+    0.55
+   ],
+   "strength": 5.0
+  },
+  "fake_snow": {
+   "color": [
+    1.0,
+    0.85,
+    0.6
+   ],
+   "strength": 0.6
+  },
+  "star_gold": {
+   "color": [
+    1.0,
+    0.8,
+    0.4
+   ],
+   "strength": 3.0
+  },
+  "cottage": {
+   "color": [
+    1.0,
+    0.7,
+    0.35
+   ],
+   "strength": 1.5
+  },
+  "facade_tower": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "facade_tower_b": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "facade_tower_c": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "facade_tower_d": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "near_tower": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  }
+ },
+ "spawn": {
+  "position": [
+   3.8,
+   1.62,
+   9.2
+  ],
+  "lookAt": [
+   3.6,
+   1.4,
+   -4.0
+  ]
+ },
+ "bounds": {
+  "min": [
+   -15.0,
+   -7.0
+  ],
+  "max": [
+   11.0,
+   10.0
+  ]
+ },
+ "waterY": -110.0,
+ "sunDirection": [
+  -0.28,
+  0.57,
+  -0.77
+ ]
+}

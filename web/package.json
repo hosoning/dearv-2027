@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "publish": "bash scripts-publish.sh"
   },
   "dependencies": {
     "three": "0.185.1"
