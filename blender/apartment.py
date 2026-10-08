@@ -25,6 +25,8 @@ from lib import (add_collider, add_collider_from, box, collection, collider_for_
 import lib
 
 H = 3.0          # ceiling height
+XW = -9.0        # west exterior wall (bedroom + study wing)
+PY = -0.6        # bedroom / study partition
 WT = 0.14        # interior wall thickness
 EXT = 0.25       # exterior wall thickness
 R = math.radians
@@ -123,11 +125,11 @@ def make_materials():
 def build_shell(M):
     A = "arch"
     # Floors (never overlapping, so no z-fighting)
-    box("floor_oak_main", (14, 6.7, 0.1), (0, 1.65, -0.05), M["oak"], group=A)
-    box("floor_oak_study", (5.8, 3.3, 0.1), (-4.1, -3.35, -0.05), M["oak"], group=A)
+    box("floor_oak_main", (16, 6.7, 0.1), (-1, 1.65, -0.05), M["oak"], group=A)
+    box("floor_oak_study", (7.8, 3.3, 0.1), (-5.1, -3.35, -0.05), M["oak"], group=A)
     box("floor_oak_entry", (2.4, 3.3, 0.1), (5.8, -3.35, -0.05), M["oak"], group=A)
     box("floor_terrazzo_kitchen", (5.8, 3.3, 0.1), (1.7, -3.35, -0.05), M["terrazzo"], group=A)
-    box("ceiling", (14.5, 10.5, 0.12), (0, 0, H + 0.06), M["ceiling"], group=A)
+    box("ceiling", (16.5, 10.5, 0.12), (-1, 0, H + 0.06), M["ceiling"], group=A)
 
     # Exterior walls
     def wall(name, x0, y0, x1, y1, z0=0.0, z1=H, mat=M["plaster"], collide=True):
@@ -136,34 +138,34 @@ def build_shell(M):
             add_collider(x0, y0, x1, y1)
         return ob
 
-    wall("wall_west", -7 - EXT, -5 - EXT, -7, 5)
+    wall("wall_west", XW - EXT, -5 - EXT, XW, 5)
     wall("wall_east", 7, -5 - EXT, 7 + EXT, 5)
-    wall("wall_south_a", -7 - EXT, -5 - EXT, 5.3, -5)
+    wall("wall_south_a", XW - EXT, -5 - EXT, 5.3, -5)
     wall("wall_south_b", 6.3, -5 - EXT, 7 + EXT, -5)
     wall("wall_south_lintel", 5.3, -5 - EXT, 6.3, -5, 2.4, H, collide=False)
 
-    # Partition x = -1.2 with study arch (y -3.3..-2.0) and bedroom door (y 1.3..2.3)
+    # Partition x = -1.2 with study arch (y -3.3..-2.0) and bedroom door (y -0.45..0.55)
     px0, px1 = -1.2 - WT / 2, -1.2 + WT / 2
     wall("part_a", px0, -5, px1, -3.3)
-    wall("part_b", px0, -2.0, px1, 1.3)
-    wall("part_c", px0, 2.3, px1, 4.92)
+    wall("part_b", px0, -2.0, px1, -0.45)
+    wall("part_c", px0, 0.55, px1, 4.92)
     wall("part_arch_lintel", px0, -3.3, px1, -2.0, 2.45, H, collide=False)
-    wall("part_door_lintel", px0, 1.3, px1, 2.3, 2.25, H, collide=False)
+    wall("part_door_lintel", px0, -0.45, px1, 0.55, 2.25, H, collide=False)
     # Bedroom / study wall
-    wall("part_bed_study", -7, 0.8 - WT / 2, px0, 0.8 + WT / 2)
+    wall("part_bed_study", XW, PY - WT / 2, px0, PY + WT / 2)
 
     # Skirting
     sk = []
     def skirt(x0, y0, x1, y1):
         sk.append(((abs(x1 - x0) or 0.018, abs(y1 - y0) or 0.018, 0.09), ((x0 + x1) / 2, (y0 + y1) / 2, 0.045)))
-    skirt(-6.99, -4.99, 5.3, -4.99); skirt(6.3, -4.99, 6.99, -4.99)
-    skirt(-6.99, -4.99, -6.99, 4.9); skirt(6.99, -4.99, 6.99, 4.9)
+    w0 = XW + 0.01
+    skirt(w0, -4.99, 5.3, -4.99); skirt(6.3, -4.99, 6.99, -4.99)
+    skirt(w0, -4.99, w0, 4.9); skirt(6.99, -4.99, 6.99, 4.9)
     skirt(px0 - 0.009, -4.99, px0 - 0.009, -3.3); skirt(px1 + 0.009, -4.99, px1 + 0.009, -3.3)
-    skirt(px0 - 0.009, -2.0, px0 - 0.009, 0.73); skirt(px0 - 0.009, 0.87, px0 - 0.009, 1.3)
-    skirt(px1 + 0.009, -2.0, px1 + 0.009, 1.3)
-    skirt(px0 - 0.009, 2.3, px0 - 0.009, 4.9); skirt(px1 + 0.009, 2.3, px1 + 0.009, 4.9)
-    skirt(-6.99, 0.8 - WT / 2 - 0.009, px0, 0.8 - WT / 2 - 0.009)
-    skirt(-6.99, 0.8 + WT / 2 + 0.009, px0, 0.8 + WT / 2 + 0.009)
+    skirt(px0 - 0.009, -2.0, px0 - 0.009, PY - WT / 2); skirt(px1 + 0.009, -2.0, px1 + 0.009, -0.45)
+    skirt(px0 - 0.009, 0.55, px0 - 0.009, 4.9); skirt(px1 + 0.009, 0.55, px1 + 0.009, 4.9)
+    skirt(w0, PY - WT / 2 - 0.009, px0, PY - WT / 2 - 0.009)
+    skirt(w0, PY + WT / 2 + 0.009, px0, PY + WT / 2 + 0.009)
     multi_box("skirting", sk, M["satin"], group=A)
 
     # Ceiling shadow-gap reveal + linear light slots in living / dining
@@ -172,21 +174,21 @@ def build_shell(M):
     multi_box("ceiling_led_slots", slots, M["ledstrip"], group=None)
 
     # Window head pelmet hiding the curtain track
-    box("pelmet", (14, 0.36, 0.22), (0, 4.62, H - 0.11), M["ceiling"], group=A)
+    box("pelmet", (16, 0.36, 0.22), (-1, 4.62, H - 0.11), M["ceiling"], group=A)
 
 
 def build_glazing(M):
     """North curtain wall: bronze mullions, head/sill, glass panes, balcony."""
-    xs_bed = [-7 + i * (5.8 / 4) for i in range(5)]
+    xs_bed = [XW + i * ((-1.2 - XW) / 5) for i in range(6)]
     xs_liv = [-1.2 + i * (8.2 / 6) for i in range(7)]
     mull = []
     for x in xs_bed + xs_liv[1:]:
         mull.append(((0.07, 0.14, 2.75), (x, 4.95, 2.75 / 2 + 0.02)))
-    mull.append(((14, 0.14, 0.07), (0, 4.95, 0.035)))           # sill
-    mull.append(((14, 0.14, 0.08), (0, 4.95, 2.75)))            # head
-    mull.append(((14, 0.06, 0.03), (0, 4.88, 0.95)))            # slim horizontal glazing bar
+    mull.append(((16, 0.14, 0.07), (-1, 4.95, 0.035)))          # sill
+    mull.append(((16, 0.14, 0.08), (-1, 4.95, 2.75)))           # head
+    mull.append(((16, 0.06, 0.03), (-1, 4.88, 0.95)))           # slim horizontal glazing bar
     multi_box("mullions", mull, M["bronze"], bevel=0.006, group="furn")
-    add_collider(-7, 4.8, 7, 5.2)
+    add_collider(XW, 4.8, 7, 5.2)
 
     panes = []
     for xa, xb in list(zip(xs_bed[:-1], xs_bed[1:])) + list(zip(xs_liv[:-1], xs_liv[1:])):
@@ -195,7 +197,7 @@ def build_glazing(M):
     g["glass"] = 1
 
     # Facade band above/below glazing (visible from balcony angles)
-    box("facade_head", (14.5, 0.3, 0.38), (0, 5.1, H + 0.0), M["facade"], group="arch")
+    box("facade_head", (16.5, 0.3, 0.38), (-1, 5.1, H + 0.0), M["facade"], group="arch")
 
     # Balcony in front of the living room
     box("balcony_slab", (8.6, 1.9, 0.24), (2.9, 6.0, -0.14), M["balcony"], group="arch")
@@ -255,9 +257,9 @@ def build_curtains(M):
         c = pleated(name, w, H - 0.32, M["sheer"], xa, d, 4.78)
         c["open_scale"] = 0.13
         curtains.append(c)
-    for name, xa, d, w in (("curtain_bed_w", -6.9, 1, 2.8), ("curtain_bed_e", -1.35, -1, 2.8)):
+    for name, xa, d, w in (("curtain_bed_w", XW + 0.1, 1, 3.8), ("curtain_bed_e", -1.35, -1, 3.8)):
         c = pleated(name, w, H - 0.32, M["blackout"], xa, d, 4.78)
-        c["open_scale"] = 0.16
+        c["open_scale"] = 0.12
         curtains.append(c)
     for c in curtains:
         c.scale.x = c["open_scale"]
@@ -337,6 +339,7 @@ def build_living(M):
     add_collider(6.5, 1.5, 7.0, 4.2)
     box("tv_body", (0.045, 1.46, 0.84), (6.93, 2.85, 1.42), M["tvbody"], bevel=0.004)
     scr = box("tv_screen", (0.006, 1.43, 0.81), (6.905, 2.85, 1.42), M["tvscreen"])
+    scr["uvfit"] = "-yz"
     interact(scr, "tv", "電視 · 回憶投影")
     # turntable on the console
     tt = empty("turntable", (6.72, 3.75, 0.58))
@@ -579,141 +582,335 @@ def build_entry(M):
 
 
 def build_bedroom(M):
-    extrude_poly("rug_bed", rounded_rect(2.8, 3.0, 0.06), 0.014, (-5.0, 3.3, 0.0), M["rug2"])
-    bed = empty("bed", (-5.85, 3.3, 0))
-    box("bed_plinth", (2.1, 1.64, 0.1), (-5.85, 3.3, 0.06), M["blackmetal"])
-    cushion("bed_base", (2.18, 1.74, 0.3), (-5.85, 3.3, 0.27), M["velvet"], puff=0.2, parent=bed)
-    cushion("bed_headboard", (0.16, 1.92, 1.15), (-6.88, 3.3, 0.8), M["velvet"], puff=0.25, parent=bed)
-    for i, y in enumerate((2.76, 3.3, 3.84)):
-        cushion(f"bed_head_panel_{i}", (0.1, 0.5, 0.9), (-6.78, y, 0.98), M["velvet"], puff=0.45, parent=bed)
-    cushion("bed_mattress", (2.0, 1.6, 0.24), (-5.82, 3.3, 0.52), M["mattress"], puff=0.2, parent=bed)
-    cushion("bed_duvet", (1.55, 1.72, 0.14), (-5.55, 3.3, 0.66), M["duvet"], puff=0.45, parent=bed)
-    cushion("bed_throw", (0.5, 1.78, 0.06), (-4.95, 3.3, 0.75), M["linen"], puff=0.45, parent=bed)
-    for i, y in enumerate((2.9, 3.7)):
-        cushion(f"bed_pillow_{i}", (0.22, 0.66, 0.42), (-6.55, y, 0.82), M["duvet"], puff=0.48,
+    """Master bedroom x[-9, -1.27] y[-0.53, 5]: bed, wardrobe, keepsake vitrine, letter wall."""
+    bx, by = -7.85, 2.6   # bed centre (headboard against the west wall)
+    rug = extrude_poly("rug_bed", rounded_rect(3.4, 3.6, 0.06), 0.014, (-7.0, by, 0.0), M["rug2"])
+    rug["uvfit"] = 1
+    bed = empty("bed", (bx, by, 0))
+    box("bed_plinth", (2.1, 1.64, 0.1), (bx, by, 0.06), M["blackmetal"])
+    cushion("bed_base", (2.18, 1.74, 0.3), (bx, by, 0.27), M["velvet"], puff=0.2, parent=bed)
+    cushion("bed_headboard", (0.16, 2.1, 1.2), (bx - 1.03, by, 0.82), M["velvet"], puff=0.25, parent=bed)
+    for i, dy in enumerate((-0.6, 0.0, 0.6)):
+        cushion(f"bed_head_panel_{i}", (0.1, 0.56, 0.92), (bx - 0.93, by + dy, 1.0), M["velvet"], puff=0.45, parent=bed)
+    cushion("bed_mattress", (2.0, 1.6, 0.24), (bx + 0.03, by, 0.52), M["mattress"], puff=0.2, parent=bed)
+    cushion("bed_duvet", (1.55, 1.72, 0.14), (bx + 0.3, by, 0.66), M["duvet"], puff=0.45, parent=bed)
+    cushion("bed_throw", (0.5, 1.78, 0.06), (bx + 0.9, by, 0.75), M["linen"], puff=0.45, parent=bed)
+    for i, dy in enumerate((-0.4, 0.4)):
+        cushion(f"bed_pillow_{i}", (0.22, 0.66, 0.42), (bx - 0.7, by + dy, 0.82), M["duvet"], puff=0.48,
                 rot=(0, R(-22), 0), parent=bed)
-        cushion(f"bed_pillow_front_{i}", (0.16, 0.54, 0.36), (-6.38, y, 0.8), M["linen"], puff=0.48,
+        cushion(f"bed_pillow_front_{i}", (0.16, 0.54, 0.36), (bx - 0.53, by + dy, 0.8), M["linen"], puff=0.48,
                 rot=(0, R(-18), 0), parent=bed)
-    cushion("bed_pillow_bolster", (0.18, 0.7, 0.24), (-6.2, 3.3, 0.78), M["velvet"], puff=0.48, parent=bed)
-    add_collider(-7.0, 2.35, -4.75, 4.25)
-    # bench at foot
-    cushion("bed_bench_pad", (0.42, 1.4, 0.12), (-4.45, 3.3, 0.46), M["leather"], puff=0.4)
-    for dy in (-0.62, 0.62):
-        box(f"bed_bench_leg_{dy}", (0.4, 0.04, 0.4), (-4.45, 3.3 + dy, 0.2), M["brass"])
-    add_collider(-4.68, 2.48, -4.22, 3.92)
-    # nightstands + lamps
-    for i, y in enumerate((1.95, 4.5)):
-        box(f"nightstand_{i}", (0.5, 0.46, 0.5), (-6.7, y, 0.3), M["walnut"], bevel=0.01)
-        box(f"nightstand_{i}_drawer_gap", (0.004, 0.4, 0.004), (-6.448, y, 0.38), M["blackmetal"])
-        box(f"nightstand_{i}_pull", (0.015, 0.12, 0.012), (-6.44, y, 0.45), M["brass"])
-        add_collider(-6.97, y - 0.24, -6.43, y + 0.24)
-        cylinder(f"bed_lamp_{i}_base", 0.07, 0.3, (-6.72, y, 0.7), M["ceramic"], r2=0.05, segs=32)
-        s = cylinder(f"bed_lamp_{i}_shade", 0.16, 0.2, (-6.72, y, 0.95), M["shade"], r2=0.12, segs=40)
+    cushion("bed_pillow_bolster", (0.18, 0.7, 0.24), (bx - 0.35, by, 0.78), M["velvet"], puff=0.48, parent=bed)
+    add_collider(XW, by - 0.95, bx + 1.1, by + 0.95)
+    box("bed_art", (0.04, 2.0, 0.75), (XW + 0.02, by, 2.2), M["linen"], bevel=0.01)
+
+    # Bench at the foot of the bed carrying the big ribboned gift
+    gx = bx + 1.42
+    cushion("bed_bench_pad", (0.44, 1.5, 0.12), (gx, by, 0.46), M["leather"], puff=0.4)
+    for dy in (-0.66, 0.66):
+        box(f"bed_bench_leg_{dy}", (0.42, 0.04, 0.4), (gx, by + dy, 0.2), M["brass"])
+    add_collider(gx - 0.23, by - 0.76, gx + 0.23, by + 0.76)
+    gy, gz = by + 0.35, 0.62
+    box("gift_body", (0.3, 0.3, 0.2), (gx, gy, gz), M["gift"], bevel=0.004)
+    multi_box("gift_ribbon_body", [((0.302, 0.04, 0.202), (gx, gy, gz)), ((0.04, 0.302, 0.202), (gx, gy, gz))],
+              M["ribbon"])
+    lid = empty("gift_lid", (gx, gy - 0.15, gz + 0.1))
+    box("gift_lid_box", (0.32, 0.32, 0.05), (gx, gy, gz + 0.12), M["gift"], bevel=0.006, parent=lid)
+    multi_box("gift_lid_ribbon", [((0.322, 0.04, 0.052), (gx, gy, gz + 0.12)), ((0.04, 0.322, 0.052), (gx, gy, gz + 0.12))],
+              M["ribbon"], parent=lid)
+    for i, a in enumerate((R(30), R(-30))):
+        sphere(f"gift_bow_{i}", 0.06, (gx + 0.1 * math.sin(a), gy, gz + 0.18), M["ribbon"],
+               scale=(1, 0.45, 0.6), rot=(0, a, 0), parent=lid)
+    heart = sphere("gift_heart", 0.05, (gx, gy, gz + 0.07), material("heart", color=(0.9, 0.1, 0.18), rough=0.25,
+                                                                        coat=1.0, emission=(1, 0.2, 0.3),
+                                                                        emission_strength=0.0))
+    heart["gift_heart"] = 1
+    interact(lid, "gift", "禮物盒", angle=110)
+
+    # Nightstands + lamps
+    for i, y in enumerate((by - 1.32, by + 1.25)):
+        nx = XW + 0.3
+        box(f"nightstand_{i}", (0.5, 0.46, 0.5), (nx, y, 0.3), M["walnut"], bevel=0.01)
+        box(f"nightstand_{i}_drawer_gap", (0.004, 0.4, 0.004), (nx + 0.252, y, 0.38), M["blackmetal"])
+        box(f"nightstand_{i}_pull", (0.015, 0.12, 0.012), (nx + 0.26, y, 0.45), M["brass"])
+        add_collider(XW, y - 0.24, nx + 0.27, y + 0.24)
+        cylinder(f"bed_lamp_{i}_base", 0.07, 0.3, (nx - 0.02, y, 0.7), M["ceramic"], r2=0.05, segs=32)
+        s = cylinder(f"bed_lamp_{i}_shade", 0.16, 0.2, (nx - 0.02, y, 0.95), M["shade"], r2=0.12, segs=40)
         interact(s, "lamp", "床頭燈", light=f"bed_lamp_{i}")
         s["lamp_group"] = f"bed_lamp_{i}"
-        point_light(f"bed_lamp_{i}", (-6.72, y, 0.92), 30, (1.0, 0.72, 0.45), 0.08)
-    # Wardrobe with hinged walnut doors (each door interactive)
-    box("wardrobe_carcass", (3.2, 0.6, 2.6), (-4.6, 1.17, 1.3), M["walnut"], bevel=0.004)
-    box("wardrobe_inside", (3.1, 0.02, 2.5), (-4.6, 0.9, 1.3), M["linen"])
-    add_collider(-6.2, 0.87, -3.0, 1.5)
+        point_light(f"bed_lamp_{i}", (nx - 0.02, y, 0.92), 30, (1.0, 0.72, 0.45), 0.08)
+
+    # Wardrobe against the bedroom/study wall, doors opening into the room (+Y)
+    wf = PY + WT / 2          # wall face
+    wx0, wx1 = -8.7, -5.5
+    box("wardrobe_carcass", (wx1 - wx0, 0.6, 2.6), ((wx0 + wx1) / 2, wf + 0.3, 1.3), M["walnut"], bevel=0.004)
+    box("wardrobe_inside", (wx1 - wx0 - 0.1, 0.02, 2.5), ((wx0 + wx1) / 2, wf + 0.03, 1.3), M["linen"])
+    add_collider(wx0, wf, wx1, wf + 0.62)
     for i in range(4):
-        x0 = -6.2 + i * 0.8
+        x0 = wx0 + i * 0.8
         hinge_x = x0 if i % 2 == 0 else x0 + 0.8
-        h = empty(f"wardrobe_door_{i}", (hinge_x, 1.48, 0))
+        h = empty(f"wardrobe_door_{i}", (hinge_x, wf + 0.61, 0))
         dx = 0.4 if i % 2 == 0 else -0.4
-        box(f"wardrobe_door_{i}_leaf", (0.79, 0.025, 2.55), (hinge_x + dx, 1.485, 1.3), M["walnut"],
+        box(f"wardrobe_door_{i}_leaf", (0.79, 0.025, 2.55), (hinge_x + dx, wf + 0.615, 1.3), M["walnut"],
             bevel=0.003, parent=h)
-        box(f"wardrobe_door_{i}_pull", (0.015, 0.02, 0.5), (hinge_x + dx * 1.85, 1.505, 1.2), M["brass"], parent=h)
+        box(f"wardrobe_door_{i}_pull", (0.015, 0.02, 0.5), (hinge_x + dx * 1.85, wf + 0.635, 1.2), M["brass"], parent=h)
         interact(h, "door", "衣櫃", angle=(90 if i % 2 == 0 else -90))
-    # clothes inside (hangers, garments)
     for i in range(14):
-        x = -6.05 + i * 0.21
+        x = wx0 + 0.15 + i * 0.21
         col = [(0.85, 0.82, 0.76), (0.2, 0.25, 0.35), (0.6, 0.3, 0.28), (0.3, 0.3, 0.3)][i % 4]
         m = material(f"garment_{i % 4}", color=col, albedo="linen_albedo" if i % 2 else None, rough=0.85,
                      tile=(0.4, 0.4))
-        cushion(f"garment_{i}", (0.05, 0.48, 1.0 + 0.2 * (i % 3)), (x, 1.17, 1.85 - (0.5 + 0.1 * (i % 3))), m,
+        cushion(f"garment_{i}", (0.05, 0.48, 1.0 + 0.2 * (i % 3)), (x, wf + 0.3, 1.85 - (0.5 + 0.1 * (i % 3))), m,
                 puff=0.45, rot=(0, 0, R(90)))
-    tube("wardrobe_rail", [(-6.15, 1.17, 2.35), (-3.05, 1.17, 2.35)], 0.012, M["brass"])
+    tube("wardrobe_rail", [(wx0 + 0.1, wf + 0.3, 2.35), (wx1 - 0.1, wf + 0.3, 2.35)], 0.012, M["brass"])
+
+    build_letter_wall(M, wf)
+    build_vitrine(M)
+
     # Reading corner by the window
-    ch = empty("bed_chair", (-2.2, 4.15, 0))
-    cushion("bed_chair_seat", (0.75, 0.75, 0.42), (-2.2, 4.15, 0.25), M["boucle"], puff=0.4, parent=ch)
-    cushion("bed_chair_back", (0.75, 0.25, 0.55), (-2.2, 4.48, 0.62), M["boucle"], puff=0.45, parent=ch)
-    ch.rotation_euler.z = R(-35)
-    add_collider(-2.65, 3.7, -1.75, 4.6)
-    cylinder("bed_side_table", 0.22, 0.03, (-2.0, 3.4, 0.5), M["darkmarble"], segs=40, bevel=0.006)
-    cylinder("bed_side_stem", 0.03, 0.5, (-2.0, 3.4, 0.25), M["brass"], segs=16)
-    # wall art over the headboard? keep it calm — a long linen panel
-    box("bed_art", (0.04, 1.8, 0.7), (-6.98, 3.2, 2.15), M["linen"], bevel=0.01)
+    ch = empty("bed_chair", (-4.3, 4.15, 0))
+    cushion("bed_chair_seat", (0.75, 0.75, 0.42), (-4.3, 4.15, 0.25), M["boucle"], puff=0.4, parent=ch)
+    cushion("bed_chair_back", (0.75, 0.25, 0.55), (-4.3, 4.48, 0.62), M["boucle"], puff=0.45, parent=ch)
+    ch.rotation_euler.z = R(25)
+    add_collider(-4.75, 3.7, -3.85, 4.6)
+    cylinder("bed_side_table", 0.22, 0.03, (-3.5, 4.3, 0.5), M["darkmarble"], segs=40, bevel=0.006)
+    cylinder("bed_side_stem", 0.03, 0.5, (-3.5, 4.3, 0.25), M["brass"], segs=16)
+    cylinder("bed_side_vase", 0.05, 0.2, (-3.5, 4.3, 0.615), M["ceramic"], r2=0.035, segs=24)
+    plant("plant_bed", (-2.0, 4.35), M, 1.7)
+
+
+def build_letter_wall(M, wf):
+    """Writing bureau + linen pin-board of letters. Each envelope opens its own letter."""
+    cx = -3.35
+    box("bureau_top", (1.8, 0.48, 0.04), (cx, wf + 0.24, 0.78), M["walnut"], bevel=0.008)
+    box("bureau_drawers", (1.7, 0.42, 0.16), (cx, wf + 0.23, 0.68), M["walnut"], bevel=0.006)
+    box("bureau_drawer_gap", (0.004, 0.005, 0.12), (cx, wf + 0.442, 0.68), M["blackmetal"])
+    for dx in (-0.42, 0.42):
+        box(f"bureau_pull_{dx}", (0.14, 0.015, 0.012), (cx + dx, wf + 0.45, 0.68), M["brass"])
+    for dx in (-0.86, 0.86):
+        box(f"bureau_leg_{dx}", (0.035, 0.42, 0.6), (cx + dx, wf + 0.23, 0.3), M["brass"])
+    add_collider(cx - 0.92, wf, cx + 0.92, wf + 0.5)
+    stool_x = cx + 0.2
+    cushion("bureau_stool", (0.42, 0.42, 0.1), (stool_x, wf + 0.82, 0.46), M["velvet"], puff=0.45)
+    for a in range(4):
+        ang = a * math.pi / 2 + math.pi / 4
+        box(f"bureau_stool_leg_{a}", (0.025, 0.025, 0.42), (stool_x + 0.14 * math.cos(ang), wf + 0.82 + 0.14 * math.sin(ang), 0.21),
+            M["brass"])
+    # Letter box on the bureau: opens the full letter library / writing
+    lb = empty("letter_box", (cx - 0.5, wf + 0.25, 0.8))
+    box("letter_box_body", (0.34, 0.26, 0.1), (cx - 0.5, wf + 0.25, 0.85), M["leather"], bevel=0.01, parent=lb)
+    for i in range(4):
+        box(f"letter_box_env_{i}", (0.24, 0.005, 0.15), (cx - 0.5, wf + 0.17 + i * 0.04, 0.93), M["envelope"],
+            parent=lb, rot=(R(-8 + i * 3), 0, 0))
+    sphere("letter_seal", 0.018, (cx - 0.5, wf + 0.13, 0.95), M["wax"], scale=(1, 0.4, 1), parent=lb)
+    interact(lb, "letters", "信箱 · 寫信與全部信件")
+    box("bureau_paper", (0.24, 0.32, 0.002), (cx + 0.15, wf + 0.26, 0.801), M["paper"], rot=(0, 0, R(-8)))
+    tube("bureau_pen", [(cx + 0.35, wf + 0.16, 0.808), (cx + 0.45, wf + 0.34, 0.808)], 0.005, M["brass"])
+    # Pin-board with brass frame
+    bz = 1.75
+    box("letter_board", (2.3, 0.025, 1.05), (cx, wf + 0.013, bz), M["linen"], bevel=0.004)
+    frame = [((2.36, 0.03, 0.03), (cx, wf + 0.02, bz + 0.54)), ((2.36, 0.03, 0.03), (cx, wf + 0.02, bz - 0.54)),
+             ((0.03, 0.03, 1.1), (cx - 1.17, wf + 0.02, bz)), ((0.03, 0.03, 1.1), (cx + 1.17, wf + 0.02, bz))]
+    multi_box("letter_board_frame", frame, M["brass"], bevel=0.004)
+    # warm fairy-light string draped across the board
+    pts = [(cx - 1.15 + 2.3 * t / 24, wf + 0.05, bz + 0.48 - 0.12 * math.sin(math.pi * t / 24 * 2) ** 2) for t in range(25)]
+    tube("fairy_wire", pts, 0.002, M["blackmetal"])
+    bulbs = [((0.022, 0.022, 0.03), p) for p in pts[1::2]]
+    multi_box("fairy_bulbs", bulbs, M["bulb"], bevel=0.008, group=None)
+    area_light("letter_board_glow", (cx, wf + 0.4, bz + 0.6), (2.0, 0.2), 18, (1.0, 0.78, 0.5),
+               rot=(R(60), 0, 0))
+    # Six pinned letters / cards, each its own interactable
+    slots = [(-0.8, 0.18, 5), (-0.25, 0.22, -4), (0.32, 0.16, 3), (0.85, 0.2, -6), (-0.55, -0.25, -3), (0.55, -0.24, 4)]
+    env_mats = [M["envelope"], M["paper"], material("card_blush", color=(0.93, 0.78, 0.76), rough=0.8)]
+    for i, (dx, dz, tilt) in enumerate(slots):
+        e = empty(f"pinned_letter_{i}", (cx + dx, wf + 0.03, bz + dz))
+        w, h = (0.34, 0.24) if i % 2 == 0 else (0.26, 0.34)
+        box(f"pinned_letter_{i}_paper", (w, 0.004, h), (cx + dx, wf + 0.03, bz + dz), env_mats[i % 3],
+            rot=(0, R(tilt), 0), parent=e)
+        if i % 2 == 0:  # envelope flap + wax seal
+            box(f"pinned_letter_{i}_flap", (w * 0.98, 0.002, 0.02), (cx + dx, wf + 0.034, bz + dz + h * 0.25),
+                M["envelope"], rot=(0, R(tilt), 0), parent=e)
+            sphere(f"pinned_letter_{i}_seal", 0.018, (cx + dx, wf + 0.036, bz + dz), M["wax"], scale=(1, 0.35, 1),
+                   parent=e)
+        sphere(f"pinned_letter_{i}_pin", 0.012, (cx + dx, wf + 0.04, bz + dz + h / 2 - 0.03), M["brass"], parent=e)
+        interact(e, "letter", f"信 {i + 1}", index=i)
+
+
+def build_vitrine(M):
+    """Lit glass display cabinet on the partition wall holding eight keepsakes."""
+    x1 = -1.2 - WT / 2          # wall face
+    x0 = x1 - 0.46
+    y0, y1 = 1.1, 3.7
+    xc, yc = (x0 + x1) / 2, (y0 + y1) / 2
+    carcass = [((0.46, 0.04, 2.2), (xc, y0 + 0.02, 1.1)), ((0.46, 0.04, 2.2), (xc, y1 - 0.02, 1.1)),
+               ((0.46, y1 - y0, 0.06), (xc, yc, 2.17)), ((0.46, y1 - y0, 0.14), (xc, yc, 0.07)),
+               ((0.02, y1 - y0, 2.2), (x1 - 0.01, yc, 1.1))]
+    multi_box("vitrine_carcass", carcass, M["walnut"], bevel=0.004)
+    box("vitrine_back", (0.01, y1 - y0 - 0.08, 2.0), (x1 - 0.025, yc, 1.15), M["velvet"])
+    shelves_z = [0.62, 1.08, 1.54, 1.98]
+    shelf = [((0.4, y1 - y0 - 0.08, 0.025), (xc, yc, z - 0.0125)) for z in shelves_z[:3]]
+    multi_box("vitrine_shelves", shelf, M["walnut"], bevel=0.004)
+    front = [((0.008, (y1 - y0) / 2 - 0.05, 2.0), (x0 + 0.01, yc + s * (y1 - y0) / 4, 1.16)) for s in (-1, 1)]
+    gf = multi_box("vitrine_glass", front, M["glass"], group=None)
+    gf["glass"] = 1
+    box("vitrine_mullion", (0.02, 0.03, 2.0), (x0 + 0.01, yc, 1.16), M["brass"])
+    leds = [((0.3, y1 - y0 - 0.1, 0.006), (xc, yc, z + 0.4)) for z in [0.15] + shelves_z[:3]]
+    multi_box("vitrine_leds", leds, M["ledstrip"], group=None)
+    for i, z in enumerate([0.15] + shelves_z[:3]):
+        area_light(f"vitrine_led_{i}", (xc, yc, z + 0.38), (0.25, y1 - y0 - 0.2), 12, (1.0, 0.86, 0.68))
+    add_collider(x0, y0, x1, y1)
+
+    # Keepsakes: two per shelf, each an interactable that opens its story book
+    spots = [(0.14, y0 + 0.65), (0.14, y1 - 0.65), (0.62, y0 + 0.65), (0.62, y1 - 0.65),
+             (1.08, y0 + 0.65), (1.08, y1 - 0.65), (1.54, y0 + 0.65), (1.54, y1 - 0.65)]
+    makers = [_ring_box, _music_box, _perfume, _polaroids, _flower_box, _snow_globe, _teddy, _diary]
+    labels = ["戒指盒", "音樂盒", "香水", "拍立得", "花盒", "雪花球", "小熊", "日記本"]
+    for i, ((z, y), make, label) in enumerate(zip(spots, makers, labels)):
+        # small walnut plinth + brass label plate under each piece
+        box(f"keepsake_{i}_plinth", (0.26, 0.3, 0.05), (xc, y, z + 0.025), M["walnut"], bevel=0.006)
+        box(f"keepsake_{i}_plate", (0.002, 0.1, 0.025), (xc - 0.131, y, z + 0.025), M["brass"])
+        root = empty(f"keepsake_{i}", (xc, y, z + 0.05))
+        make(f"keepsake_{i}", xc, y, z + 0.05, root, M)
+        root.scale = (2.0, 2.0, 2.0)   # pieces are modelled at life size; display them larger
+        interact(root, "keepsake", label, index=i)
+
+
+def _ring_box(n, x, y, z, p, M):
+    velvet = material("ring_velvet", color=(0.45, 0.05, 0.1), rough=0.7, sheen=1.0)
+    box(f"{n}_base", (0.09, 0.09, 0.05), (x, y, z + 0.025), velvet, bevel=0.015, parent=p)
+    box(f"{n}_lid", (0.09, 0.012, 0.07), (x - 0.01, y + 0.045, z + 0.085), velvet, bevel=0.005, rot=(R(-15), 0, 0),
+        parent=p)
+    tube(f"{n}_ring", [(x + 0.012 * math.cos(a * math.pi / 8), y, z + 0.075 + 0.012 * math.sin(a * math.pi / 8))
+                       for a in range(17)], 0.0025, M["brass"], parent=p)
+    sphere(f"{n}_stone", 0.006, (x, y, z + 0.09), material("diamond", color=(0.95, 0.97, 1.0), rough=0.02, metal=0.3),
+           segs=10, parent=p)
+
+
+def _music_box(n, x, y, z, p, M):
+    box(f"{n}_body", (0.16, 0.22, 0.1), (x, y, z + 0.05), M["walnut"], bevel=0.008, parent=p)
+    box(f"{n}_inlay", (0.12, 0.17, 0.002), (x, y, z + 0.101), M["brass"], parent=p)
+    cylinder(f"{n}_crank", 0.005, 0.05, (x, y - 0.13, z + 0.05), M["brass"], rot=(R(90), 0, 0), segs=8, parent=p)
+    sphere(f"{n}_ballerina", 0.012, (x, y, z + 0.13), M["ceramic"], scale=(1, 1, 2.2), parent=p)
+
+
+def _perfume(n, x, y, z, p, M):
+    glass = material("perfume_glass", color=(0.95, 0.8, 0.85), rough=0.05, coat=1.0)
+    box(f"{n}_bottle", (0.08, 0.08, 0.1), (x, y, z + 0.05), glass, bevel=0.02, parent=p)
+    cylinder(f"{n}_neck", 0.012, 0.02, (x, y, z + 0.11), M["brass"], segs=12, parent=p)
+    sphere(f"{n}_cap", 0.025, (x, y, z + 0.14), M["brass"], scale=(1, 1, 0.8), segs=16, parent=p)
+    box(f"{n}_box", (0.09, 0.03, 0.12), (x, y + 0.09, z + 0.06), material("perfume_box", color=(0.95, 0.93, 0.9),
+                                                                          rough=0.5), bevel=0.003, parent=p)
+
+
+def _polaroids(n, x, y, z, p, M):
+    for k in range(3):
+        box(f"{n}_frame_{k}", (0.004, 0.09, 0.11), (x - 0.03 + k * 0.012, y - 0.06 + k * 0.06, z + 0.055 + k * 0.004),
+            M["paper"], rot=(0, R(-12), R(8 * (k - 1))), parent=p)
+        box(f"{n}_img_{k}", (0.005, 0.075, 0.075), (x - 0.03 + k * 0.012, y - 0.06 + k * 0.06, z + 0.065 + k * 0.004),
+            M[f"photo{k + 3}"], rot=(0, R(-12), R(8 * (k - 1))), parent=p)
+
+
+def _flower_box(n, x, y, z, p, M):
+    cylinder(f"{n}_hatbox", 0.09, 0.09, (x, y, z + 0.045), material("hatbox", color=(0.12, 0.12, 0.13), rough=0.4),
+             segs=40, parent=p)
+    rose = material("rose", color=(0.78, 0.08, 0.16), rough=0.6, sheen=0.6)
+    blush = material("rose_blush", color=(0.95, 0.68, 0.72), rough=0.6, sheen=0.6)
+    for k in range(9):
+        a = k * 2.4
+        r = 0.055 * math.sqrt(k / 9)
+        sphere(f"{n}_rose_{k}", 0.026, (x + r * math.cos(a), y + r * math.sin(a), z + 0.1), rose if k % 3 else blush,
+               scale=(1, 1, 0.75), segs=12, parent=p)
+
+
+def _snow_globe(n, x, y, z, p, M):
+    cylinder(f"{n}_base", 0.06, 0.04, (x, y, z + 0.02), M["walnut"], r2=0.05, segs=32, parent=p)
+    box(f"{n}_house", (0.035, 0.035, 0.03), (x, y, z + 0.065), M["gift"], parent=p)
+    g = sphere(f"{n}_glass", 0.06, (x, y, z + 0.095), M["glass"], segs=24, group=None, parent=p)
+    g["glass"] = 1
+
+
+def _teddy(n, x, y, z, p, M):
+    fur = material("teddy_fur", color=(0.62, 0.45, 0.3), albedo="boucle_albedo", rough=1.0, tile=(0.1, 0.1), sheen=1.0)
+    sphere(f"{n}_body", 0.05, (x, y, z + 0.05), fur, scale=(1, 0.9, 1.1), segs=16, parent=p)
+    sphere(f"{n}_head", 0.038, (x - 0.01, y, z + 0.125), fur, segs=16, parent=p)
+    for s in (-1, 1):
+        sphere(f"{n}_ear_{s}", 0.014, (x - 0.01, y + s * 0.03, z + 0.155), fur, segs=10, parent=p)
+        sphere(f"{n}_arm_{s}", 0.018, (x - 0.02, y + s * 0.05, z + 0.07), fur, scale=(1, 1, 1.4), segs=10, parent=p)
+    sphere(f"{n}_nose", 0.008, (x - 0.045, y, z + 0.12), M["vinyl"], segs=8, parent=p)
+    box(f"{n}_bow", (0.01, 0.05, 0.015), (x - 0.04, y, z + 0.09), M["gift"], parent=p)
+
+
+def _diary(n, x, y, z, p, M):
+    cover = material("diary_cover", color=(0.36, 0.18, 0.12), albedo="leather_albedo", normal="leather_normal",
+                     rough=0.5, tile=(0.3, 0.3))
+    box(f"{n}_cover", (0.15, 0.2, 0.035), (x, y, z + 0.018), cover, bevel=0.006, rot=(0, 0, R(10)), parent=p)
+    box(f"{n}_pages", (0.14, 0.19, 0.028), (x + 0.004, y, z + 0.018), M["paper"], rot=(0, 0, R(10)), parent=p)
+    box(f"{n}_ribbon", (0.006, 0.004, 0.06), (x, y - 0.095, z + 0.0), M["gift"], parent=p)
 
 
 def build_study(M):
-    extrude_poly("rug_study", rounded_rect(2.6, 2.2, 0.06), 0.014, (-4.0, -2.2, 0.0), M["rug2"])
-    # Desk facing the bed/study wall
-    d = empty("desk", (-3.8, 0.35, 0))
-    box("desk_top", (1.7, 0.75, 0.04), (-3.8, 0.35, 0.75), M["walnut"], bevel=0.008, parent=d)
-    for dx in (-0.8, 0.8):
-        box(f"desk_leg_{dx}", (0.04, 0.68, 0.73), (-3.8 + dx, 0.35, 0.365), M["brass"], parent=d)
-    box("desk_drawer", (0.6, 0.6, 0.1), (-4.25, 0.35, 0.68), M["walnut"], bevel=0.006, parent=d)
-    add_collider(-4.7, -0.05, -2.9, 0.73)
-    # desk chair
-    dc = empty("desk_chair", (-3.8, -0.35, 0))
-    cushion("desk_chair_seat", (0.5, 0.5, 0.08), (-3.8, -0.35, 0.47), M["leather"], puff=0.4, parent=dc)
-    cushion("desk_chair_back", (0.48, 0.06, 0.4), (-3.8, -0.62, 0.78), M["leather"], puff=0.4, rot=(R(10), 0, 0),
+    """Memory study x[-9, -1.27] y[-5, -0.67]: gallery wall, desk, library, reading corner."""
+    sf = PY - WT / 2   # study face of the partition
+    rug = extrude_poly("rug_study", rounded_rect(3.0, 2.4, 0.06), 0.014, (-5.2, -2.8, 0.0), M["rug2"])
+    rug["uvfit"] = 1
+    # Desk against the bedroom wall
+    dx0 = -4.4
+    d = empty("desk", (dx0, sf - 0.4, 0))
+    box("desk_top", (1.7, 0.75, 0.04), (dx0, sf - 0.4, 0.75), M["walnut"], bevel=0.008, parent=d)
+    for ddx in (-0.8, 0.8):
+        box(f"desk_leg_{ddx}", (0.04, 0.68, 0.73), (dx0 + ddx, sf - 0.4, 0.365), M["brass"], parent=d)
+    box("desk_drawer", (0.6, 0.6, 0.1), (dx0 - 0.45, sf - 0.4, 0.68), M["walnut"], bevel=0.006, parent=d)
+    add_collider(dx0 - 0.88, sf - 0.8, dx0 + 0.88, sf)
+    dc = empty("desk_chair", (dx0, sf - 1.1, 0))
+    cushion("desk_chair_seat", (0.5, 0.5, 0.08), (dx0, sf - 1.1, 0.47), M["leather"], puff=0.4, parent=dc)
+    cushion("desk_chair_back", (0.48, 0.06, 0.4), (dx0, sf - 1.37, 0.78), M["leather"], puff=0.4, rot=(R(10), 0, 0),
             parent=dc)
-    for dx in (-0.21, 0.21):
-        for dy in (-0.21, 0.21):
-            box(f"desk_chair_leg_{dx}_{dy}", (0.03, 0.03, 0.44), (-3.8 + dx, -0.35 + dy, 0.22), M["blackmetal"],
+    for ddx in (-0.21, 0.21):
+        for ddy in (-0.21, 0.21):
+            box(f"desk_chair_leg_{ddx}_{ddy}", (0.03, 0.03, 0.44), (dx0 + ddx, sf - 1.1 + ddy, 0.22), M["blackmetal"],
                 parent=dc)
-    add_collider(-4.1, -0.65, -3.5, -0.05)
-    # Letters box (interactive) + letters
-    lb = empty("letter_box", (-3.35, 0.3, 0.77))
-    box("letter_box_body", (0.34, 0.26, 0.1), (-3.35, 0.3, 0.82), M["leather"], bevel=0.01, parent=lb)
-    for i in range(4):
-        box(f"letter_{i}", (0.24, 0.005, 0.15), (-3.35, 0.22 + i * 0.04, 0.9), M["envelope"], parent=lb,
-            rot=(R(-8 + i * 3), 0, 0))
-    sphere("letter_seal", 0.018, (-3.35, 0.18, 0.92), M["wax"], scale=(1, 0.4, 1), parent=lb)
-    interact(lb, "letters", "信箱 · 寫給你的信")
-    # an open letter + pen on the desk
-    box("desk_paper", (0.24, 0.32, 0.002), (-3.95, 0.3, 0.771), M["paper"], rot=(0, 0, R(-8)))
-    tube("desk_pen", [(-3.75, 0.2, 0.778), (-3.65, 0.38, 0.778)], 0.005, M["brass"])
-    # desk lamp
-    cylinder("desk_lamp_base", 0.08, 0.02, (-4.45, 0.55, 0.78), M["brass"], segs=32)
-    tube("desk_lamp_arm", [(-4.45, 0.55, 0.78), (-4.42, 0.5, 1.15), (-4.25, 0.35, 1.22)], 0.008, M["brass"])
-    s = cylinder("desk_lamp_shade", 0.09, 0.12, (-4.22, 0.33, 1.17), M["brass"], r2=0.03, segs=32)
+    add_collider(dx0 - 0.3, sf - 1.4, dx0 + 0.3, sf - 0.8)
+    box("desk_paper", (0.24, 0.32, 0.002), (dx0 - 0.1, sf - 0.45, 0.771), M["paper"], rot=(0, 0, R(-8)))
+    tube("desk_pen", [(dx0 + 0.1, sf - 0.55, 0.778), (dx0 + 0.2, sf - 0.37, 0.778)], 0.005, M["brass"])
+    for k in range(3):
+        box(f"desk_book_{k}", (0.22, 0.16, 0.03), (dx0 + 0.55, sf - 0.3, 0.785 + k * 0.032), M[f"book{k}"],
+            bevel=0.003, rot=(0, 0, R(6 * k - 6)))
+    cylinder("desk_lamp_base", 0.08, 0.02, (dx0 - 0.65, sf - 0.2, 0.78), M["brass"], segs=32)
+    tube("desk_lamp_arm", [(dx0 - 0.65, sf - 0.2, 0.78), (dx0 - 0.62, sf - 0.25, 1.15), (dx0 - 0.45, sf - 0.4, 1.22)],
+         0.008, M["brass"])
+    s = cylinder("desk_lamp_shade", 0.09, 0.12, (dx0 - 0.42, sf - 0.42, 1.17), M["brass"], r2=0.03, segs=32)
     interact(s, "lamp", "檯燈", light="desk_lamp")
-    sphere("desk_lamp_bulb", 0.03, (-4.22, 0.33, 1.12), M["bulb"])["lamp_group"] = "desk_lamp"
-    point_light("desk_lamp", (-4.22, 0.33, 1.08), 20, (1.0, 0.76, 0.5), 0.05)
+    sphere("desk_lamp_bulb", 0.03, (dx0 - 0.42, sf - 0.42, 1.12), M["bulb"])["lamp_group"] = "desk_lamp"
+    point_light("desk_lamp", (dx0 - 0.42, sf - 0.42, 1.08), 20, (1.0, 0.76, 0.5), 0.05)
 
     # Memory gallery on the west wall: 7 frames
-    frames = [(-4.2, 1.95, 0.8, 0.6), (-3.2, 2.05, 0.6, 0.8), (-2.25, 1.9, 0.8, 0.6),
-              (-4.15, 1.25, 0.6, 0.45), (-3.25, 1.2, 0.5, 0.5), (-2.3, 1.25, 0.6, 0.45), (-1.25, 1.6, 0.6, 0.85)]
+    frames = [(-4.0, 1.95, 0.8, 0.6), (-3.0, 2.05, 0.6, 0.8), (-2.05, 1.9, 0.8, 0.6),
+              (-3.95, 1.25, 0.6, 0.45), (-3.05, 1.2, 0.5, 0.5), (-2.1, 1.25, 0.6, 0.45), (-1.25, 1.6, 0.5, 0.75)]
     for i, (y, z, w, h) in enumerate(frames):
-        g = empty(f"frame_{i}", (-6.97, y, z))
-        box(f"frame_{i}_wood", (0.035, w, h), (-6.975, y, z), M["walnut"], bevel=0.006, parent=g)
-        box(f"frame_{i}_mat", (0.01, w - 0.06, h - 0.06), (-6.955, y, z), M["mat"], parent=g)
-        p = box(f"frame_{i}_photo", (0.004, w - 0.16, h - 0.16), (-6.948, y, z), M[f"photo{i}"], parent=g)
+        g = empty(f"frame_{i}", (XW + 0.03, y, z))
+        box(f"frame_{i}_wood", (0.035, w, h), (XW + 0.025, y, z), M["walnut"], bevel=0.006, parent=g)
+        box(f"frame_{i}_mat", (0.01, w - 0.06, h - 0.06), (XW + 0.045, y, z), M["mat"], parent=g)
+        p = box(f"frame_{i}_photo", (0.004, w - 0.16, h - 0.16), (XW + 0.052, y, z), M[f"photo{i}"], parent=g)
+        p["uvfit"] = "yz"
         interact(p, "photo", f"回憶相框 {i + 1}", index=i)
-    # picture light above the gallery
-    box("gallery_light", (0.12, 3.6, 0.04), (-6.9, -2.75, 2.55), M["brass"], bevel=0.01)
-    box("gallery_light_led", (0.08, 3.5, 0.004), (-6.9, -2.75, 2.528), M["ledstrip"], group=None)
-    area_light("gallery_led", (-6.85, -2.75, 2.5), (0.06, 3.4), 40, (1.0, 0.85, 0.65), night_only=True,
+    box("gallery_light", (0.12, 3.6, 0.04), (XW + 0.1, -2.6, 2.55), M["brass"], bevel=0.01)
+    box("gallery_light_led", (0.08, 3.5, 0.004), (XW + 0.1, -2.6, 2.528), M["ledstrip"], group=None)
+    area_light("gallery_led", (XW + 0.15, -2.6, 2.5), (0.06, 3.4), 40, (1.0, 0.85, 0.65), night_only=True,
                rot=(R(-35), 0, R(90)))
 
     # Bookshelf along the south wall
-    shelf = []
-    for i in range(6):
-        shelf.append(((0.03, 0.34, 2.4), (-6.6 + i * 0.92, -4.82, 1.2)))
-    for j in range(6):
-        shelf.append(((4.63, 0.34, 0.025), (-4.3, -4.82, 0.04 + j * 0.46)))
+    bx0 = -8.6
+    shelf = [((0.03, 0.34, 2.4), (bx0 + i * 0.92, -4.82, 1.2)) for i in range(6)]
+    shelf += [((4.63, 0.34, 0.025), (bx0 + 2.3, -4.82, 0.04 + j * 0.46)) for j in range(6)]
     multi_box("bookshelf", shelf, M["walnut"], bevel=0.003)
-    add_collider(-6.65, -5.0, -1.95, -4.62)
+    add_collider(bx0 - 0.05, -5.0, bx0 + 4.65, -4.62)
     rnd = random.Random(7)
     books = {i: [] for i in range(6)}
     for j in range(5):
         for bay in range(5):
-            x = -6.56 + bay * 0.92
+            x = bx0 + 0.04 + bay * 0.92
             end = x + 0.86
-            if rnd.random() < 0.25:   # styling gap with an object instead
+            if rnd.random() < 0.25:
                 continue
             while x < end - 0.05:
                 w = rnd.uniform(0.025, 0.05)
@@ -727,54 +924,35 @@ def build_study(M):
         if bl:
             multi_box(f"books_{i}", bl, M[f"book{i}"], bevel=0.002)
 
-    # Gift on a pedestal (interactive: lid opens)
-    box("gift_pedestal", (0.5, 0.5, 0.9), (-5.6, -2.3, 0.45), M["marble"], bevel=0.006)
-    add_collider(-5.85, -2.55, -5.35, -2.05)
-    box("gift_body", (0.3, 0.3, 0.2), (-5.6, -2.3, 1.0), M["gift"], bevel=0.004)
-    multi_box("gift_ribbon_body", [((0.302, 0.04, 0.202), (-5.6, -2.3, 1.0)), ((0.04, 0.302, 0.202), (-5.6, -2.3, 1.0))],
-              M["ribbon"])
-    lid = empty("gift_lid", (-5.6, -2.45, 1.1))
-    box("gift_lid_box", (0.32, 0.32, 0.05), (-5.6, -2.3, 1.12), M["gift"], bevel=0.006, parent=lid)
-    multi_box("gift_lid_ribbon", [((0.322, 0.04, 0.052), (-5.6, -2.3, 1.12)), ((0.04, 0.322, 0.052), (-5.6, -2.3, 1.12))],
-              M["ribbon"], parent=lid)
-    for a in (R(30), R(-30)):
-        sphere(f"gift_bow_{a:.2f}", 0.06, (-5.6 + 0.05 * math.sin(a) * 2, -2.3, 1.18), M["ribbon"],
-               scale=(1, 0.45, 0.6), rot=(0, a, 0), parent=lid)
-    # little heart inside revealed when open
-    heart = sphere("gift_heart", 0.05, (-5.6, -2.3, 1.07), material("heart", color=(0.9, 0.1, 0.18), rough=0.25,
-                                                                         coat=1.0, emission=(1, 0.2, 0.3),
-                                                                         emission_strength=0.0))
-    heart["gift_heart"] = 1
-    interact(lid, "gift", "禮物盒", angle=110)
-
     # Reading chair + floor lamp
-    rc = empty("reading_chair", (-2.0, -4.0, 0))
-    cushion("reading_seat", (0.8, 0.8, 0.42), (-2.0, -4.0, 0.25), M["leather"], puff=0.35, parent=rc)
-    cushion("reading_back", (0.8, 0.22, 0.6), (-2.0, -4.35, 0.68), M["leather"], puff=0.4, parent=rc)
-    for dx in (-0.37, 0.37):
-        cushion(f"reading_arm_{dx}", (0.14, 0.8, 0.5), (-2.0 + dx, -4.0, 0.42), M["leather"], puff=0.45, parent=rc)
+    rc = empty("reading_chair", (-2.2, -4.0, 0))
+    cushion("reading_seat", (0.8, 0.8, 0.42), (-2.2, -4.0, 0.25), M["leather"], puff=0.35, parent=rc)
+    cushion("reading_back", (0.8, 0.22, 0.6), (-2.2, -4.35, 0.68), M["leather"], puff=0.4, parent=rc)
+    for ddx in (-0.37, 0.37):
+        cushion(f"reading_arm_{ddx}", (0.14, 0.8, 0.5), (-2.2 + ddx, -4.0, 0.42), M["leather"], puff=0.45, parent=rc)
     rc.rotation_euler.z = R(-30)
-    add_collider(-2.5, -4.55, -1.4, -3.5)
+    add_collider(-2.7, -4.55, -1.6, -3.5)
     cylinder("reading_lamp_base", 0.15, 0.03, (-1.6, -4.62, 0.015), M["blackmetal"], segs=32)
     cylinder("reading_lamp_pole", 0.012, 1.45, (-1.6, -4.62, 0.74), M["brass"], segs=12)
     s = cylinder("reading_lamp_shade", 0.2, 0.3, (-1.6, -4.62, 1.55), M["shade"], r2=0.17, segs=40)
     interact(s, "lamp", "閱讀燈", light="reading_lamp")
     s["lamp_group"] = "reading_lamp"
     point_light("reading_lamp", (-1.6, -4.62, 1.5), 35, (1.0, 0.72, 0.45), 0.1)
+    plant("plant_study", (-8.55, -0.95), M, 1.5)
 
 
 def build_doors(M):
-    # Bedroom door: hinge at (x=-1.2, y=2.3) opening into the bedroom
-    h = empty("bedroom_door", (-1.2 - WT / 2 + 0.02, 2.28, 0))
-    box("bedroom_door_leaf", (0.04, 0.96, 2.22), (-1.2 - WT / 2 + 0.02, 1.8, 1.11), M["walnut"], bevel=0.004, parent=h)
+    # Bedroom door: hinge at the north jamb (y=0.53), swinging into the bedroom
+    h = empty("bedroom_door", (-1.2 - WT / 2 + 0.02, 0.53, 0))
+    box("bedroom_door_leaf", (0.04, 0.96, 2.22), (-1.2 - WT / 2 + 0.02, 0.05, 1.11), M["walnut"], bevel=0.004, parent=h)
     for sx in (-1, 1):
-        cylinder(f"bedroom_door_knob_{sx}", 0.022, 0.07, (-1.2 - WT / 2 + 0.02 + sx * 0.04, 1.42, 1.0), M["brass"],
+        cylinder(f"bedroom_door_knob_{sx}", 0.022, 0.07, (-1.2 - WT / 2 + 0.02 + sx * 0.04, -0.33, 1.0), M["brass"],
                  segs=16, rot=(0, R(90), 0), parent=h)
     interact(h, "door", "臥室門", angle=-95, open=0)
     trims = []
     for x in (-1.2 - WT / 2 - 0.01, -1.2 + WT / 2 + 0.01):
-        trims += [((0.02, 0.06, 2.28), (x, 1.27, 1.14)), ((0.02, 0.06, 2.28), (x, 2.33, 1.14)),
-                  ((0.02, 1.12, 0.06), (x, 1.8, 2.28))]
+        trims += [((0.02, 0.06, 2.28), (x, -0.48, 1.14)), ((0.02, 0.06, 2.28), (x, 0.58, 1.14)),
+                  ((0.02, 1.12, 0.06), (x, 0.05, 2.28))]
         trims += [((0.02, 0.06, 2.48), (x, -3.33, 1.24)), ((0.02, 0.06, 2.48), (x, -1.97, 1.24)),
                   ((0.02, 1.4, 0.06), (x, -2.65, 2.48))]
     multi_box("door_trims", trims, M["satin"], bevel=0.004)
@@ -823,8 +1001,8 @@ def spot(name, loc, watts, color=(1.0, 0.82, 0.62), angle=70):
 
 def build_ceiling_lights(M):
     # recessed downlights (mesh rings) + spot lights for the night bake
-    spots = [(-5.6, 2.3), (-3.0, 2.3), (-5.6, 4.0), (-3.0, 4.0),            # bedroom
-             (-5.5, -1.0), (-2.6, -1.0), (-5.5, -3.8), (-2.6, -3.8),         # study
+    spots = [(-7.4, 0.9), (-4.6, 1.0), (-7.4, 4.1), (-4.6, 3.9), (-2.5, 2.4),  # bedroom
+             (-7.4, -1.7), (-4.2, -1.9), (-7.4, -3.9), (-4.2, -3.9), (-2.4, -3.2),  # study
              (0.4, -3.2), (3.0, -3.2), (0.4, -1.7), (3.0, -1.7),             # kitchen
              (5.8, -4.0), (5.8, -2.5), (-0.4, 0.0), (5.8, 0.4)]               # entry / circulation
     discs = []

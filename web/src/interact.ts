@@ -3,7 +3,7 @@ import type { World, V3 } from './world';
 import type { Player, Box2 } from './controls';
 import { Music } from './audio';
 import { store } from './store';
-import { giftSheet, lettersSheet, photoSheet } from './ui';
+import { giftSheet, keepsakeBook, lettersSheet, openBook, photoSheet, pinnedLetterBook } from './ui';
 
 /** Blender (x, y, z) -> three (x, z, -y). */
 const fromBlender = (v: V3) => new THREE.Vector3(v[0], v[2], -v[1]);
@@ -51,7 +51,7 @@ export class Home {
       door: this.open.get(root) ? '關上' : '打開', lamp: this.lampOn.get(root.userData.light) ? '關燈' : '開燈',
       curtains: this.curtainsClosed.get(root.userData.target) ? '拉開' : '拉上', tv: this.tv?.on ? '關掉' : '打開',
       music: this.music.playing ? '停止' : '播放', faucet: this.water?.visible ? '關水' : '開水', sit: '', letters: '翻閱',
-      photo: '看看', gift: this.open.get(root) ? '再看一次' : '拆開',
+      photo: '看看', gift: this.open.get(root) ? '再看一次' : '拆開', keepsake: '翻閱', letter: '讀信',
     };
     return `<b>${verb[kind] ?? ''}</b>${base}`;
   }
@@ -85,6 +85,21 @@ export class Home {
       case 'music': this.music.playing ? this.music.stop() : this.music.start(); break;
       case 'faucet': this.toggleFaucet(d.spout as V3); break;
       case 'letters': lettersSheet(); break;
+      case 'keepsake': {
+        const b = keepsakeBook(d.index as number);
+        if (b) {
+          // lift the keepsake a little while its book is open
+          const y0 = root.position.y;
+          this.tween(root.position as unknown as Record<string, number>, 'y', y0 + 0.04, 0.5);
+          openBook(b, () => this.tween(root.position as unknown as Record<string, number>, 'y', y0, 0.5));
+        }
+        break;
+      }
+      case 'letter': {
+        const b = pinnedLetterBook(d.index as number);
+        if (b) openBook(b);
+        break;
+      }
       case 'photo': {
         const i = d.index as number;
         photoSheet(i, this.photoImgs[i]?.src ?? '', (url) => this.applyPhoto(i, url));

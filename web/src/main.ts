@@ -4,7 +4,7 @@ import { loadWorld, type V3 } from './world';
 import { Environment } from './environment';
 import { Player } from './controls';
 import { Home } from './interact';
-import { lettersSheet, sheetOpen } from './ui';
+import { lettersSheet, setContent, sheetOpen, type Content } from './ui';
 import { store } from './store';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -27,14 +27,22 @@ const PLACES: Record<string, { pos: V3; look: V3 }> = {
   living: { pos: [2.1, 0.9, 1.6], look: [6.5, 3.4, 1.2] },
   window: { pos: [2.4, 4.25, 1.6], look: [1.0, 60, -6] },
   kitchen: { pos: [1.7, -1.0, 1.6], look: [1.7, -4.8, 1.1] },
-  bedroom: { pos: [-2.1, 2.0, 1.6], look: [-6.5, 3.3, 0.9] },
-  study: { pos: [-2.6, -1.9, 1.6], look: [-7.0, -2.6, 1.4] },
+  bedroom: { pos: [-2.6, 1.0, 1.6], look: [-8.5, 2.8, 0.9] },
+  vitrine: { pos: [-3.7, 2.4, 1.55], look: [-1.3, 2.4, 1.0] },
+  letters: { pos: [-3.35, 1.5, 1.6], look: [-3.35, -0.6, 1.45] },
+  study: { pos: [-2.6, -2.6, 1.6], look: [-9.0, -2.6, 1.4] },
 };
 
 async function boot() {
   const base = `${import.meta.env.BASE_URL}assets/`;
   const bar = $('bar');
-  const world = await loadWorld(base, (f) => { bar.style.width = `${(f * 100).toFixed(1)}%`; });
+  const contentBase = import.meta.env.BASE_URL;
+  const [world, content] = await Promise.all([
+    loadWorld(base, (f) => { bar.style.width = `${(f * 100).toFixed(1)}%`; }),
+    fetch(`${contentBase}content/memories.json?v=${Date.now()}`).then((r) => r.json() as Promise<Content>)
+      .catch(() => ({ keepsakes: [], letters: [] })),
+  ]);
+  setContent(content, contentBase);
   scene.add(world.interior, world.city);
 
   const env = new Environment(scene, world);
@@ -235,6 +243,8 @@ async function boot() {
       look: (pos: V3, look: V3) => player.spawn(fromBlender(pos), fromBlender(look)),
       setTime: (t: number, lights: number) => { goal.t = time.t = t; goal.lights = time.lights = lights; home.setLightsMaster(lights > 0.5); },
       info: () => renderer.info.render,
+      world,
+      scene,
     };
   }
   const at = qs.get('at');

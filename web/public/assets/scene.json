@@ -3,33 +3,33 @@
   "arch": {
    "day": {
     "file": "lightmaps/arch_day.webp",
-    "scale": 2.4657605409622194
+    "scale": 2.4974107146263123
    },
    "night": {
     "file": "lightmaps/arch_night.webp",
-    "scale": 3.171064066886902
+    "scale": 2.323631036281586
    }
   },
   "furn": {
    "day": {
     "file": "lightmaps/furn_day.webp",
-    "scale": 1.920586931705475
+    "scale": 2.24833517074585
    },
    "night": {
     "file": "lightmaps/furn_night.webp",
-    "scale": 4.565093636512756
+    "scale": 7.860757684707642
    }
   }
  },
- "version": 1791434332,
+ "version": 1791437373,
  "colliders": [
   {
    "min": [
-    -7.25,
+    -9.25,
     -5
    ],
    "max": [
-    -7,
+    -9.0,
     5.25
    ]
   },
@@ -45,7 +45,7 @@
   },
   {
    "min": [
-    -7.25,
+    -9.25,
     5
    ],
    "max": [
@@ -76,7 +76,7 @@
   {
    "min": [
     -1.27,
-    -1.3
+    0.45
    ],
    "max": [
     -1.13,
@@ -90,22 +90,22 @@
    ],
    "max": [
     -1.13,
-    -2.3
+    -0.55
    ]
   },
   {
    "min": [
-    -7,
-    -0.87
+    -9.0,
+    0.53
    ],
    "max": [
     -1.27,
-    -0.73
+    0.67
    ]
   },
   {
    "min": [
-    -7,
+    -9.0,
     -5.2
    ],
    "max": [
@@ -275,112 +275,142 @@
   },
   {
    "min": [
-    -7.0,
-    -4.25
+    -9.0,
+    -3.55
    ],
    "max": [
-    -4.75,
-    -2.35
+    -6.75,
+    -1.65
    ]
   },
   {
    "min": [
-    -4.68,
-    -3.92
+    -6.66,
+    -3.36
    ],
    "max": [
-    -4.22,
-    -2.48
-   ]
-  },
-  {
-   "min": [
-    -6.97,
-    -2.19
-   ],
-   "max": [
-    -6.43,
-    -1.71
-   ]
-  },
-  {
-   "min": [
-    -6.97,
-    -4.74
-   ],
-   "max": [
-    -6.43,
-    -4.26
-   ]
-  },
-  {
-   "min": [
     -6.2,
-    -1.5
-   ],
-   "max": [
-    -3.0,
-    -0.87
+    -1.84
    ]
   },
   {
    "min": [
-    -2.65,
+    -9.0,
+    -1.52
+   ],
+   "max": [
+    -8.43,
+    -1.04
+   ]
+  },
+  {
+   "min": [
+    -9.0,
+    -4.09
+   ],
+   "max": [
+    -8.43,
+    -3.61
+   ]
+  },
+  {
+   "min": [
+    -8.7,
+    -0.09
+   ],
+   "max": [
+    -5.5,
+    0.53
+   ]
+  },
+  {
+   "min": [
+    -4.27,
+    0.03
+   ],
+   "max": [
+    -2.43,
+    0.53
+   ]
+  },
+  {
+   "min": [
+    -1.73,
+    -3.7
+   ],
+   "max": [
+    -1.27,
+    -1.1
+   ]
+  },
+  {
+   "min": [
+    -4.75,
     -4.6
    ],
    "max": [
-    -1.75,
+    -3.85,
     -3.7
    ]
   },
   {
    "min": [
+    -2.3,
+    -4.65
+   ],
+   "max": [
+    -1.7,
+    -4.05
+   ]
+  },
+  {
+   "min": [
+    -5.28,
+    0.67
+   ],
+   "max": [
+    -3.52,
+    1.47
+   ]
+  },
+  {
+   "min": [
     -4.7,
-    -0.73
+    1.47
    ],
    "max": [
-    -2.9,
-    0.05
-   ]
-  },
-  {
-   "min": [
     -4.1,
-    0.05
-   ],
-   "max": [
-    -3.5,
-    0.65
+    2.07
    ]
   },
   {
    "min": [
-    -6.65,
+    -8.65,
     4.62
    ],
    "max": [
-    -1.95,
+    -3.95,
     5.0
    ]
   },
   {
    "min": [
-    -5.85,
-    2.05
+    -2.7,
+    3.5
    ],
    "max": [
-    -5.35,
-    2.55
+    -1.6,
+    4.55
    ]
   },
   {
    "min": [
-    -2.5,
-    3.5
+    -8.85,
+    0.65
    ],
    "max": [
-    -1.4,
-    4.55
+    -8.25,
+    1.25
    ]
   }
  ],
@@ -459,6 +489,12 @@
    "angle": -80
   },
   {
+   "name": "gift_lid",
+   "kind": "gift",
+   "label": "禮物盒",
+   "angle": 110
+  },
+  {
    "name": "bed_lamp_0_shade",
    "kind": "lamp",
    "label": "床頭燈",
@@ -497,7 +533,91 @@
   {
    "name": "letter_box",
    "kind": "letters",
-   "label": "信箱 · 寫給你的信"
+   "label": "信箱 · 寫信與全部信件"
+  },
+  {
+   "name": "pinned_letter_0",
+   "kind": "letter",
+   "label": "信 1",
+   "index": 0
+  },
+  {
+   "name": "pinned_letter_1",
+   "kind": "letter",
+   "label": "信 2",
+   "index": 1
+  },
+  {
+   "name": "pinned_letter_2",
+   "kind": "letter",
+   "label": "信 3",
+   "index": 2
+  },
+  {
+   "name": "pinned_letter_3",
+   "kind": "letter",
+   "label": "信 4",
+   "index": 3
+  },
+  {
+   "name": "pinned_letter_4",
+   "kind": "letter",
+   "label": "信 5",
+   "index": 4
+  },
+  {
+   "name": "pinned_letter_5",
+   "kind": "letter",
+   "label": "信 6",
+   "index": 5
+  },
+  {
+   "name": "keepsake_0",
+   "kind": "keepsake",
+   "label": "戒指盒",
+   "index": 0
+  },
+  {
+   "name": "keepsake_1",
+   "kind": "keepsake",
+   "label": "音樂盒",
+   "index": 1
+  },
+  {
+   "name": "keepsake_2",
+   "kind": "keepsake",
+   "label": "香水",
+   "index": 2
+  },
+  {
+   "name": "keepsake_3",
+   "kind": "keepsake",
+   "label": "拍立得",
+   "index": 3
+  },
+  {
+   "name": "keepsake_4",
+   "kind": "keepsake",
+   "label": "花盒",
+   "index": 4
+  },
+  {
+   "name": "keepsake_5",
+   "kind": "keepsake",
+   "label": "雪花球",
+   "index": 5
+  },
+  {
+   "name": "keepsake_6",
+   "kind": "keepsake",
+   "label": "小熊",
+   "index": 6
+  },
+  {
+   "name": "keepsake_7",
+   "kind": "keepsake",
+   "label": "日記本",
+   "index": 7
   },
   {
    "name": "desk_lamp_shade",
@@ -546,12 +666,6 @@
    "kind": "photo",
    "label": "回憶相框 7",
    "index": 6
-  },
-  {
-   "name": "gift_lid",
-   "kind": "gift",
-   "label": "禮物盒",
-   "angle": 110
   },
   {
    "name": "reading_lamp_shade",
@@ -624,6 +738,22 @@
    ],
    "strength": 1.0
   },
+  "facade_tower_c": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "facade_tower_d": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
   "near_tower": {
    "color": [
     1,
@@ -647,7 +777,7 @@
  },
  "bounds": {
   "min": [
-   -7,
+   -9.0,
    -5
   ],
   "max": [

@@ -79,6 +79,12 @@ uniform float uDayGain;`,
   mat.customProgramCacheKey = () => 'dearv-lightmap';
 }
 
+/** Blender tints on textured materials travel as extras (glTF would drop them). */
+function applyTint(mat: THREE.MeshStandardMaterial) {
+  const t = mat.userData.tint as number[] | undefined;
+  if (t && mat.map && mat.color.r > 0.99 && mat.color.g > 0.99 && mat.color.b > 0.99) mat.color.setRGB(t[0], t[1], t[2]);
+}
+
 export interface Emitter {
   material: THREE.MeshStandardMaterial;
   strength: number;
@@ -186,6 +192,7 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
     let mat = matCache.get(key);
     if (!mat) {
       mat = src.clone();
+      applyTint(mat);
       const lm = group ? lmByGroup.get(group) : undefined;
       if (lm && mesh.geometry.getAttribute('uv1')) {
         mat.lightMap = lm.day;
@@ -278,8 +285,7 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
     // the reflection probe is captured inside the flat; it must not light the city
     mat.envMapIntensity = 0;
     // glTF drops the colour factor on textured Blender materials: re-apply facade tints
-    const tints: Record<string, number> = { facade_tower_b: 0xc9d0da, facade_tower_c: 0xf0dcc0, facade_tower_d: 0x6f7f8c };
-    if (tints[mat.name]) mat.color.setHex(tints[mat.name]);
+    applyTint(mat);
     if (/facade|near_tower/.test(mat.name)) {
       mat.emissive = new THREE.Color(1, 0.92, 0.8);
       mat.emissiveMap = facadeNight;

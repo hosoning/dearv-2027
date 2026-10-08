@@ -79,7 +79,18 @@ def material(
         t = nt.nodes.new("ShaderNodeTexImage")
         t.image = _img(albedo)
         nt.links.new(uvn.outputs["UV"], t.inputs["Vector"])
-        nt.links.new(t.outputs["Color"], p.inputs["Base Color"])
+        if tuple(round(c, 3) for c in color) != (0.8, 0.8, 0.8):
+            # tinted texture: multiply in Blender (bake), and pass the tint to three.js via extras
+            mix = nt.nodes.new("ShaderNodeMix")
+            mix.data_type = "RGBA"
+            mix.blend_type = "MULTIPLY"
+            mix.inputs["Factor"].default_value = 1.0
+            nt.links.new(t.outputs["Color"], mix.inputs["A"])
+            mix.inputs["B"].default_value = (*color, 1.0)
+            nt.links.new(mix.outputs["Result"], p.inputs["Base Color"])
+            m["tint"] = list(color)
+        else:
+            nt.links.new(t.outputs["Color"], p.inputs["Base Color"])
     if rough_map:
         t = nt.nodes.new("ShaderNodeTexImage")
         t.image = _img(rough_map, True)

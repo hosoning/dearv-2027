@@ -25,24 +25,7 @@ function write(key: string, value: unknown): boolean {
   }
 }
 
-const SEED: Letter[] = [
-  {
-    id: 'seed-1',
-    title: '給 V：第一晚',
-    from: '我',
-    date: '2027-01-01',
-    body:
-      '這是我們的第一個家。\n\n窗外是整個海港，晚上的燈會一盞一盞亮起來。我把你喜歡的東西都放在這裡了——' +
-      '沙發邊的落地燈、書房牆上的照片、還有那個你一定會先打開的禮物盒。\n\n以後的每一封信，都放在這個信箱裡。',
-  },
-  {
-    id: 'seed-2',
-    title: '關於黑膠唱機',
-    from: '我',
-    date: '2027-02-14',
-    body: '如果有一天晚上睡不著，就去客廳把唱機打開，坐在沙發上看海。\n\n音樂是為這個房間寫的，很慢，很輕。',
-  },
-];
+const SEED: Letter[] = []; // the pinned letters live in public/content/memories.json
 
 export const store = {
   letters(): Letter[] {

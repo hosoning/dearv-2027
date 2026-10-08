@@ -65,12 +65,14 @@ def lightmap_uvs(objs, res=2048, margin_px=6):
         uv_area = 0.0
         world_area = 0.0
         mw = ob.matrix_world
+        sc = sorted(mw.to_scale())
+        area_scale = sc[1] * sc[2]  # parented / scaled objects get proportional texels
         for poly in me.polygons:
             idx = list(poly.loop_indices)
             pts = a[idx]
             x, y = pts[:, 0], pts[:, 1]
             uv_area += 0.5 * abs(np.dot(x, np.roll(y, 1)) - np.dot(y, np.roll(x, 1)))
-            world_area += (mw.to_3x3() @ poly.normal).length * 0 + poly.area
+            world_area += poly.area * area_scale
         info.append((ob, a, lo, np.maximum(hi - lo, 1e-6), max(uv_area, 1e-9), max(world_area, 1e-6)))
     gap = margin_px * 2.0 / res
     lo_k, hi_k = 1e-6, 10.0

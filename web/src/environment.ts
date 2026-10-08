@@ -175,7 +175,7 @@ export class Environment {
     this.sun.intensity = THREE.MathUtils.lerp(3.0, 0.05, Math.min(1, t * 1.4));
     this.hemi.color.copy(u.uHorizon.value);
     this.hemi.groundColor.copy(u.uGround.value);
-    this.hemi.intensity = THREE.MathUtils.lerp(1.3, 0.12, t);
+    this.hemi.intensity = THREE.MathUtils.lerp(1.3, 0.05, t);
 
     const wu = (this.water.material as THREE.ShaderMaterial).uniforms;
     const moon = u.uMoonDir.value as THREE.Vector3;
@@ -185,7 +185,7 @@ export class Environment {
 
     (this.scene.fog as THREE.FogExp2).color.copy(u.uHorizon.value);
 
-    for (const m of this.world.facadeMats) m.emissiveIntensity = 1.6 * THREE.MathUtils.smoothstep(t, 0.3, 0.9);
+    for (const m of this.world.facadeMats) m.emissiveIntensity = 0.85 * THREE.MathUtils.smoothstep(t, 0.3, 0.9);
 
     // Baked interior mix
     lightUniforms.uNight.value = night;

@@ -159,7 +159,7 @@ export class Player {
         }
       }
     }
-    return [THREE.MathUtils.clamp(x, -6.8, 6.8), THREE.MathUtils.clamp(z, -4.75, 4.85)];
+    return [THREE.MathUtils.clamp(x, -8.8, 6.8), THREE.MathUtils.clamp(z, -4.75, 4.85)];
   }
 
   update(dt: number) {

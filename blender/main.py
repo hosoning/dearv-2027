@@ -39,7 +39,7 @@ def strip_hidden_shell_faces(objs, pad=0.01):
     """
     import bmesh
     from mathutils import Vector
-    lo, hi = Vector((-7, -5, 0)), Vector((7, 5, 3.0))
+    lo, hi = Vector((apartment.XW, -5, 0)), Vector((7, 5, 3.0))
     for ob in objs:
         if not (ob.name.startswith(("floor_", "wall_", "ceiling"))):
             continue
@@ -91,15 +91,18 @@ def main():
         if ob.type != "MESH":
             continue
         if ob.get("uvfit"):
-            # rugs: stretch the bordered texture over the object's own footprint
+            # rugs / photos / TV: stretch the texture over the object's own extent
             import bmesh
+            mode = ob["uvfit"] if isinstance(ob["uvfit"], str) else "xy"
+            flip = mode.startswith("-")
+            ia, ib = {"xy": (0, 1), "yz": (1, 2), "xz": (0, 2)}[mode.lstrip("-")]
             bm = bmesh.new(); bm.from_mesh(ob.data)
             uv = bm.loops.layers.uv.get("UVMap") or bm.loops.layers.uv.new("UVMap")
-            xs = [v.co.x for v in bm.verts]; ys = [v.co.y for v in bm.verts]
+            ca = [v.co[ia] for v in bm.verts]; cb = [v.co[ib] for v in bm.verts]
             for f in bm.faces:
                 for l in f.loops:
-                    l[uv].uv = ((l.vert.co.x - min(xs)) / (max(xs) - min(xs)),
-                                (l.vert.co.y - min(ys)) / (max(ys) - min(ys)))
+                    u = (l.vert.co[ia] - min(ca)) / (max(ca) - min(ca))
+                    l[uv].uv = (1 - u if flip else u, (l.vert.co[ib] - min(cb)) / (max(cb) - min(cb)))
             bm.to_mesh(ob.data); bm.free()
         else:
             lib.box_project_uv(ob)
@@ -174,7 +177,7 @@ def main():
         "interactables": apartment.INTERACT,
         "emitters": emitters,
         "spawn": {"position": to_three((5.8, -4.1, 1.62)), "lookAt": to_three((3.0, 3.0, 1.4))},
-        "bounds": {"min": [-7, -5], "max": [7, 5]},
+        "bounds": {"min": [apartment.XW, -5], "max": [7, 5]},
         "waterY": exterior.WATER_Z,
         "sunDirection": to_three((-0.28, 0.77, 0.57)),
     })
