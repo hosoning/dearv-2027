@@ -208,6 +208,8 @@ def main():
         "waterY": exterior.WATER_Z,
         "sunDirection": to_three((-0.28, 0.77, 0.57)),
     })
+    with open(os.path.join(out, "city.json"), "w") as f:
+        json.dump({"lanes": [{**l, "y3": -l["y"]} for l in exterior.LANES]}, f)
     with open(os.path.join(out, "scene.json"), "w") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=1)
     print(f"[dearv] done in {time.time() - t0:.1f}s -> {out}")

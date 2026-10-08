@@ -86,6 +86,13 @@ async function boot() {
     const rt = pmrem.fromScene(scene, 0.02, 0.1, 12000, { size: 128, position: new THREE.Vector3(2.5, 1.5, -1.5) });
     env.water.visible = true;
     scene.environment = rt.texture;
+    // three only honours envMapIntensity when the material has its own envMap: assign the
+    // probe explicitly so the city ignores it and the window glass only catches a hint of it
+    world.city.traverse((o) => {
+      const m = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+      if (m && (o as THREE.Mesh).isMesh) { m.envMap = rt.texture; m.envMapIntensity = 0; }
+    });
+    for (const g of world.glassMats) { g.envMap = rt.texture; g.envMapIntensity = 0.12; }
     envRT?.dispose();
     envRT = rt;
   };
@@ -228,16 +235,14 @@ async function boot() {
 
   bar.style.width = '100%';
   const enter = $('enter') as HTMLButtonElement;
-  enter.hidden = false;
   requestAnimationFrame(frame);
   enter.addEventListener('click', () => {
     $('loader').classList.add('gone');
     $('hud').hidden = false;
     setTimeout(() => $('loader').remove(), 1000);
   });
-  // allow automation / deep links: ?enter=1&t=night&at=window
+  setupDoorLock(() => enter.click());
   const qs = new URLSearchParams(location.search);
-  if (qs.get('enter')) enter.click();
   const qt = qs.get('t');
   if (qt) { goal.t = time.t = qt === 'night' ? 1 : qt === 'dusk' ? 0.5 : 0; goal.lights = time.lights = goal.t > 0.4 ? 1 : 0; home.setLightsMaster(goal.lights > 0.5); refreshDock(); }
   if (qs.get('debug')) {
@@ -261,6 +266,62 @@ async function boot() {
   }
   const at = qs.get('at');
   if (at && PLACES[at]) { player.spawn(fromBlender(PLACES[at].pos), fromBlender(PLACES[at].look)); }
+}
+
+/**
+ * Smart door lock. Any digits may come before or after: the door opens as soon as the
+ * code appears consecutively in what was typed (anti-peep entry, like the real lock).
+ * This keeps casual visitors out; it is not cryptographic protection.
+ */
+const DOOR_CODE = '0526';
+function setupDoorLock(open: () => void) {
+  const lock = $('lock');
+  const dots = $('lock-dots');
+  const msg = $('lock-msg');
+  $('bar').parentElement!.hidden = true;
+  lock.hidden = false;
+  let typed = '';
+  let ctx: AudioContext | null = null;
+  const beep = (f: number, d = 0.07) => {
+    try {
+      ctx ??= new AudioContext();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.06, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + d);
+      o.connect(g).connect(ctx.destination);
+      o.start();
+      o.stop(ctx.currentTime + d);
+    } catch { /* audio is optional */ }
+  };
+  let done = false;
+  const press = (k: string) => {
+    if (done) return;
+    navigator.vibrate?.(12);
+    if (k === '*') { typed = ''; dots.textContent = ''; msg.textContent = '輸入門鎖密碼'; beep(440); return; }
+    if (k === '#') { if (!typed.includes(DOOR_CODE)) { msg.textContent = '密碼不對'; beep(220, 0.25); typed = ''; dots.textContent = ''; } return; }
+    beep(1320);
+    typed = (typed + k).slice(-16);
+    dots.textContent = '•'.repeat(Math.min(typed.length, 8));
+    msg.textContent = '';
+    if (typed.includes(DOOR_CODE)) {
+      done = true;
+      lock.classList.add('open');
+      msg.textContent = '歡迎回家';
+      setTimeout(() => beep(1568, 0.12), 80);
+      setTimeout(() => beep(2093, 0.18), 220);
+      setTimeout(open, 900);
+    }
+  };
+  lock.querySelectorAll<HTMLElement>('[data-k]').forEach((b) => b.addEventListener('click', () => press(b.dataset.k!)));
+  const onKey = (e: KeyboardEvent) => {
+    if (/^[0-9]$/.test(e.key)) press(e.key);
+    else if (e.key === 'Backspace' || e.key === 'Escape') press('*');
+    else if (e.key === 'Enter') press('#');
+    if (done) window.removeEventListener('keydown', onKey);
+  };
+  window.addEventListener('keydown', onKey);
 }
 
 window.addEventListener('resize', () => {

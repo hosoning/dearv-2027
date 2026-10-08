@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import type { Lane } from './traffic';
 
 export type V3 = [number, number, number];
 
@@ -101,6 +102,8 @@ export interface World {
   curtainMats: THREE.MeshStandardMaterial[];
   glassMats: THREE.MeshStandardMaterial[];
   facadeMats: THREE.MeshStandardMaterial[];
+  cityLamps: THREE.MeshStandardMaterial[];
+  lanes: Lane[];
   interactive: THREE.Object3D[];
   floors: THREE.Object3D[];
   byName: Map<string, THREE.Object3D>;
@@ -118,6 +121,8 @@ function ancestorWith(o: THREE.Object3D, key: string): THREE.Object3D | null {
 
 export async function loadWorld(base: string, onProgress: (f: number) => void): Promise<World> {
   const manifest: Manifest = await (await fetch(`${base}scene.json`)).json();
+  const lanes: Lane[] = await fetch(`${base}city.json?v=${manifest.version}`).then((r) => (r.ok ? r.json() : { lanes: [] }))
+    .then((j) => j.lanes ?? []).catch(() => []);
   const manager = new THREE.LoadingManager();
   const progress = new Map<string, number>();
   const weights: Record<string, number> = { apartment: 0.55, city: 0.15, maps: 0.3 };
@@ -241,7 +246,7 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
       if (isGlass) {
         const g = new THREE.MeshStandardMaterial({
           name: src.name, color: 0xdfeef2, roughness: 0.04, metalness: 0.0,
-          transparent: true, opacity: 0.1, depthWrite: false,
+          transparent: true, opacity: 0.1, depthWrite: false, envMapIntensity: 0.12,
         });
         mat = g;
         glassMats.push(g);
@@ -294,6 +299,7 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
 
   // City: lit by the exterior sun/sky, night windows from the emissive facade map.
   const facadeMats: THREE.MeshStandardMaterial[] = [];
+  const cityLamps: THREE.MeshStandardMaterial[] = [];
   const cityMats = new Map<THREE.Material, THREE.Mesh[]>();
   city.updateMatrixWorld(true);
   city.traverse((o) => {
@@ -310,6 +316,12 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
     mat.envMapIntensity = 0;
     // glTF drops the colour factor on textured Blender materials: re-apply facade tints
     applyTint(mat);
+    if (mat.userData.night_emission && !/facade|near_tower/.test(mat.name)) {
+      const ec = (mat.userData.emit_color as number[]) ?? [1, 0.8, 0.5];
+      mat.emissive = new THREE.Color(ec[0], ec[1], ec[2]);
+      mat.emissiveIntensity = 0;
+      cityLamps.push(mat);
+    }
     if (/facade|near_tower/.test(mat.name)) {
       mat.emissive = new THREE.Color(1, 0.92, 0.8);
       mat.emissiveMap = facadeNight;
@@ -327,7 +339,7 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
   interior.traverse((o) => byName.set(o.name, o));
 
   return {
-    interior, city: cityRoot, manifest, emitters, curtainMats, glassMats, facadeMats,
+    interior, city: cityRoot, manifest, emitters, curtainMats, glassMats, facadeMats, cityLamps, lanes,
     interactive, floors, byName, waterNormals,
   };
 }

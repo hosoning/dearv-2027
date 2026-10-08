@@ -27,7 +27,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .loader-sub { font-size: 12px; letter-spacing: .3em; color: var(--ink-dim); }
 .bar { width: 220px; height: 2px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; margin-top: 10px; }
 .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
-.enter { margin-top: 18px; padding: 12px 30px; border-radius: 999px; border: 1px solid rgba(232,195,143,.6);
+.enter-unused { margin-top: 18px; padding: 12px 30px; border-radius: 999px; border: 1px solid rgba(232,195,143,.6);
   background: rgba(232,195,143,.1); letter-spacing: .25em; font-size: 13px; }
 .enter:hover { background: rgba(232,195,143,.22); }
 
@@ -189,3 +189,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tv-days { padding-left: 18px; display: grid; gap: 10px; }
 .tv-days p { margin: 2px 0 0; font-size: 14px; line-height: 1.7; }
 .tv-note { color: var(--ink-dim); font-size: 13px; }
+
+/* Door lock ------------------------------------------------------------------------ */
+.lock { margin-top: 16px; width: 248px; padding: 18px 18px 20px; border-radius: 28px; display: grid; gap: 16px;
+  background: linear-gradient(160deg, #2a2622, #15130f); border: 1px solid rgba(232,195,143,.35);
+  box-shadow: 0 20px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08); }
+.lock-screen { height: 46px; border-radius: 12px; background: #0b0a09; display: grid; place-items: center; position: relative;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+.lock-dots { letter-spacing: .45em; font-size: 20px; color: #9fd8ff; text-shadow: 0 0 8px rgba(120,190,255,.7); }
+.lock-msg { position: absolute; font-size: 12px; letter-spacing: .2em; color: var(--ink-dim); }
+.lock-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.lock-pad button { height: 54px; border-radius: 50%; width: 54px; justify-self: center; border: 1px solid rgba(255,255,255,.08);
+  background: radial-gradient(circle at 50% 35%, #34302b, #1d1a17); color: #e9f4ff; font-size: 22px;
+  text-shadow: 0 0 10px rgba(140,200,255,.55); transition: transform .08s, background .2s; touch-action: manipulation; }
+.lock-pad button:active { transform: scale(.93); background: radial-gradient(circle at 50% 35%, #4a6a86, #23384a); }
+.lock-pad button.dim { color: var(--ink-dim); text-shadow: none; font-size: 16px; }
+.lock-pad button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lock.open { border-color: rgba(120,220,160,.7); box-shadow: 0 0 40px rgba(120,220,160,.35); }
+.lock.open .lock-msg { color: #9be7b8; }

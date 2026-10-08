@@ -182,16 +182,17 @@ def facade(out, size=1024, cols=16, rows=32):
     cx = (xx * cols) % 1.0
     cy = (yy * rows) % 1.0
     win = (cx > 0.12) & (cx < 0.88) & (cy > 0.18) & (cy < 0.82)
+    win_n = (cx > 0.2) & (cx < 0.8) & (cy > 0.28) & (cy < 0.78)   # lit glass sits inside the frame
     rng = np.random.default_rng(7)
     cid = (np.floor(xx * cols) + np.floor(yy * rows) * cols).astype(int)
-    lit = rng.random(cols * rows)[cid] < 0.42
+    lit = rng.random(cols * rows)[cid] < 0.26
     warmth = rng.random(cols * rows)[cid]
     sky = fbm(size, 3, 3, seed=8)
     day = np.where(win[..., None], colorize(sky, (0.26, 0.34, 0.42), (0.55, 0.64, 0.72)),
                    np.array((0.78, 0.77, 0.74))[None, None, :])
     em = np.zeros((size, size, 3))
     warm = colorize(warmth, (1.0, 0.72, 0.42), (0.85, 0.92, 1.0))
-    mask = (win & lit)[..., None]
+    mask = (win_n & lit)[..., None]
     em = np.where(mask, warm * (0.6 + 0.4 * warmth[..., None]), em)
     save(f"{out}/facade_day.png", day)
     save(f"{out}/facade_night.png", em)
@@ -224,6 +225,7 @@ def generate_all(out: str):
     world_map(out)
     couture(out)
     plush(out)
+    road(out)
 
 
 if __name__ == "__main__":
@@ -540,3 +542,25 @@ def plush(out, size=512):
     t = 0.86 + 0.08 * pile + 0.06 * cloud
     save(f"{out}/plush_albedo.png", np.dstack([t] * 3))
     save(f"{out}/plush_normal.png", normal_from_height(pile, 1.6))
+
+
+def road(out, W=256, H=512):
+    """One 12 m x 24 m tile of the six-lane waterfront highway (u along the road, v across)."""
+    v = np.linspace(0, 24, H)[:, None] * np.ones((1, W))
+    u = np.linspace(0, 12, W)[None, :] * np.ones((H, 1))
+    asphalt = colorize(fbm(512, 60, 3, seed=900)[:H, :W], (0.13, 0.13, 0.14), (0.2, 0.2, 0.21))
+    def line(c, w=0.15):
+        return np.abs(v - c) < w / 2
+    white = np.zeros((H, W), bool)
+    for c in (0.4, 23.6):
+        white |= line(c)
+    dash = (u % 12) < 6
+    for c in (3.75, 7.25, 16.75, 20.25):
+        white |= line(c) & dash
+    yellow = line(10.6) | line(13.4)
+    median = (v > 10.75) & (v < 13.25)
+    img = asphalt.copy()
+    img[median] = (0.32, 0.33, 0.3)
+    img[white] = (0.85, 0.85, 0.82)
+    img[yellow] = (0.85, 0.7, 0.2)
+    save(f"{out}/road_albedo.png", np.flipud(img))

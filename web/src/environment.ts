@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Water } from 'three/examples/jsm/objects/Water.js';
 import { lightUniforms, type World } from './world';
+import { Traffic } from './traffic';
 
 /** 0 = day, 0.5 = dusk, 1 = night. Everything outside and the baked mix follow it. */
 export interface TimeState {
@@ -66,6 +67,7 @@ export class Environment {
   private boats: { obj: THREE.Object3D; speed: number; range: number; phase: number }[] = [];
   private beacons: THREE.Mesh[] = [];
   state: TimeState = { t: 0, lights: 0 };
+  private traffic: Traffic | null = null;
 
   constructor(private scene: THREE.Scene, private world: World) {
     const m = world.manifest;
@@ -105,6 +107,7 @@ export class Environment {
     scene.add(this.sun, this.hemi);
     scene.fog = new THREE.FogExp2(0xbcd6ec, 0.00016);
     this.buildHarbourLife(m.waterY);
+    if (world.lanes.length) this.traffic = new Traffic(scene, world.lanes);
   }
 
   /** Small modelled boats and blinking aviation beacons keep the harbour alive. */
@@ -175,7 +178,7 @@ export class Environment {
     this.sun.intensity = THREE.MathUtils.lerp(3.0, 0.05, Math.min(1, t * 1.4));
     this.hemi.color.copy(u.uHorizon.value);
     this.hemi.groundColor.copy(u.uGround.value);
-    this.hemi.intensity = THREE.MathUtils.lerp(1.3, 0.05, t);
+    this.hemi.intensity = THREE.MathUtils.lerp(1.3, 0.1, t);
 
     const wu = (this.water.material as THREE.ShaderMaterial).uniforms;
     const moon = u.uMoonDir.value as THREE.Vector3;
@@ -185,7 +188,8 @@ export class Environment {
 
     (this.scene.fog as THREE.FogExp2).color.copy(u.uHorizon.value);
 
-    for (const m of this.world.facadeMats) m.emissiveIntensity = 0.85 * THREE.MathUtils.smoothstep(t, 0.3, 0.9);
+    for (const m of this.world.facadeMats) m.emissiveIntensity = 0.75 * THREE.MathUtils.smoothstep(t, 0.3, 0.9);
+    for (const m of this.world.cityLamps) m.emissiveIntensity = 3.0 * THREE.MathUtils.smoothstep(t, 0.35, 0.8);
 
     // Baked interior mix
     lightUniforms.uNight.value = night;
@@ -194,10 +198,11 @@ export class Environment {
     for (const c of this.world.curtainMats) {
       c.emissiveIntensity = THREE.MathUtils.lerp(0.75, 0.05, Math.min(1, t * 1.3)) + state.lights * night * 0.12;
     }
-    for (const g of this.world.glassMats) g.opacity = THREE.MathUtils.lerp(0.06, 0.16, night);
+    for (const g of this.world.glassMats) g.opacity = THREE.MathUtils.lerp(0.06, 0.1, night);
   }
 
   update(dt: number, time: number) {
+    this.traffic?.update(dt, THREE.MathUtils.smoothstep(this.state.t, 0.35, 0.85));
     this.skyMat.uniforms.uTime.value = time;
     (this.water.material as THREE.ShaderMaterial).uniforms.time.value += dt * 0.5;
     for (const b of this.boats) {
