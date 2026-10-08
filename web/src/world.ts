@@ -20,6 +20,7 @@ export interface Manifest {
   spawn: { position: V3; lookAt: V3 };
   waterY: number;
   sunDirection: V3;
+  models?: { apartment?: string; city?: string };
 }
 
 /** Shared by every lightmapped material: one update re-lights the whole home. */
@@ -146,8 +147,8 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
   const tick = <T,>(p: Promise<T>) => p.then((r) => { mapsDone++; progress.set('maps', mapsDone / mapTotal); report(); return r; });
 
   const [interior, city, lightmaps, facadeNight, waterNormals] = await Promise.all([
-    loadGltf('apartment', `${base}apartment.glb`),
-    loadGltf('city', `${base}city.glb`),
+    loadGltf('apartment', base + (manifest.models?.apartment ?? 'apartment.glb')),
+    loadGltf('city', base + (manifest.models?.city ?? 'city.glb')),
     Promise.all(
       lmEntries.map(async ([group, e]) => {
         const [day, night] = await Promise.all([tick(loadTex(base + e.day.file)), tick(loadTex(base + e.night.file))]);
