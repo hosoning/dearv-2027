@@ -103,3 +103,78 @@ export class Music {
     src.start();
   }
 }
+
+/** Music-box "Silent Night" (public domain), for the Christmas snow lantern. */
+export class MusicBox {
+  private ctx: AudioContext | null = null;
+  private out: GainNode | null = null;
+  private timer = 0;
+  playing = false;
+  // [midi, beats] in 3/4
+  private tune: [number, number][] = [
+    [67, 1.5], [69, 0.5], [67, 1], [64, 3], [67, 1.5], [69, 0.5], [67, 1], [64, 3],
+    [74, 2], [74, 1], [71, 3], [72, 2], [72, 1], [67, 3],
+    [69, 2], [69, 1], [72, 1.5], [71, 0.5], [69, 1], [67, 1.5], [69, 0.5], [67, 1], [64, 3],
+    [69, 2], [69, 1], [72, 1.5], [71, 0.5], [69, 1], [67, 1.5], [69, 0.5], [67, 1], [64, 3],
+    [74, 2], [74, 1], [77, 1.5], [74, 0.5], [71, 1], [72, 3], [76, 3],
+    [72, 1.5], [67, 0.5], [64, 1], [67, 1.5], [65, 0.5], [62, 1], [60, 6],
+  ];
+
+  start() {
+    if (this.playing) return;
+    this.ctx ??= new AudioContext();
+    void this.ctx.resume();
+    const ctx = this.ctx;
+    this.out = ctx.createGain();
+    this.out.gain.value = 0.55;
+    const echo = ctx.createDelay();
+    echo.delayTime.value = 0.23;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.28;
+    echo.connect(fb).connect(echo);
+    this.out.connect(ctx.destination);
+    this.out.connect(echo);
+    echo.connect(ctx.destination);
+    this.playing = true;
+    const loop = () => {
+      const beat = 0.5; // seconds per beat (~120 bpm, slightly slowed by the box)
+      let t = ctx.currentTime + 0.08;
+      for (const [m, b] of this.tune) {
+        this.pluck(m + 12, t, 0.18);
+        if (b >= 2) this.pluck(m, t, 0.07);
+        t += b * beat * (0.97 + Math.random() * 0.06);
+      }
+      this.timer = window.setTimeout(loop, (t - ctx.currentTime + 1.2) * 1000);
+    };
+    loop();
+  }
+
+  stop() {
+    if (!this.playing || !this.ctx || !this.out) return;
+    window.clearTimeout(this.timer);
+    const g = this.out;
+    g.gain.setTargetAtTime(0, this.ctx.currentTime, 0.25);
+    setTimeout(() => g.disconnect(), 1500);
+    this.playing = false;
+  }
+
+  private pluck(midi: number, when: number, vel: number) {
+    const ctx = this.ctx!;
+    const f = 440 * 2 ** ((midi - 69) / 12);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, when);
+    g.gain.linearRampToValueAtTime(vel, when + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 1.6);
+    for (const [mult, amp] of [[1, 1], [4.07, 0.35], [10.2, 0.08]] as const) {
+      const o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f * mult;
+      const og = ctx.createGain();
+      og.gain.value = amp;
+      o.connect(og).connect(g);
+      o.start(when);
+      o.stop(when + 1.7);
+    }
+    g.connect(this.out!);
+  }
+}

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { World, V3 } from './world';
 import type { Player, Box2 } from './controls';
-import { Music } from './audio';
+import { Music, MusicBox } from './audio';
 import { store } from './store';
 import { giftSheet, keepsakeBook, lettersSheet, openBook, photoSheet, pinnedLetterBook } from './ui';
 
@@ -16,6 +16,8 @@ export class Home {
   private lampOn = new Map<string, number>();
   private lampLights = new Map<string, THREE.PointLight>();
   private music = new Music();
+  private musicBox = new MusicBox();
+  private snow: { root: THREE.Object3D; points: THREE.Points; box: THREE.Box3; vel: Float32Array; light: THREE.PointLight; on: boolean; index: number } | null = null;
   private platter: THREE.Object3D | null = null;
   private tv: { mesh: THREE.Mesh; canvas: HTMLCanvasElement; tex: THREE.CanvasTexture; on: number; t: number } | null = null;
   private water: THREE.Mesh | null = null;
@@ -31,6 +33,7 @@ export class Home {
     this.setupLamps();
     this.setupTv();
     this.setupPhotos();
+    this.setupSnow();
     player.dynamicColliders = () => this.doorColliders();
   }
 
@@ -52,6 +55,7 @@ export class Home {
       curtains: this.curtainsClosed.get(root.userData.target) ? '拉開' : '拉上', tv: this.tv?.on ? '關掉' : '打開',
       music: this.music.playing ? '停止' : '播放', faucet: this.water?.visible ? '關水' : '開水', sit: '', letters: '翻閱',
       photo: '看看', gift: this.open.get(root) ? '再看一次' : '拆開', keepsake: '翻閱', letter: '讀信',
+      snowglobe: this.snow?.on ? '停止' : '飄雪 + 音樂 ·',
     };
     return `<b>${verb[kind] ?? ''}</b>${base}`;
   }
@@ -95,6 +99,7 @@ export class Home {
         }
         break;
       }
+      case 'snowglobe': this.toggleSnow(root, d.index as number); break;
       case 'letter': {
         const b = pinnedLetterBook(d.index as number);
         if (b) openBook(b);
@@ -311,6 +316,75 @@ export class Home {
     this.water.visible = !this.water.visible;
   }
 
+  // Christmas snow lantern ------------------------------------------------------------
+  private setupSnow() {
+    let glass: THREE.Object3D | null = null;
+    this.world.interior.traverse((o) => { if (o.userData.snowbox) glass = o; });
+    if (!glass) return;
+    const g = glass as THREE.Object3D;
+    let root: THREE.Object3D | null = g;
+    while (root && !root.userData.interact) root = root.parent;
+    const box = new THREE.Box3().setFromObject(g);
+    box.expandByScalar(-0.006);
+    const n = 260;
+    const pos = new Float32Array(n * 3);
+    const vel = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      pos[i * 3] = THREE.MathUtils.lerp(box.min.x, box.max.x, Math.random());
+      pos[i * 3 + 1] = THREE.MathUtils.lerp(box.min.y, box.max.y, Math.random());
+      pos[i * 3 + 2] = THREE.MathUtils.lerp(box.min.z, box.max.z, Math.random());
+      vel[i] = 0.02 + Math.random() * 0.03;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const points = new THREE.Points(geo, new THREE.PointsMaterial({
+      color: 0xffffff, size: 0.0045, sizeAttenuation: true, transparent: true, opacity: 0.95, depthWrite: false,
+    }));
+    points.visible = false;
+    points.renderOrder = 3;
+    this.scene.add(points);
+    const light = new THREE.PointLight(0xffc27a, 0, 0.9, 2);
+    light.position.copy(box.getCenter(new THREE.Vector3()));
+    this.scene.add(light);
+    this.snow = { root: root ?? g, points, box, vel, light, on: false, index: 0 };
+  }
+
+  private toggleSnow(root: THREE.Object3D, index: number) {
+    const s = this.snow;
+    if (!s) return;
+    s.on = !s.on;
+    s.index = index;
+    s.points.visible = s.on;
+    if (s.on) this.musicBox.start(); else this.musicBox.stop();
+    const story = document.getElementById('story');
+    if (story) {
+      story.hidden = !s.on;
+      story.onclick = () => { const b = keepsakeBook(index); if (b) openBook(b); };
+    }
+    void root;
+  }
+
+  private updateSnow(dt: number) {
+    const s = this.snow;
+    if (!s) return;
+    s.light.intensity += ((s.on ? 0.9 : 0) - s.light.intensity) * Math.min(1, dt * 3);
+    if (!s.on) return;
+    const a = s.points.geometry.getAttribute('position') as THREE.BufferAttribute;
+    const p = a.array as Float32Array;
+    const t = performance.now() / 1000;
+    for (let i = 0; i < s.vel.length; i++) {
+      p[i * 3 + 1] -= s.vel[i] * dt;
+      p[i * 3] += Math.sin(t * 1.3 + i) * 0.004 * dt;
+      p[i * 3 + 2] += Math.cos(t * 1.1 + i * 0.7) * 0.004 * dt;
+      if (p[i * 3 + 1] < s.box.min.y) {
+        p[i * 3 + 1] = s.box.max.y;
+        p[i * 3] = THREE.MathUtils.lerp(s.box.min.x, s.box.max.x, Math.random());
+        p[i * 3 + 2] = THREE.MathUtils.lerp(s.box.min.z, s.box.max.z, Math.random());
+      }
+    }
+    a.needsUpdate = true;
+  }
+
   // Doors as dynamic colliders -------------------------------------------------------
   private doorColliders(): Box2[] {
     const out: Box2[] = [];
@@ -338,6 +412,7 @@ export class Home {
     this.tweens = this.tweens.filter((t) => t.t < 1);
     if (this.platter && this.music.playing) this.platter.rotation.y -= dt * 3.5;
     if (this.tv) this.drawTv(dt);
+    this.updateSnow(dt);
     if (this.water?.visible) this.water.scale.x = 1 + Math.sin(performance.now() * 0.03) * 0.08;
     if (this.heart && this.heart.position) this.heart.rotation.y += dt * 1.2;
   }

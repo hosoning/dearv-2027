@@ -763,16 +763,184 @@ def build_vitrine(M):
     # Keepsakes: two per shelf, each an interactable that opens its story book
     spots = [(0.14, y0 + 0.65), (0.14, y1 - 0.65), (0.62, y0 + 0.65), (0.62, y1 - 0.65),
              (1.08, y0 + 0.65), (1.08, y1 - 0.65), (1.54, y0 + 0.65), (1.54, y1 - 0.65)]
-    makers = [_ring_box, _music_box, _perfume, _polaroids, _flower_box, _snow_globe, _teddy, _diary]
-    labels = ["戒指盒", "音樂盒", "香水", "拍立得", "花盒", "雪花球", "小熊", "日記本"]
-    for i, ((z, y), make, label) in enumerate(zip(spots, makers, labels)):
-        # small walnut plinth + brass label plate under each piece
-        box(f"keepsake_{i}_plinth", (0.26, 0.3, 0.05), (xc, y, z + 0.025), M["walnut"], bevel=0.006)
-        box(f"keepsake_{i}_plate", (0.002, 0.1, 0.025), (xc - 0.131, y, z + 0.025), M["brass"])
-        root = empty(f"keepsake_{i}", (xc, y, z + 0.05))
-        make(f"keepsake_{i}", xc, y, z + 0.05, root, M)
-        root.scale = (2.0, 2.0, 2.0)   # pieces are modelled at life size; display them larger
-        interact(root, "keepsake", label, index=i)
+    makers = [_pajamas, _polaroids, _tie_clip, _teddy, _xmas_lantern, _gold520, _diary, _perfume]
+    labels = ["Quin's 的睡衣", "拍立得", "領帶夾 · Enrico Coveri", "小熊", "聖誕雪屋音樂盒", "520 黃金大餅", "日記本", "香水"]
+    scales = [1.15, 2, 2.2, 2, 1.6, 1.3, 2, 2]
+    kinds = ["keepsake"] * 4 + ["snowglobe"] + ["keepsake"] * 3
+    for i, ((z, y), make, label, sc, kind) in enumerate(zip(spots, makers, labels, scales, kinds)):
+        lift = 0.05 if make in (_polaroids, _teddy, _diary, _perfume) else 0.0
+        if lift:  # small walnut plinth + brass label plate under the smaller pieces
+            box(f"keepsake_{i}_plinth", (0.26, 0.3, 0.05), (xc, y, z + 0.025), M["walnut"], bevel=0.006)
+            box(f"keepsake_{i}_plate", (0.002, 0.1, 0.025), (xc - 0.131, y, z + 0.025), M["brass"])
+        root = empty(f"keepsake_{i}", (xc, y, z + lift))
+        make(f"keepsake_{i}", xc, y, z + lift, root, M)
+        root.scale = (sc, sc, sc)   # pieces are modelled at life size; small ones are displayed larger
+        interact(root, kind, label, index=i)
+
+
+def _pajamas(n, x, y, z, p, M):
+    """Quin's charcoal pinstripe satin pajamas in the white PRIFU gift box."""
+    paper = material("prifu_white", color=(0.95, 0.945, 0.935), rough=0.6)
+    satin = material("pinstripe_satin", albedo="pinstripe_albedo", normal="pinstripe_normal", rough=0.32,
+                     tile=(0.14, 0.14), sheen=0.6, normal_strength=0.3)
+    cuff = material("cuff_quins", albedo="cuff_quins_albedo", rough=0.32, sheen=0.6)
+    art = material("prifu_box_art", albedo="prifu_box_albedo", rough=0.55)
+    tx = x - 0.04                                   # tray towards the glass
+    tw, tl, th, t = 0.26, 0.36, 0.07, 0.006
+    walls = [((tw, tl, t), (tx, y, z + t / 2)),
+             ((t, tl, th), (tx - tw / 2 + t / 2, y, z + th / 2)), ((t, tl, th), (tx + tw / 2 - t / 2, y, z + th / 2)),
+             ((tw, t, th), (tx, y - tl / 2 + t / 2, z + th / 2)), ((tw, t, th), (tx, y + tl / 2 - t / 2, z + th / 2))]
+    multi_box(f"{n}_tray", walls, paper, bevel=0.001, parent=p)
+    box(f"{n}_tissue", (tw - 0.02, tl - 0.02, 0.002), (tx, y, z + 0.008), M["paper"], parent=p)
+    # folded shirt: collar at the back, placket running towards the viewer
+    cushion(f"{n}_shirt", (tw - 0.03, tl - 0.04, 0.04), (tx, y, z + 0.03), satin, puff=0.3, parent=p)
+    for s_ in (-1, 1):
+        box(f"{n}_lapel_{s_}", (0.075, 0.05, 0.006), (tx + 0.07, y + s_ * 0.03, z + 0.056), satin,
+            rot=(0, 0, R(s_ * 32)), parent=p)
+    box(f"{n}_collar", (0.03, 0.14, 0.012), (tx + 0.105, y, z + 0.054), satin, bevel=0.004, parent=p)
+    for k in range(3):
+        cylinder(f"{n}_button_{k}", 0.007, 0.003, (tx + 0.035 - k * 0.055, y, z + 0.058), M["vinyl"], segs=12,
+                 parent=p)
+    box(f"{n}_pocket", (0.05, 0.045, 0.002), (tx + 0.04, y - 0.08, z + 0.057), satin, parent=p)
+    # folded trouser hem laid across the top, embroidered "Quin's."
+    band = box(f"{n}_cuff", (0.062, tl - 0.05, 0.01), (tx - 0.065, y, z + 0.063), cuff, bevel=0.002, parent=p)
+    band["uvfit"] = "-yx"
+    tube(f"{n}_ribbon", [(tx - 0.1, y - 0.2, z + 0.004), (tx - 0.06, y - 0.15, z + 0.07), (tx + 0.02, y - 0.12, z + 0.075),
+                         (tx + 0.06, y - 0.2, z + 0.003)], 0.004, paper, parent=p)
+    # lid leaning against the back of the vitrine, art facing the room
+    lid = box(f"{n}_lid", (tw, tl, 0.014), (0, 0, 0), art, bevel=0.002, parent=None)
+    lid["uvfit"] = "-yx"
+    lid.location = (x + 0.15, y, z + 0.125)
+    lid.rotation_euler = (0, R(-72), 0)
+    bpy.context.view_layer.update()
+    mw = lid.matrix_world.copy()
+    lid.parent = p
+    lid.matrix_world = mw
+
+
+def _xmas_lantern(n, x, y, z, p, M):
+    """Antique-bronze flat lantern snow music box (14.5 x 8 x 22 cm): forest, cottages, lamppost."""
+    bronze = material("antique_bronze", color=(0.22, 0.13, 0.07), metal=0.8, rough=0.42)
+    gilt = material("bronze_gilt", color=(0.62, 0.42, 0.2), metal=1.0, rough=0.3)
+    snow = material("fake_snow", color=(0.96, 0.96, 0.98), rough=0.9, emission=(1.0, 0.85, 0.6), night_emission=0.6)
+    pine = material("pine", color=(0.08, 0.24, 0.13), rough=0.7)
+    W, D = 0.145, 0.08          # width along y, depth along x (front faces -x)
+    box(f"{n}_plinth", (D + 0.012, W + 0.012, 0.045), (x, y, z + 0.0225), bronze, bevel=0.004, parent=p)
+    box(f"{n}_plinth_trim", (D + 0.016, W + 0.016, 0.006), (x, y, z + 0.046), gilt, bevel=0.002, parent=p)
+    box(f"{n}_scroll", (0.002, 0.08, 0.012), (x - D / 2 - 0.007, y, z + 0.024), gilt, bevel=0.003, parent=p)
+    for dx in (-1, 1):
+        for dy in (-1, 1):
+            sphere(f"{n}_foot_{dx}_{dy}", 0.007, (x + dx * D / 2, y + dy * W / 2, z - 0.002), bronze, segs=10, parent=p)
+    g0, gh = z + 0.049, 0.105
+    posts = [((0.009, 0.009, gh), (x + dx * (D / 2 - 0.004), y + dy * (W / 2 - 0.004), g0 + gh / 2))
+             for dx in (-1, 1) for dy in (-1, 1)]
+    posts.append(((D, W, 0.008), (x, y, g0 + gh)))
+    multi_box(f"{n}_frame", posts, bronze, bevel=0.002, parent=p)
+    gl = box(f"{n}_glass", (D - 0.006, W - 0.006, gh - 0.004), (x, y, g0 + gh / 2), M["glass"], group=None, parent=p)
+    gl["glass"] = 1
+    gl["snowbox"] = 1
+    box(f"{n}_snow", (D - 0.01, W - 0.01, 0.012), (x, y, g0 + 0.006), snow, parent=p)
+    for k, (dy, h, dx) in enumerate(((0.0, 0.07, 0.0), (-0.035, 0.05, 0.012), (0.04, 0.055, 0.01), (-0.055, 0.035, -0.01),
+                                       (0.058, 0.04, -0.012), (0.02, 0.03, 0.022))):
+        cylinder(f"{n}_tree_{k}", 0.014 + h * 0.18, h, (x + dx, y + dy, g0 + 0.012 + h / 2), pine, r2=0.001, segs=10,
+                 parent=p)
+        cylinder(f"{n}_treesnow_{k}", 0.008 + h * 0.1, h * 0.35, (x + dx, y + dy, g0 + 0.012 + h * 0.8), snow,
+                 r2=0.0005, segs=10, parent=p)
+    sphere(f"{n}_star", 0.006, (x, y, g0 + 0.086), material("star_gold", color=(1, 0.8, 0.3), metal=1, rough=0.2,
+                                                           emission=(1, 0.8, 0.4), night_emission=3.0),
+           scale=(0.5, 1, 1), segs=8, parent=p)
+    for k in range(6):
+        a = k * 1.9
+        sphere(f"{n}_bauble_{k}", 0.003, (x + 0.012 * math.cos(a) - 0.004, y + 0.012 * math.sin(a), g0 + 0.03 + k * 0.007),
+               material("bauble_red", color=(0.8, 0.05, 0.05), rough=0.2), segs=8, parent=p)
+    cottage = material("cottage", color=(0.62, 0.32, 0.2), rough=0.6, emission=(1.0, 0.7, 0.35), night_emission=1.5)
+    for k, dy in enumerate((-0.028, 0.03)):
+        box(f"{n}_house_{k}", (0.022, 0.026, 0.02), (x + 0.018, y + dy, g0 + 0.022), cottage, parent=p)
+        box(f"{n}_roof_{k}", (0.026, 0.03, 0.008), (x + 0.018, y + dy, g0 + 0.036), snow, rot=(R(18), 0, 0), parent=p)
+    cylinder(f"{n}_lamppost", 0.0015, 0.05, (x - 0.02, y - 0.05, g0 + 0.037), bronze, segs=6, parent=p)
+    sphere(f"{n}_lamp", 0.004, (x - 0.02, y - 0.05, g0 + 0.064), M["bulb"], segs=8, parent=p)
+    # roof, finial and ring
+    box(f"{n}_eaves", (D + 0.03, W + 0.035, 0.008), (x, y, g0 + gh + 0.008), bronze, bevel=0.003, parent=p)
+    cylinder(f"{n}_roof", 0.085, 0.04, (x, y, g0 + gh + 0.032), bronze, r2=0.025, segs=4, rot=(0, 0, R(45)),
+             parent=p).scale = (0.62, 1.12, 1)
+    box(f"{n}_roof_scroll", (0.002, 0.07, 0.01), (x - 0.03, y, g0 + gh + 0.025), gilt, rot=(0, R(-35), 0), parent=p)
+    cylinder(f"{n}_finial", 0.012, 0.022, (x, y, g0 + gh + 0.063), bronze, r2=0.008, segs=16, parent=p)
+    tube(f"{n}_ring", [(x, y + 0.02 * math.cos(a * math.pi / 10), g0 + gh + 0.096 + 0.022 * math.sin(a * math.pi / 10))
+                       for a in range(21)], 0.003, bronze, parent=p)
+
+
+def _tie_clip(n, x, y, z, p, M):
+    """Enrico Coveri tie clip (round disc, garnet stone) in its open grey box + the pink-wrapped gift."""
+    grey = material("ec_box", albedo="ec_box_albedo", rough=0.7)
+    greyp = material("ec_box_plain", color=(0.6, 0.59, 0.57), rough=0.7)
+    leather = material("insert_leather", color=(0.03, 0.03, 0.035), albedo="leather_albedo", normal="leather_normal",
+                       rough=0.5, tile=(0.08, 0.08))
+    silver = material("rhodium", color=(0.86, 0.87, 0.9), metal=1.0, rough=0.12)
+    by = y - 0.03
+    box(f"{n}_base", (0.06, 0.1, 0.022), (x, by, z + 0.011), greyp, bevel=0.002, parent=p)
+    box(f"{n}_insert", (0.052, 0.092, 0.002), (x, by, z + 0.0225), leather, parent=p)
+    lid = box(f"{n}_lid", (0.006, 0.1, 0.06), (x + 0.033, by, z + 0.052), grey, bevel=0.0015, rot=(0, R(-8), 0), parent=p)
+    lid["uvfit"] = "-yz"
+    box(f"{n}_tab", (0.004, 0.012, 0.012), (x + 0.03, by, z + 0.085), material("ribbon_grey", color=(0.5, 0.5, 0.52),
+                                                                               rough=0.4, sheen=0.6), parent=p)
+    # the clip: bar + spring blade, disc with engraved ring and a garnet
+    box(f"{n}_bar", (0.006, 0.058, 0.0025), (x - 0.004, by + 0.004, z + 0.026), silver, bevel=0.001, parent=p)
+    box(f"{n}_blade", (0.0045, 0.05, 0.0015), (x - 0.004, by + 0.008, z + 0.0238), silver, bevel=0.0006, parent=p)
+    disc = cylinder(f"{n}_disc", 0.0095, 0.003, (x - 0.004, by - 0.026, z + 0.0265),
+                    material("tieclip_disc", albedo="tieclip_disc_albedo", metal=0.9, rough=0.18), segs=40, parent=p)
+    disc["uvfit"] = "xy"
+    sphere(f"{n}_garnet", 0.0045, (x - 0.004, by - 0.026, z + 0.028),
+           material("garnet", color=(0.38, 0.02, 0.14), rough=0.05, coat=1.0), scale=(1, 1, 0.45), segs=16, parent=p)
+    # pink striped wrapping with the iridescent star bow
+    wy = y + 0.07
+    box(f"{n}_wrapped", (0.055, 0.085, 0.032), (x - 0.005, wy, z + 0.016),
+        material("wrap_coral", color=(0.93, 0.45, 0.42), rough=0.35, coat=0.5), bevel=0.002, parent=p)
+    bow = material("bow_iridescent", color=(0.92, 0.66, 0.85), metal=0.6, rough=0.18, coat=1.0)
+    for k in range(10):
+        a = k * 2 * math.pi / 10
+        cylinder(f"{n}_bow_{k}", 0.006, 0.022, (x - 0.005 + 0.009 * math.cos(a), wy + 0.009 * math.sin(a), z + 0.04),
+                 bow, r2=0.0005, segs=8, rot=(R(62), 0, a + math.pi / 2),
+                 parent=p)
+    sphere(f"{n}_bow_core", 0.009, (x - 0.005, wy, z + 0.042), bow, scale=(1, 1, 0.8), segs=12, parent=p)
+
+
+def _gold520(n, x, y, z, p, M):
+    """Round rose box with satin 'forever love' ribbon, the 520 gold coin on its stand, and the card."""
+    cream = material("hatbox_cream", color=(0.93, 0.86, 0.68), metal=0.2, rough=0.4)
+    goldband = material("hatbox_gold", color=(0.8, 0.62, 0.32), metal=1.0, rough=0.3)
+    satin = material("satin_dusty_pink", color=(0.72, 0.5, 0.46), rough=0.3, sheen=0.8)
+    rose = material("rose_soft_pink", color=(0.93, 0.7, 0.74), rough=0.6, sheen=0.6)
+    hy = y - 0.06
+    cylinder(f"{n}_hatbox", 0.07, 0.075, (x, hy, z + 0.0375), cream, segs=48, parent=p)
+    cylinder(f"{n}_hatband", 0.0705, 0.012, (x, hy, z + 0.008), goldband, segs=48, parent=p)
+    for k in range(13):
+        a = k * 2.4
+        r = 0.05 * math.sqrt(k / 13)
+        rx, ry = x + r * math.cos(a), hy + r * math.sin(a)
+        sphere(f"{n}_rose_{k}", 0.019, (rx, ry, z + 0.085), rose, scale=(1, 1, 0.7), segs=14, parent=p)
+        cylinder(f"{n}_petal_{k}", 0.021, 0.006, (rx, ry, z + 0.079), rose, r2=0.024, segs=14, parent=p)
+    for ang in (0, 90):
+        tube(f"{n}_ribbon_{ang}", [(x + 0.074 * math.cos(math.radians(ang)) * s_, hy + 0.074 * math.sin(math.radians(ang)) * s_,
+                                    z + (0.0 if abs(s_) > 0.9 else 0.09 + 0.012 * (1 - s_ * s_)))
+                                   for s_ in (-1, -0.95, -0.6, 0, 0.6, 0.95, 1)], 0.003, satin, parent=p)
+    for s_ in (-1, 1):
+        sphere(f"{n}_bowloop_{s_}", 0.022, (x + s_ * 0.018, hy, z + 0.112), satin, scale=(1, 0.35, 0.6), segs=12,
+               rot=(0, R(s_ * 25), 0), parent=p)
+    # coin standing in a clear ring on a red velvet stand, facing the room
+    cy_ = y + 0.075
+    box(f"{n}_stand", (0.05, 0.075, 0.018), (x + 0.005, cy_, z + 0.009), material("stand_red", color=(0.5, 0.05, 0.07),
+                                                                                  rough=0.7, sheen=1.0), bevel=0.004,
+        parent=p)
+    coin = cylinder(f"{n}_coin", 0.034, 0.005, (x, cy_, z + 0.054),
+                    material("coin520", albedo="coin520_albedo", normal="coin520_normal", metal=1.0, rough=0.22,
+                             normal_strength=0.8), segs=64, rot=(0, R(-90), 0), parent=p)
+    coin["uvfit"] = "-yx"   # local x points up after the -90 deg turn; the face looks at the room
+    ring = cylinder(f"{n}_acrylic", 0.038, 0.012, (x, cy_, z + 0.054), M["glass"], segs=48, rot=(0, R(90), 0),
+                    group=None, parent=p)
+    ring["glass"] = 1
+    card = box(f"{n}_card", (0.055, 0.066, 0.002), (x - 0.06, y + 0.005, z + 0.001),
+               material("bestwishes_card", albedo="bestwishes_card_albedo", rough=0.8), rot=(0, 0, R(-8)), parent=p)
+    card["uvfit"] = "-yx"
 
 
 def _ring_box(n, x, y, z, p, M):

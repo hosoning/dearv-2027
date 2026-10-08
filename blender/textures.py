@@ -219,6 +219,8 @@ def generate_all(out: str):
     facade(out)
     water_normals(out)
     photos(out)
+    pajamas(out)
+    gifts_2025(out)
 
 
 if __name__ == "__main__":
@@ -246,3 +248,184 @@ def photos(out, count=8, size=512):
         img += np.exp(-(d / 0.09) ** 2)[..., None] * 0.35
         vign = 1 - 0.35 * ((xx - 0.5) ** 2 + (yy - 0.5) ** 2) * 2
         save(f"{out}/photo_{i}.png", img * vign[..., None])
+
+
+# --------------------------------------------------------------------------
+# Quin's pajamas: charcoal satin with silver dotted pinstripes, "Quin's." cuff
+# embroidery, and the white PRIFU gift box with its arched lighthouse window.
+FONT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts")
+
+
+def _font(name, size):
+    from PIL import ImageFont
+    return ImageFont.truetype(os.path.join(FONT_DIR, name), size)
+
+
+def _pinstripe(size, stripes=6, seed=600):
+    yy, xx = np.mgrid[0:size, 0:size] / size
+    sheen = fbm(size, 3, 4, aspect=(1.0, 0.3), seed=seed)
+    base = colorize(sheen, (0.10, 0.105, 0.12), (0.22, 0.225, 0.25))
+    phase = (xx * stripes) % 1.0
+    line = np.exp(-((phase - 0.5) * size / stripes / 1.2) ** 2)
+    dots = (np.sin(yy * size * 0.9) > -0.2).astype(float)
+    silver = (line * dots)[..., None] * np.array((0.78, 0.8, 0.84))
+    return np.clip(base * (1 - line[..., None] * 0.9) + silver, 0, 1), line
+
+
+def pajamas(out, size=512):
+    from PIL import Image as PImage, ImageDraw
+    alb, line = _pinstripe(size)
+    save(f"{out}/pinstripe_albedo.png", alb)
+    weave = fbm(size, 90, 2, aspect=(1, 0.3), seed=610)
+    save(f"{out}/pinstripe_normal.png", normal_from_height(weave * 0.5 + line * 0.3, 1.0))
+
+    # Cuff band (folded trouser hem) with the embroidered name
+    W, Hh = 1024, 256
+    band, _ = _pinstripe(1024)
+    band = band[:Hh] * 0.95
+    img = PImage.fromarray((band * 255).astype(np.uint8), "RGB")
+    txt = PImage.new("L", (W, Hh), 0)
+    d = ImageDraw.Draw(txt)
+    f = _font("dancing-script-latin-400-normal.woff", 132)
+    d.text((W / 2, Hh / 2 + 6), "Quin's.", font=f, fill=255, anchor="mm")
+    txt = txt.rotate(9, resample=PImage.BICUBIC, center=(W / 2, Hh / 2))
+    thread = PImage.new("RGB", (W, Hh), (226, 224, 216))
+    img.paste(thread, (0, 0), txt)
+    d2 = ImageDraw.Draw(img)
+    for y in (10, Hh - 12):  # hem stitching
+        for x in range(0, W, 14):
+            d2.line([(x, y), (x + 8, y)], fill=(70, 72, 78), width=2)
+    img.save(f"{out}/cuff_quins_albedo.png")
+
+    # Box lid art
+    W, Hh = 768, 1024
+    paper = colorize(fbm(Hh, 40, 3, seed=620)[:, :W] if False else fbm(1024, 40, 3, seed=620)[:, :W],
+                     (0.95, 0.945, 0.935), (0.985, 0.98, 0.975))
+    img = PImage.fromarray((paper * 255).astype(np.uint8), "RGB")
+    d = ImageDraw.Draw(img)
+    ax0, ax1, ay0, ay1 = 250, 518, 260, 640
+    r = (ax1 - ax0) // 2
+    # night-sea scene inside an arch
+    scene = PImage.new("RGB", (W, Hh))
+    sd = ImageDraw.Draw(scene)
+    for y in range(ay0 - r, ay1):
+        t = (y - (ay0 - r)) / (ay1 - ay0 + r)
+        c = tuple(int(255 * v) for v in (0.17 + 0.12 * t, 0.21 + 0.12 * t, 0.26 + 0.1 * t))
+        sd.line([(ax0, y), (ax1, y)], fill=c)
+    horizon = 520
+    sd.rectangle([ax0, horizon, ax1, ay1], fill=(38, 46, 56))
+    for k in range(18):
+        yk = horizon + 8 + k * 6
+        sd.line([(ax0 + 20 + (k * 37) % 60, yk), (ax1 - 30 - (k * 23) % 50, yk)], fill=(70, 82, 96), width=1)
+    sd.rectangle([ax0, horizon - 22, ax1, horizon], fill=(30, 36, 44))           # breakwater
+    lx = 404
+    sd.polygon([(lx - 12, horizon - 22), (lx + 12, horizon - 22), (lx + 7, horizon - 120), (lx - 7, horizon - 120)],
+               fill=(28, 32, 38))                                                  # lighthouse tower
+    sd.rectangle([lx - 10, horizon - 140, lx + 10, horizon - 120], fill=(240, 226, 170))
+    sd.polygon([(lx - 13, horizon - 140), (lx + 13, horizon - 140), (lx, horizon - 158)], fill=(28, 32, 38))
+    sd.ellipse([300, 370, 330, 400], fill=(236, 236, 228))                       # moon
+    for bx, by in ((330, 450), (352, 440)):
+        sd.arc([bx - 8, by - 4, bx, by + 4], 200, 340, fill=(220, 220, 214), width=2)
+        sd.arc([bx, by - 4, bx + 8, by + 4], 200, 340, fill=(220, 220, 214), width=2)
+    mask = PImage.new("L", (W, Hh), 0)
+    md = ImageDraw.Draw(mask)
+    md.rectangle([ax0, ay0, ax1, ay1], fill=255)
+    md.ellipse([ax0, ay0 - r, ax1, ay0 + r], fill=255)
+    img.paste(scene, (0, 0), mask)
+    rng = np.random.default_rng(630)
+    for _ in range(26):  # stars and little moons around the arch
+        a = rng.uniform(0, 2 * np.pi)
+        rad = rng.uniform(r + 25, r + 110)
+        sx, sy = W / 2 + rad * np.cos(a) * 0.9, (ay0 + 80) + rad * np.sin(a) * 1.25
+        s = rng.uniform(2, 6)
+        d.polygon([(sx, sy - s), (sx + s * 0.3, sy), (sx, sy + s), (sx - s * 0.3, sy)], fill=(40, 42, 48))
+        d.polygon([(sx - s, sy), (sx, sy + s * 0.3), (sx + s, sy), (sx, sy - s * 0.3)], fill=(40, 42, 48))
+    d.text((W / 2, ay1 + 40), "Sweet Dreams", font=_font("cormorant-garamond-latin-500-italic.woff", 40),
+           fill=(60, 60, 64), anchor="mm")
+    d.text((W / 2, ay1 + 150), "P R I F U", font=_font("cormorant-garamond-latin-500-italic.woff", 54),
+           fill=(40, 40, 44), anchor="mm")
+    d.text((W / 2, ay1 + 225), "派赋", font=_font("noto-serif-sc-prifu.ttf", 48), fill=(40, 40, 44), anchor="mm")
+    img.save(f"{out}/prifu_box_albedo.png")
+
+
+def gifts_2025(out):
+    """Tie-clip box & disc (Enrico Coveri), the 520 gold coin, the Best Wishes card."""
+    from PIL import Image as PImage, ImageDraw
+    serif = "cormorant-garamond-latin-500-italic.woff"
+    # Enrico Coveri box lid: warm grey sparkle paper with the EC monogram
+    W = 1024
+    n = fbm(W, 120, 2, seed=700)
+    paper = colorize(n, (0.56, 0.55, 0.53), (0.66, 0.65, 0.63))
+    rng = np.random.default_rng(701)
+    paper[rng.random((W, W)) > 0.996] = (0.9, 0.9, 0.88)
+    img = PImage.fromarray((paper * 255).astype(np.uint8), "RGB")
+    d = ImageDraw.Draw(img)
+    ink = (122, 108, 102)
+    d.text((W / 2, W * 0.42), "EC", font=_font(serif, 260), fill=ink, anchor="mm")
+    d.ellipse([W / 2 - 150, W * 0.42 - 150, W / 2 + 150, W * 0.42 + 150], outline=ink, width=6)
+    d.text((W / 2, W * 0.68), "ENRICO COVERI", font=_font(serif, 96), fill=ink, anchor="mm")
+    img.save(f"{out}/ec_box_albedo.png")
+    # tie-clip disc: engraved name ring around a garnet stone
+    S = 512
+    img = PImage.new("RGB", (S, S), (205, 207, 212))
+    d = ImageDraw.Draw(img)
+    d.ellipse([8, 8, S - 8, S - 8], fill=(214, 216, 220), outline=(150, 152, 158), width=6)
+    d.ellipse([150, 150, S - 150, S - 150], fill=(92, 18, 52))
+    d.ellipse([195, 175, 250, 215], fill=(190, 90, 140))
+    f = _font(serif, 44)
+    text = "ENRICO COVERI · ENRICO COVERI · "
+    for k, ch in enumerate(text):
+        a = 2 * np.pi * k / len(text) - np.pi / 2
+        tile = PImage.new("L", (60, 60), 0)
+        ImageDraw.Draw(tile).text((30, 30), ch, font=f, fill=255, anchor="mm")
+        tile = tile.rotate(-np.degrees(a) - 90, resample=PImage.BICUBIC)
+        cx, cy = S / 2 + 175 * np.cos(a), S / 2 + 175 * np.sin(a)
+        img.paste((95, 97, 104), (int(cx - 30), int(cy - 30)), tile)
+    img.save(f"{out}/tieclip_disc_albedo.png")
+    # 520 gold coin: albedo + embossed normal
+    S = 1024
+    h = PImage.new("L", (S, S), 0)
+    d = ImageDraw.Draw(h)
+    d.ellipse([20, 20, S - 20, S - 20], fill=90)
+    for k in range(72):  # scalloped inner rim
+        a = 2 * np.pi * k / 72
+        cx, cy = S / 2 + 400 * np.cos(a), S / 2 + 400 * np.sin(a)
+        d.ellipse([cx - 22, cy - 22, cx + 22, cy + 22], fill=150)
+    d.ellipse([110, 110, S - 110, S - 110], fill=70)
+    d.text((S / 2, S / 2 + 10), "520", font=_font("DejaVuSerif-Bold.ttf", 300), fill=235, anchor="mm")
+    for k in range(10):  # little hearts and stars around the numerals
+        a = 2 * np.pi * k / 10 + 0.3
+        cx, cy = S / 2 + 310 * np.cos(a), S / 2 + 310 * np.sin(a)
+        if k % 2 == 0:
+            r = 18
+            d.ellipse([cx - r, cy - r, cx, cy], fill=200); d.ellipse([cx, cy - r, cx + r, cy], fill=200)
+            d.polygon([(cx - r, cy - r / 2), (cx + r, cy - r / 2), (cx, cy + r)], fill=200)
+        else:
+            d.polygon([(cx, cy - 16), (cx + 5, cy), (cx, cy + 16), (cx - 5, cy)], fill=190)
+            d.polygon([(cx - 16, cy), (cx, cy + 5), (cx + 16, cy), (cx, cy - 5)], fill=190)
+    hh = np.asarray(h, dtype=float) / 255
+    hh = _blur(hh, 1.5) if "_blur" in globals() else hh
+    gold = colorize(np.clip(hh * 1.2, 0, 1), (0.72, 0.52, 0.16), (1.0, 0.84, 0.42))
+    save(f"{out}/coin520_albedo.png", gold)
+    save(f"{out}/coin520_normal.png", normal_from_height(hh, 6.0))
+    # Best Wishes card
+    W, Hh = 768, 640
+    img = PImage.new("RGB", (W, Hh), (246, 241, 234))
+    d = ImageDraw.Draw(img)
+    for k in range(14):  # soft painted roses around the border
+        cx, cy = rng.uniform(0, W), (rng.uniform(0, 110) if k % 2 else rng.uniform(Hh - 110, Hh))
+        r = rng.uniform(30, 60)
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(236, 200, 196) if k % 3 else (214, 222, 205))
+        d.ellipse([cx - r * 0.5, cy - r * 0.5, cx + r * 0.5, cy + r * 0.5], fill=(225, 178, 176))
+    d.text((W / 2, Hh / 2 - 30), "Best Wishes", font=_font(serif, 92), fill=(70, 66, 64), anchor="mm")
+    d.text((W / 2, Hh / 2 + 50), "Loving companion at all times", font=_font(serif, 40), fill=(90, 86, 84), anchor="mm")
+    img.save(f"{out}/bestwishes_card_albedo.png")
+
+
+def _blur(a, sigma):
+    r = int(sigma * 3)
+    k = np.exp(-(np.arange(-r, r + 1) ** 2) / (2 * sigma * sigma))
+    k /= k.sum()
+    for axis in (0, 1):
+        a = sum(w * np.roll(a, i - r, axis=axis) for i, w in enumerate(k))
+    return a

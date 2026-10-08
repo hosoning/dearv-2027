@@ -60,6 +60,37 @@ def strip_hidden_shell_faces(objs, pad=0.01):
         bm.free()
 
 
+def apply_uvs():
+    """UV pass shared by the build and the product renders: hide outward shell faces,
+    box-project tiling textures, and fit decal textures (rugs, photos, labels) to their objects."""
+    ext = lib.collection("Exterior")
+    interior = list(lib.collection("Interior").objects)
+    strip_hidden_shell_faces(lib.LIGHTMAP_GROUPS["arch"])
+    for ob in interior:
+        if ob.type != "MESH":
+            continue
+        if ob.get("uvfit"):
+            # rugs / photos / TV: stretch the texture over the object's own extent
+            import bmesh
+            mode = ob["uvfit"] if isinstance(ob["uvfit"], str) else "xy"
+            flip = mode.startswith("-")
+            ia, ib = {"xy": (0, 1), "yx": (1, 0), "yz": (1, 2), "xz": (0, 2)}[mode.lstrip("-")]
+            bm = bmesh.new(); bm.from_mesh(ob.data)
+            uv = bm.loops.layers.uv.get("UVMap") or bm.loops.layers.uv.new("UVMap")
+            ca = [v.co[ia] for v in bm.verts]; cb = [v.co[ib] for v in bm.verts]
+            for f in bm.faces:
+                for l in f.loops:
+                    u = (l.vert.co[ia] - min(ca)) / (max(ca) - min(ca))
+                    l[uv].uv = (1 - u if flip else u, (l.vert.co[ib] - min(cb)) / (max(cb) - min(cb)))
+            bm.to_mesh(ob.data); bm.free()
+        else:
+            lib.box_project_uv(ob)
+    for ob in ext.objects:
+        if ob.type == "MESH" and not ob.get("facade"):
+            lib.box_project_uv(ob, tile=(50, 50))
+    return interior, ext
+
+
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]
     ap = argparse.ArgumentParser()
@@ -75,7 +106,7 @@ def main():
     t0 = time.time()
 
     tex = os.path.abspath(args.tex)
-    if not os.path.exists(os.path.join(tex, "photo_7.png")):
+    if not os.path.exists(os.path.join(tex, "prifu_box_albedo.png")):
         print("[dearv] generating textures ->", tex)
         textures.generate_all(tex)
     lib.TEX_DIR = tex
@@ -85,30 +116,7 @@ def main():
     ext = exterior.build()
     bpy.context.view_layer.update()
 
-    interior = list(lib.collection("Interior").objects)
-    strip_hidden_shell_faces(lib.LIGHTMAP_GROUPS["arch"])
-    for ob in interior:
-        if ob.type != "MESH":
-            continue
-        if ob.get("uvfit"):
-            # rugs / photos / TV: stretch the texture over the object's own extent
-            import bmesh
-            mode = ob["uvfit"] if isinstance(ob["uvfit"], str) else "xy"
-            flip = mode.startswith("-")
-            ia, ib = {"xy": (0, 1), "yz": (1, 2), "xz": (0, 2)}[mode.lstrip("-")]
-            bm = bmesh.new(); bm.from_mesh(ob.data)
-            uv = bm.loops.layers.uv.get("UVMap") or bm.loops.layers.uv.new("UVMap")
-            ca = [v.co[ia] for v in bm.verts]; cb = [v.co[ib] for v in bm.verts]
-            for f in bm.faces:
-                for l in f.loops:
-                    u = (l.vert.co[ia] - min(ca)) / (max(ca) - min(ca))
-                    l[uv].uv = (1 - u if flip else u, (l.vert.co[ib] - min(cb)) / (max(cb) - min(cb)))
-            bm.to_mesh(ob.data); bm.free()
-        else:
-            lib.box_project_uv(ob)
-    for ob in ext.objects:
-        if ob.type == "MESH" and not ob.get("facade"):
-            lib.box_project_uv(ob, tile=(50, 50))
+    interior, ext = apply_uvs()
     print(f"[dearv] geometry built in {time.time() - t0:.1f}s; "
           f"arch={len(lib.LIGHTMAP_GROUPS['arch'])} furn={len(lib.LIGHTMAP_GROUPS['furn'])}")
 
