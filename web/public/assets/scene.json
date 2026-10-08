@@ -1,0 +1,664 @@
+{
+ "lightmaps": {
+  "arch": {
+   "day": {
+    "file": "lightmaps/arch_day.webp",
+    "scale": 2.4657605409622194
+   },
+   "night": {
+    "file": "lightmaps/arch_night.webp",
+    "scale": 3.171064066886902
+   }
+  },
+  "furn": {
+   "day": {
+    "file": "lightmaps/furn_day.webp",
+    "scale": 1.920586931705475
+   },
+   "night": {
+    "file": "lightmaps/furn_night.webp",
+    "scale": 4.565093636512756
+   }
+  }
+ },
+ "version": 1791434332,
+ "colliders": [
+  {
+   "min": [
+    -7.25,
+    -5
+   ],
+   "max": [
+    -7,
+    5.25
+   ]
+  },
+  {
+   "min": [
+    7,
+    -5
+   ],
+   "max": [
+    7.25,
+    5.25
+   ]
+  },
+  {
+   "min": [
+    -7.25,
+    5
+   ],
+   "max": [
+    5.3,
+    5.25
+   ]
+  },
+  {
+   "min": [
+    6.3,
+    5
+   ],
+   "max": [
+    7.25,
+    5.25
+   ]
+  },
+  {
+   "min": [
+    -1.27,
+    3.3
+   ],
+   "max": [
+    -1.13,
+    5
+   ]
+  },
+  {
+   "min": [
+    -1.27,
+    -1.3
+   ],
+   "max": [
+    -1.13,
+    2.0
+   ]
+  },
+  {
+   "min": [
+    -1.27,
+    -4.92
+   ],
+   "max": [
+    -1.13,
+    -2.3
+   ]
+  },
+  {
+   "min": [
+    -7,
+    -0.87
+   ],
+   "max": [
+    -1.27,
+    -0.73
+   ]
+  },
+  {
+   "min": [
+    -7,
+    -5.2
+   ],
+   "max": [
+    7,
+    -4.8
+   ]
+  },
+  {
+   "min": [
+    2.9,
+    -4.47
+   ],
+   "max": [
+    3.98,
+    -1.3
+   ]
+  },
+  {
+   "min": [
+    3.98,
+    -2.3
+   ],
+   "max": [
+    4.97,
+    -1.3
+   ]
+  },
+  {
+   "min": [
+    4.72,
+    -3.63
+   ],
+   "max": [
+    5.88,
+    -2.47
+   ]
+  },
+  {
+   "min": [
+    6.5,
+    -4.2
+   ],
+   "max": [
+    7.0,
+    -1.5
+   ]
+  },
+  {
+   "min": [
+    5.1,
+    -4.6
+   ],
+   "max": [
+    6.1,
+    -3.6
+   ]
+  },
+  {
+   "min": [
+    6.2,
+    -4.55
+   ],
+   "max": [
+    6.8,
+    -3.95
+   ]
+  },
+  {
+   "min": [
+    -1.05,
+    -4.75
+   ],
+   "max": [
+    -0.45,
+    -4.15
+   ]
+  },
+  {
+   "min": [
+    0.15,
+    -4.2
+   ],
+   "max": [
+    1.25,
+    -2.0
+   ]
+  },
+  {
+   "min": [
+    -1.2,
+    4.3
+   ],
+   "max": [
+    0.05,
+    5.0
+   ]
+  },
+  {
+   "min": [
+    0.05,
+    4.32
+   ],
+   "max": [
+    4.45,
+    5.0
+   ]
+  },
+  {
+   "min": [
+    0.23,
+    2.2
+   ],
+   "max": [
+    3.17,
+    3.3
+   ]
+  },
+  {
+   "min": [
+    0.68,
+    1.73
+   ],
+   "max": [
+    1.12,
+    2.17
+   ]
+  },
+  {
+   "min": [
+    1.48,
+    1.73
+   ],
+   "max": [
+    1.92,
+    2.17
+   ]
+  },
+  {
+   "min": [
+    2.28,
+    1.73
+   ],
+   "max": [
+    2.72,
+    2.17
+   ]
+  },
+  {
+   "min": [
+    5.3,
+    5.0
+   ],
+   "max": [
+    6.3,
+    5.4
+   ]
+  },
+  {
+   "min": [
+    6.6,
+    2.55
+   ],
+   "max": [
+    7.0,
+    4.25
+   ]
+  },
+  {
+   "min": [
+    -7.0,
+    -4.25
+   ],
+   "max": [
+    -4.75,
+    -2.35
+   ]
+  },
+  {
+   "min": [
+    -4.68,
+    -3.92
+   ],
+   "max": [
+    -4.22,
+    -2.48
+   ]
+  },
+  {
+   "min": [
+    -6.97,
+    -2.19
+   ],
+   "max": [
+    -6.43,
+    -1.71
+   ]
+  },
+  {
+   "min": [
+    -6.97,
+    -4.74
+   ],
+   "max": [
+    -6.43,
+    -4.26
+   ]
+  },
+  {
+   "min": [
+    -6.2,
+    -1.5
+   ],
+   "max": [
+    -3.0,
+    -0.87
+   ]
+  },
+  {
+   "min": [
+    -2.65,
+    -4.6
+   ],
+   "max": [
+    -1.75,
+    -3.7
+   ]
+  },
+  {
+   "min": [
+    -4.7,
+    -0.73
+   ],
+   "max": [
+    -2.9,
+    0.05
+   ]
+  },
+  {
+   "min": [
+    -4.1,
+    0.05
+   ],
+   "max": [
+    -3.5,
+    0.65
+   ]
+  },
+  {
+   "min": [
+    -6.65,
+    4.62
+   ],
+   "max": [
+    -1.95,
+    5.0
+   ]
+  },
+  {
+   "min": [
+    -5.85,
+    2.05
+   ],
+   "max": [
+    -5.35,
+    2.55
+   ]
+  },
+  {
+   "min": [
+    -2.5,
+    3.5
+   ],
+   "max": [
+    -1.4,
+    4.55
+   ]
+  }
+ ],
+ "interactables": [
+  {
+   "name": "curtain_switch_living",
+   "kind": "curtains",
+   "label": "窗簾 · 客廳",
+   "target": "curtain_living"
+  },
+  {
+   "name": "curtain_switch_bed",
+   "kind": "curtains",
+   "label": "窗簾 · 臥室",
+   "target": "curtain_bed"
+  },
+  {
+   "name": "sofa_seat_1",
+   "kind": "sit",
+   "label": "坐下休息",
+   "seat": "sofa_seat_point",
+   "look_at": [
+    6.9,
+    2.85,
+    1.2
+   ]
+  },
+  {
+   "name": "tv_screen",
+   "kind": "tv",
+   "label": "電視 · 回憶投影"
+  },
+  {
+   "name": "turntable_platter",
+   "kind": "music",
+   "label": "黑膠唱機 · 播放音樂"
+  },
+  {
+   "name": "arc_lamp_shade",
+   "kind": "lamp",
+   "label": "落地燈",
+   "light": "arc_lamp"
+  },
+  {
+   "name": "dining_pendant_body",
+   "kind": "lamp",
+   "label": "餐桌吊燈",
+   "light": "dining_pendant"
+  },
+  {
+   "name": "fridge_hinge",
+   "kind": "door",
+   "label": "冰箱",
+   "angle": 100
+  },
+  {
+   "name": "k_faucet_neck",
+   "kind": "faucet",
+   "label": "水龍頭",
+   "spout": [
+    1.0,
+    -4.68,
+    1.22
+   ]
+  },
+  {
+   "name": "island_pendant_1_glass",
+   "kind": "lamp",
+   "label": "中島吊燈",
+   "light": "island_pendants"
+  },
+  {
+   "name": "front_door_hinge",
+   "kind": "door",
+   "label": "大門",
+   "angle": -80
+  },
+  {
+   "name": "bed_lamp_0_shade",
+   "kind": "lamp",
+   "label": "床頭燈",
+   "light": "bed_lamp_0"
+  },
+  {
+   "name": "bed_lamp_1_shade",
+   "kind": "lamp",
+   "label": "床頭燈",
+   "light": "bed_lamp_1"
+  },
+  {
+   "name": "wardrobe_door_0",
+   "kind": "door",
+   "label": "衣櫃",
+   "angle": 90
+  },
+  {
+   "name": "wardrobe_door_1",
+   "kind": "door",
+   "label": "衣櫃",
+   "angle": -90
+  },
+  {
+   "name": "wardrobe_door_2",
+   "kind": "door",
+   "label": "衣櫃",
+   "angle": 90
+  },
+  {
+   "name": "wardrobe_door_3",
+   "kind": "door",
+   "label": "衣櫃",
+   "angle": -90
+  },
+  {
+   "name": "letter_box",
+   "kind": "letters",
+   "label": "信箱 · 寫給你的信"
+  },
+  {
+   "name": "desk_lamp_shade",
+   "kind": "lamp",
+   "label": "檯燈",
+   "light": "desk_lamp"
+  },
+  {
+   "name": "frame_0_photo",
+   "kind": "photo",
+   "label": "回憶相框 1",
+   "index": 0
+  },
+  {
+   "name": "frame_1_photo",
+   "kind": "photo",
+   "label": "回憶相框 2",
+   "index": 1
+  },
+  {
+   "name": "frame_2_photo",
+   "kind": "photo",
+   "label": "回憶相框 3",
+   "index": 2
+  },
+  {
+   "name": "frame_3_photo",
+   "kind": "photo",
+   "label": "回憶相框 4",
+   "index": 3
+  },
+  {
+   "name": "frame_4_photo",
+   "kind": "photo",
+   "label": "回憶相框 5",
+   "index": 4
+  },
+  {
+   "name": "frame_5_photo",
+   "kind": "photo",
+   "label": "回憶相框 6",
+   "index": 5
+  },
+  {
+   "name": "frame_6_photo",
+   "kind": "photo",
+   "label": "回憶相框 7",
+   "index": 6
+  },
+  {
+   "name": "gift_lid",
+   "kind": "gift",
+   "label": "禮物盒",
+   "angle": 110
+  },
+  {
+   "name": "reading_lamp_shade",
+   "kind": "lamp",
+   "label": "閱讀燈",
+   "light": "reading_lamp"
+  },
+  {
+   "name": "bedroom_door",
+   "kind": "door",
+   "label": "臥室門",
+   "angle": -95,
+   "open": 0
+  }
+ ],
+ "emitters": {
+  "lamp_shade": {
+   "color": [
+    1.0,
+    0.78,
+    0.5
+   ],
+   "strength": 6.0
+  },
+  "lamp_bulb": {
+   "color": [
+    1.0,
+    0.82,
+    0.58
+   ],
+   "strength": 20.0
+  },
+  "led_strip": {
+   "color": [
+    1.0,
+    0.82,
+    0.62
+   ],
+   "strength": 14.0
+  },
+  "downlight": {
+   "color": [
+    1.0,
+    0.86,
+    0.7
+   ],
+   "strength": 18.0
+  },
+  "globe_glass": {
+   "color": [
+    1.0,
+    0.8,
+    0.55
+   ],
+   "strength": 5.0
+  },
+  "facade_tower": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "facade_tower_b": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  },
+  "near_tower": {
+   "color": [
+    1,
+    1,
+    1
+   ],
+   "strength": 1.0
+  }
+ },
+ "spawn": {
+  "position": [
+   5.8,
+   1.62,
+   4.1
+  ],
+  "lookAt": [
+   3.0,
+   1.4,
+   -3.0
+  ]
+ },
+ "bounds": {
+  "min": [
+   -7,
+   -5
+  ],
+  "max": [
+   7,
+   5
+  ]
+ },
+ "waterY": -110.0,
+ "sunDirection": [
+  -0.28,
+  0.57,
+  -0.77
+ ]
+}

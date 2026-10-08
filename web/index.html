@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+    <meta name="theme-color" content="#0e0d0c" />
+    <title>Dear V · 海港的家</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+TC:wght@300;400;500&display=swap" />
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div id="loader">
+      <div class="mark">V</div>
+      <div class="loader-title">Dear V</div>
+      <div class="loader-sub">正在打開我們的家</div>
+      <div class="bar"><i id="bar"></i></div>
+      <button id="enter" class="enter" hidden>推門進去</button>
+    </div>
+
+    <div id="hud" hidden>
+      <div class="brand"><span class="mark sm">V</span><span>海港的家</span></div>
+      <div class="hint" id="hint">拖動看四周 · WASD / 點地板走動 · 點擊物件互動</div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="dock">
+        <button data-act="time" id="btn-time" title="時間">☀︎<span>白天</span></button>
+        <button data-act="lights" id="btn-lights" title="燈光">◐<span>燈光</span></button>
+        <button data-act="curtains" title="窗簾">≋<span>窗簾</span></button>
+        <button data-act="letters" title="信件">✉︎<span>信件</span></button>
+        <button data-act="views" id="btn-views" title="地點">⌖<span>走到</span></button>
+      </div>
+      <div class="places" id="places" hidden>
+        <button data-go="living">客廳</button>
+        <button data-go="window">落地窗</button>
+        <button data-go="kitchen">廚房</button>
+        <button data-go="bedroom">臥室</button>
+        <button data-go="study">回憶書房</button>
+      </div>
+      <button class="stand" id="stand" hidden>起身</button>
+      <div class="joy" id="joy" hidden><i></i></div>
+    </div>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-card">
+        <button class="close" data-close>✕</button>
+        <div id="sheet-body"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

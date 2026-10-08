@@ -50,3 +50,7 @@ next-env.d.ts
 /game/assets/previews/
 __pycache__/
 *.pyc
+
+# Blender → three.js harbour home (web/)
+/web/node_modules/
+/web/dist/
