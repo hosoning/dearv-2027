@@ -20,6 +20,7 @@ sys.path.insert(0, HERE)
 import bpy  # noqa: E402
 
 import apartment  # noqa: E402
+import home  # noqa: E402
 import bake  # noqa: E402
 import exterior  # noqa: E402
 import lib  # noqa: E402
@@ -39,7 +40,7 @@ def strip_hidden_shell_faces(objs, pad=0.01):
     """
     import bmesh
     from mathutils import Vector
-    lo, hi = Vector((apartment.XW, -5, 0)), Vector((7, 5, 3.0))
+    lo, hi = Vector((home.XW, home.YS, 0)), Vector((home.XE, home.YN, home.H))
     for ob in objs:
         if not (ob.name.startswith(("floor_", "wall_", "ceiling"))):
             continue
@@ -58,6 +59,23 @@ def strip_hidden_shell_faces(objs, pad=0.01):
         bmesh.ops.delete(bm, geom=kill, context="FACES")
         bm.to_mesh(ob.data)
         bm.free()
+
+
+def split_furniture_groups():
+    """Furniture lightmaps per zone (suite / study / rest) keep texel density up in the big flat."""
+    from mathutils import Vector
+    bpy.context.view_layer.update()
+    keep = []
+    for ob in lib.LIGHTMAP_GROUPS["furn"]:
+        c = sum((ob.matrix_world @ Vector(b) for b in ob.bound_box), Vector()) / 8
+        g = "suite" if c.x < home.SUITE_X else "study" if (c.x > home.STUDY_X and c.y < home.STUDY_Y) else "furn"
+        ob["lm"] = g
+        (keep if g == "furn" else lib.LIGHTMAP_GROUPS[g]).append(ob)
+    lib.LIGHTMAP_GROUPS["furn"] = keep
+    for g in ("suite", "study"):
+        for ob in lib.LIGHTMAP_GROUPS[g]:
+            ob["lm"] = g
+    print("[dearv] lightmap groups:", {k: len(v) for k, v in lib.LIGHTMAP_GROUPS.items()})
 
 
 def apply_uvs():
@@ -112,8 +130,9 @@ def main():
     lib.TEX_DIR = tex
 
     lib.reset_scene()
-    apartment.build()
+    home.build()
     ext = exterior.build()
+    split_furniture_groups()
     bpy.context.view_layer.update()
 
     interior, ext = apply_uvs()
@@ -126,8 +145,8 @@ def main():
         o.hide_render = True
 
     if not args.no_bake:
-        res = {"arch": 1024 if args.quick else 2048, "furn": 1024 if args.quick else 2048}
-        samples = {"day": 48 if args.quick else 192, "night": 64 if args.quick else 256}
+        res = {g: (1024 if args.quick else 2048) for g in lib.LIGHTMAP_GROUPS}
+        samples = {"day": 40 if args.quick else 160, "night": 56 if args.quick else 224}
         for group, objs in lib.LIGHTMAP_GROUPS.items():
             t = time.time()
             bake.lightmap_uvs(objs, res=res[group], margin_px=4)
@@ -184,8 +203,8 @@ def main():
         "colliders": cols,
         "interactables": apartment.INTERACT,
         "emitters": emitters,
-        "spawn": {"position": to_three((5.8, -4.1, 1.62)), "lookAt": to_three((3.0, 3.0, 1.4))},
-        "bounds": {"min": [apartment.XW, -5], "max": [7, 5]},
+        "spawn": {"position": to_three((3.8, -9.2, 1.62)), "lookAt": to_three((3.6, 4.0, 1.4))},
+        "bounds": {"min": to_three((home.XW, home.YN, 0))[::2], "max": to_three((home.XE, home.YS, 0))[::2]},
         "waterY": exterior.WATER_Z,
         "sunDirection": to_three((-0.28, 0.77, 0.57)),
     })

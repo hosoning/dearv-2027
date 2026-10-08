@@ -6,6 +6,7 @@ const K = {
   photos: 'dearv.photos.v1',
   gift: 'dearv.gift.v1',
   state: 'dearv.state.v1',
+  notes: 'dearv.notes.v1',
 };
 
 function read<T>(key: string, fallback: T): T {
@@ -49,6 +50,12 @@ export const store = {
   },
   setGift(text: string) {
     write(K.gift, text);
+  },
+  notes(): string {
+    return read<string>(K.notes, '');
+  },
+  setNotes(t: string) {
+    write(K.notes, t);
   },
   state(): { t?: number; lights?: number } {
     return read(K.state, {});

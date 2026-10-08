@@ -1,109 +1,45 @@
 {
- "_readme": "臥室禮物展示櫃(keepsakes, 8 格; 索引 0-7: 0 底層門邊, 1 底層窗邊, 2/3 第二層, 4/5 第三層, 6/7 頂層) 與信件牆(letters, 6 封)。圖片放在 content/ 用相對路徑填 image；page 可以只有 text、只有 image，或兩者都有。gift_<n>_overview/detail.webp 是 Blender 3D 渲染圖，有實拍照片時可以替換。",
+ "_readme": "內容檔。keepsakes：臥室禮物櫃 8 格（索引 0-7：0 底層門邊、1 底層窗邊、2/3 第二層、4/5 第三層、6/7 頂層），點了會把實物拿到眼前看，卡片顯示 title / date / story。letters：信件牆 6 封，翻頁閱讀。trips：書房旅行牆與電腦「旅行」，lat/lon 填了會在地圖上插釘；days 是每天的行程。圖片放 content/ 用相對路徑。",
  "keepsakes": [
   {
    "title": "Quin's 的睡衣",
    "date": "4 月 5 日",
-   "pages": [
-    {
-     "image": "content/gift_0_overview.webp",
-     "text": "長袖長褲，紳士灰銀色條紋緞面"
-    },
-    {
-     "image": "content/gift_0_detail.webp",
-     "text": "袖口繡著 Quin's."
-    },
-    {
-     "text": "My first customised Pyjamas…"
-    }
-   ]
+   "story": "長袖長褲，紳士灰銀色條紋緞面，PRIFU 派賦的禮盒。\n袖口繡著 Quin's.\n\nMy first customised Pyjamas…"
   },
   {
    "title": "拍立得",
    "date": "",
-   "pages": [
-    {
-     "image": "content/placeholder/photo_3.webp",
-     "text": "（下一批禮物的照片和故事）"
-    }
-   ]
+   "story": "（下一批禮物）"
   },
   {
-   "title": "領帶夾",
+   "title": "領帶夾 · Enrico Coveri",
    "date": "2025 · 聖誕",
-   "pages": [
-    {
-     "image": "content/gift_2_overview.webp",
-     "text": "Enrico Coveri · 銅鑼灣 SOGO"
-    },
-    {
-     "image": "content/gift_2_detail.webp",
-     "text": "刻著名字的圓牌，中間一顆酒紅色的石"
-    },
-    {
-     "text": "網購的以為要遲到了，約好變成跨年禮物。\n前幾天忙這忙那，找好了 Jellycat 忘下單了，來不及了 (◦´︿`◦)\n\n—— 24 December 2025"
-    }
-   ]
+   "story": "銅鑼灣 SOGO 買的。圓牌上一圈刻著名字，中間一顆酒紅色的石。\n\n網購的以為要遲到了，約好變成跨年禮物。前幾天忙這忙那，找好了 Jellycat 忘下單了，來不及了 (◦´︿`◦)\n—— 24 December 2025"
   },
   {
    "title": "小熊",
    "date": "",
-   "pages": [
-    {
-     "image": "content/placeholder/photo_6.webp",
-     "text": "（下一批禮物的照片和故事）"
-    }
-   ]
+   "story": "（下一批禮物）"
   },
   {
    "title": "聖誕雪屋音樂盒",
    "date": "2025",
-   "pages": [
-    {
-     "image": "content/gift_4_overview.webp",
-     "text": "古銅色扁方聖誕森林屋 · 會飄雪、會唱歌"
-    },
-    {
-     "image": "content/gift_4_detail.webp"
-    },
-    {
-     "text": "2025。\n第一次認認真真地發自己的朋友圈就給你啦。\n\n從年初（自以為）獨自給你過生日，到了生日前本著被騙也沒關係的心態鏈接上，再到現在已經很習慣出門在外莫名其妙就看到一大片玫瑰花海了。"
-    }
-   ]
+   "story": "古銅色扁方聖誕森林屋，會飄雪、會唱歌。\n\n2025。第一次認認真真地發自己的朋友圈就給你啦。\n從年初（自以為）獨自給你過生日，到了生日前本著被騙也沒關係的心態鏈接上，再到現在已經很習慣出門在外莫名其妙就看到一大片玫瑰花海了。"
   },
   {
    "title": "520 黃金大餅",
    "date": "5 月 20 日",
-   "pages": [
-    {
-     "image": "content/gift_5_overview.webp",
-     "text": "打開玫瑰花盒，裡面是 520 黃金大餅"
-    },
-    {
-     "image": "content/gift_5_detail.webp",
-     "text": "Best Wishes · Loving companion at all times"
-    }
-   ]
+   "story": "打開玫瑰花盒，裡面是 520 黃金大餅。\nBest Wishes · Loving companion at all times"
   },
   {
    "title": "日記本",
    "date": "",
-   "pages": [
-    {
-     "image": "content/placeholder/photo_7.webp",
-     "text": "（下一批禮物的照片和故事）"
-    }
-   ]
+   "story": "（下一批禮物）"
   },
   {
    "title": "香水",
    "date": "",
-   "pages": [
-    {
-     "image": "content/placeholder/photo_2.webp",
-     "text": "（下一批禮物的照片和故事）"
-    }
-   ]
+   "story": "（下一批禮物）"
   }
  ],
  "letters": [
@@ -155,6 +91,39 @@
    "date": "",
    "pages": [
     "（信的內容）"
+   ]
+  }
+ ],
+ "trips": [
+  {
+   "title": "旅行 1（待補）",
+   "dates": "日期",
+   "places": [
+    "城市"
+   ],
+   "note": "告訴我你們去過哪裡、什麼時候、每天做了什麼，我把地圖釘和行程填上。",
+   "days": [
+    {
+     "day": "Day 1",
+     "text": "行程內容"
+    },
+    {
+     "day": "Day 2",
+     "text": "行程內容"
+    }
+   ]
+  },
+  {
+   "title": "旅行 2（待補）",
+   "dates": "日期",
+   "places": [
+    "城市"
+   ],
+   "days": [
+    {
+     "day": "Day 1",
+     "text": "行程內容"
+    }
    ]
   }
  ]

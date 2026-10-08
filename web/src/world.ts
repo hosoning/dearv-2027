@@ -21,6 +21,7 @@ export interface Manifest {
   waterY: number;
   sunDirection: V3;
   models?: { apartment?: string; city?: string };
+  bounds?: { min: [number, number]; max: [number, number] };
 }
 
 /** Shared by every lightmapped material: one update re-lights the whole home. */

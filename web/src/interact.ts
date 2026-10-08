@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import type { World, V3 } from './world';
+import type { World } from './world';
 import type { Player, Box2 } from './controls';
 import { Music, MusicBox } from './audio';
 import { store } from './store';
-import { giftSheet, keepsakeBook, lettersSheet, openBook, photoSheet, pinnedLetterBook } from './ui';
+import { getContent, giftSheet, keepsakeCaption, lettersSheet, openBook, photoSheet, pinnedLetterBook, travelSheet } from './ui';
+import type { Inspector } from './inspect';
+import { Desktop, travelView } from './desktop';
 
-/** Blender (x, y, z) -> three (x, z, -y). */
-const fromBlender = (v: V3) => new THREE.Vector3(v[0], v[2], -v[1]);
 
 interface Tween { obj: Record<string, number>; key: string; from: number; to: number; t: number; dur: number; done?: () => void }
 
@@ -17,23 +17,31 @@ export class Home {
   private lampLights = new Map<string, THREE.PointLight>();
   private music = new Music();
   private musicBox = new MusicBox();
-  private snow: { root: THREE.Object3D; points: THREE.Points; box: THREE.Box3; vel: Float32Array; light: THREE.PointLight; on: boolean; index: number } | null = null;
+  private streams = new Map<string, THREE.Mesh>();
+  private bath: { water: THREE.Mesh; full: boolean; y0: number } | null = null;
+  private pc: { canvas: HTMLCanvasElement; tex: THREE.CanvasTexture; t: number } | null = null;
+  desktop: Desktop;
   private platter: THREE.Object3D | null = null;
   private tv: { mesh: THREE.Mesh; canvas: HTMLCanvasElement; tex: THREE.CanvasTexture; on: number; t: number } | null = null;
-  private water: THREE.Mesh | null = null;
   private photoImgs: HTMLImageElement[] = [];
   private heart: THREE.Mesh | null = null;
   private curtainsClosed = new Map<string, boolean>();
   lightsMaster = 1;
   onLightsChanged: () => void = () => {};
 
-  constructor(private world: World, private player: Player, private scene: THREE.Scene) {
+  constructor(private world: World, private player: Player, private scene: THREE.Scene, private inspector: Inspector) {
     this.platter = world.byName.get('turntable_platter') ?? null;
     this.heart = (world.byName.get('gift_heart') as THREE.Mesh) ?? null;
     this.setupLamps();
     this.setupTv();
     this.setupPhotos();
-    this.setupSnow();
+    this.setupBath();
+    this.setupComputer();
+    this.setupTravelPins();
+    this.desktop = new Desktop(getContent, {
+      photos: () => this.photoImgs.map((i) => i.src).filter(Boolean),
+      music: { playing: () => this.music.playing, toggle: () => (this.music.playing ? this.music.stop() : this.music.start()) },
+    });
     player.dynamicColliders = () => this.doorColliders();
   }
 
@@ -53,9 +61,9 @@ export class Home {
     const verb: Record<string, string> = {
       door: this.open.get(root) ? '關上' : '打開', lamp: this.lampOn.get(root.userData.light) ? '關燈' : '開燈',
       curtains: this.curtainsClosed.get(root.userData.target) ? '拉開' : '拉上', tv: this.tv?.on ? '關掉' : '打開',
-      music: this.music.playing ? '停止' : '播放', faucet: this.water?.visible ? '關水' : '開水', sit: '', letters: '翻閱',
-      photo: '看看', gift: this.open.get(root) ? '再看一次' : '拆開', keepsake: '翻閱', letter: '讀信',
-      snowglobe: this.snow?.on ? '停止' : '飄雪 + 音樂 ·',
+      music: this.music.playing ? '停止' : '播放', faucet: this.streams.get(root.userData.spout)?.visible ? '關水' : '開水',
+      sit: '', letters: '翻閱', photo: '看看', gift: this.open.get(root) ? '再看一次' : '拆開', keepsake: '拿起來看',
+      letter: '讀信', snowglobe: '拿起來看 ·', computer: '', travel: '看看', bath: this.bath?.full ? '放掉水' : '放水',
     };
     return `<b>${verb[kind] ?? ''}</b>${base}`;
   }
@@ -87,19 +95,19 @@ export class Home {
       case 'curtains': this.toggleCurtains(d.target as string); break;
       case 'tv': if (this.tv) this.tween(this.tv as unknown as Record<string, number>, 'on', this.tv.on > 0.5 ? 0 : 1, 0.6); break;
       case 'music': this.music.playing ? this.music.stop() : this.music.start(); break;
-      case 'faucet': this.toggleFaucet(d.spout as V3); break;
+      case 'faucet': this.toggleStream(d.spout as string); break;
       case 'letters': lettersSheet(); break;
-      case 'keepsake': {
-        const b = keepsakeBook(d.index as number);
-        if (b) {
-          // lift the keepsake a little while its book is open
-          const y0 = root.position.y;
-          this.tween(root.position as unknown as Record<string, number>, 'y', y0 + 0.04, 0.5);
-          openBook(b, () => this.tween(root.position as unknown as Record<string, number>, 'y', y0, 0.5));
-        }
+      case 'keepsake':
+      case 'snowglobe': {
+        const cap = keepsakeCaption(d.index as number) ?? { title: d.label as string };
+        const lantern = d.interact === 'snowglobe';
+        if (lantern) this.musicBox.start();
+        this.inspector.open(root, cap, { onClose: () => { if (lantern) this.musicBox.stop(); } });
         break;
       }
-      case 'snowglobe': this.toggleSnow(root, d.index as number); break;
+      case 'computer': this.desktop.show(); break;
+      case 'travel': travelSheet((el) => travelView(el, getContent().trips ?? [])); break;
+      case 'bath': this.toggleBath(); break;
       case 'letter': {
         const b = pinnedLetterBook(d.index as number);
         if (b) openBook(b);
@@ -115,7 +123,10 @@ export class Home {
         if (seat) {
           const p = new THREE.Vector3();
           seat.getWorldPosition(p);
-          this.player.sit(p, fromBlender(d.look_at as V3));
+          const look = new THREE.Vector3();
+          const t = this.world.byName.get(d.look as string);
+          if (t) t.getWorldPosition(look); else look.copy(p).add(new THREE.Vector3(1, 0, 0));
+          this.player.sit(p, look);
           document.getElementById('stand')!.hidden = false;
         }
         break;
@@ -299,99 +310,129 @@ export class Home {
     img.src = url;
   }
 
-  // Faucet ---------------------------------------------------------------------------
-  private toggleFaucet(spout: V3) {
-    if (!this.water) {
-      const p = fromBlender(spout);
-      const h = p.y - 0.94;
-      const m = new THREE.Mesh(
+  // Water: faucets, tub filler, bath ------------------------------------------------
+  private toggleStream(spout: string) {
+    let m = this.streams.get(spout);
+    if (!m) {
+      const o = this.world.byName.get(spout);
+      if (!o) return;
+      const p = new THREE.Vector3();
+      o.getWorldPosition(p);
+      // fall until the first surface below (basin, sink or tub floor)
+      const ray = new THREE.Raycaster(p.clone().add(new THREE.Vector3(0, -0.02, 0)), new THREE.Vector3(0, -1, 0), 0, 2);
+      const hits = ray.intersectObjects(this.world.interior.children, true).filter((h) => !h.object.userData.bathwater);
+      const h = Math.max(0.05, hits[0]?.distance ?? 0.3);
+      m = new THREE.Mesh(
         new THREE.CylinderGeometry(0.006, 0.009, h, 10, 1, true),
         new THREE.MeshStandardMaterial({ color: 0xcfe8ff, roughness: 0.05, transparent: true, opacity: 0.55, emissive: 0x335566, emissiveIntensity: 0.4 }),
       );
       m.position.set(p.x, p.y - h / 2, p.z);
       m.visible = false;
       this.scene.add(m);
-      this.water = m;
+      this.streams.set(spout, m);
     }
-    this.water.visible = !this.water.visible;
+    m.visible = !m.visible;
   }
 
-  // Christmas snow lantern ------------------------------------------------------------
-  private setupSnow() {
-    let glass: THREE.Object3D | null = null;
-    this.world.interior.traverse((o) => { if (o.userData.snowbox) glass = o; });
-    if (!glass) return;
-    const g = glass as THREE.Object3D;
-    let root: THREE.Object3D | null = g;
-    while (root && !root.userData.interact) root = root.parent;
-    const box = new THREE.Box3().setFromObject(g);
-    box.expandByScalar(-0.006);
-    const n = 260;
-    const pos = new Float32Array(n * 3);
-    const vel = new Float32Array(n);
-    for (let i = 0; i < n; i++) {
-      pos[i * 3] = THREE.MathUtils.lerp(box.min.x, box.max.x, Math.random());
-      pos[i * 3 + 1] = THREE.MathUtils.lerp(box.min.y, box.max.y, Math.random());
-      pos[i * 3 + 2] = THREE.MathUtils.lerp(box.min.z, box.max.z, Math.random());
-      vel[i] = 0.02 + Math.random() * 0.03;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const points = new THREE.Points(geo, new THREE.PointsMaterial({
-      color: 0xffffff, size: 0.0045, sizeAttenuation: true, transparent: true, opacity: 0.95, depthWrite: false,
-    }));
-    points.visible = false;
-    points.renderOrder = 3;
-    this.scene.add(points);
-    const light = new THREE.PointLight(0xffc27a, 0, 0.9, 2);
-    light.position.copy(box.getCenter(new THREE.Vector3()));
-    this.scene.add(light);
-    this.snow = { root: root ?? g, points, box, vel, light, on: false, index: 0 };
+  private setupBath() {
+    let water: THREE.Mesh | null = null;
+    this.world.interior.traverse((o) => { if (o.userData.bathwater) water = o as THREE.Mesh; });
+    if (!water) return;
+    const w = water as THREE.Mesh;
+    w.material = new THREE.MeshStandardMaterial({ color: 0xbfe3ea, roughness: 0.04, metalness: 0, transparent: true,
+      opacity: 0.6, emissive: 0x1d3a44, emissiveIntensity: 0.25, depthWrite: false });
+    w.visible = false;
+    this.bath = { water: w, full: false, y0: w.position.y };
   }
 
-  private toggleSnow(root: THREE.Object3D, index: number) {
-    const s = this.snow;
-    if (!s) return;
-    s.on = !s.on;
-    s.index = index;
-    s.points.visible = s.on;
-    if (s.on) this.musicBox.start(); else this.musicBox.stop();
-    const story = document.getElementById('story');
-    if (story) {
-      story.hidden = !s.on;
-      story.onclick = () => { const b = keepsakeBook(index); if (b) openBook(b); };
+  private toggleBath() {
+    const b = this.bath;
+    if (!b) return;
+    b.full = !b.full;
+    this.toggleStream('tub_spout');
+    if (b.full) {
+      b.water.visible = true;
+      b.water.position.y = b.y0 - 0.3;
+      this.tween(b.water.position as unknown as Record<string, number>, 'y', b.y0, 6, () => {
+        const s = this.streams.get('tub_spout');
+        if (s?.visible) s.visible = false;
+      });
+    } else {
+      this.tween(b.water.position as unknown as Record<string, number>, 'y', b.y0 - 0.3, 3, () => { b.water.visible = false; });
     }
-    void root;
   }
 
-  private updateSnow(dt: number) {
-    const s = this.snow;
-    if (!s) return;
-    s.light.intensity += ((s.on ? 0.9 : 0) - s.light.intensity) * Math.min(1, dt * 3);
-    if (!s.on) return;
-    const a = s.points.geometry.getAttribute('position') as THREE.BufferAttribute;
-    const p = a.array as Float32Array;
-    const t = performance.now() / 1000;
-    for (let i = 0; i < s.vel.length; i++) {
-      p[i * 3 + 1] -= s.vel[i] * dt;
-      p[i * 3] += Math.sin(t * 1.3 + i) * 0.004 * dt;
-      p[i * 3 + 2] += Math.cos(t * 1.1 + i * 0.7) * 0.004 * dt;
-      if (p[i * 3 + 1] < s.box.min.y) {
-        p[i * 3 + 1] = s.box.max.y;
-        p[i * 3] = THREE.MathUtils.lerp(s.box.min.x, s.box.max.x, Math.random());
-        p[i * 3 + 2] = THREE.MathUtils.lerp(s.box.min.z, s.box.max.z, Math.random());
-      }
+  // Study computer screen (live desktop on the display) + pins on the travel map --------
+  private setupComputer() {
+    const mesh = this.world.byName.get('pc_screen') as THREE.Mesh | undefined;
+    if (!mesh) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 584;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.flipY = false;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = (mesh.material as THREE.MeshStandardMaterial).clone();
+    mat.emissive = new THREE.Color(1, 1, 1);
+    mat.emissiveMap = tex;
+    mat.emissiveIntensity = 0.9;
+    mesh.material = mat;
+    this.pc = { canvas, tex, t: 99 };
+  }
+
+  private drawComputer(dt: number) {
+    const pc = this.pc!;
+    pc.t += dt;
+    if (pc.t < 20) return;
+    pc.t = 0;
+    const c = pc.canvas.getContext('2d')!;
+    const W = pc.canvas.width, H = pc.canvas.height;
+    const g = c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#1d2b45'); g.addColorStop(0.6, '#c98a6b'); g.addColorStop(1, '#2a2230');
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.fillStyle = 'rgba(255,255,255,0.12)'; c.fillRect(0, 0, W, 34);
+    c.fillStyle = '#fff'; c.font = '20px "Noto Sans TC", sans-serif';
+    const now = new Date();
+    c.fillText(`${now.getMonth() + 1}月${now.getDate()}日 ${now.toTimeString().slice(0, 5)}`, W - 190, 24);
+    c.font = 'italic 64px "Cormorant Garamond", Georgia, serif';
+    c.fillText('Dear V', 60, H / 2);
+    const apps = ['相簿', '旅行', '信件', '便條', '音樂'];
+    c.fillStyle = 'rgba(255,255,255,0.22)';
+    c.fillRect(W / 2 - 260, H - 96, 520, 76);
+    apps.forEach((a, i) => {
+      c.fillStyle = ['#e8b26a', '#6aa9c9', '#d98c8c', '#e9d98f', '#a98fd9'][i];
+      c.fillRect(W / 2 - 240 + i * 100, H - 86, 56, 56);
+      c.fillStyle = '#fff'; c.font = '16px "Noto Sans TC", sans-serif';
+      c.fillText(a, W / 2 - 232 + i * 100, H - 12);
+    });
+    pc.tex.needsUpdate = true;
+  }
+
+  private setupTravelPins() {
+    const map = this.world.byName.get('travel_map');
+    const trips = getContent().trips ?? [];
+    if (!map || !trips.length) return;
+    const box = new THREE.Box3().setFromObject(map);
+    const pinMat = new THREE.MeshStandardMaterial({ color: 0xb3262e, roughness: 0.3, emissive: 0x3a0508 });
+    for (const t of trips) {
+      if (t.lat == null || t.lon == null) continue;
+      // the map faces +z (into the study); u runs along -x of Blender, i.e. +x here
+      const u = (t.lon + 180) / 360, v = (90 - t.lat) / 180;
+      const pin = new THREE.Mesh(new THREE.SphereGeometry(0.018, 12, 8), pinMat);
+      pin.position.set(THREE.MathUtils.lerp(box.min.x, box.max.x, u), THREE.MathUtils.lerp(box.max.y, box.min.y, v), box.max.z + 0.012);
+      this.scene.add(pin);
     }
-    a.needsUpdate = true;
   }
 
   // Doors as dynamic colliders -------------------------------------------------------
   private doorColliders(): Box2[] {
     const out: Box2[] = [];
-    const door = this.world.byName.get('bedroom_door');
-    if (door && !this.open.get(door)) {
-      const b = new THREE.Box3().setFromObject(door);
-      out.push({ min: [b.min.x - 0.04, b.min.z], max: [b.max.x + 0.04, b.max.z] });
+    for (const name of ['bedroom_door', 'bath_door_living', 'bath_door_suite', 'study_door_s', 'study_door_n']) {
+      const door = this.world.byName.get(name);
+      if (door && !this.open.get(door)) {
+        const b = new THREE.Box3().setFromObject(door);
+        out.push({ min: [b.min.x - 0.04, b.min.z - 0.04], max: [b.max.x + 0.04, b.max.z + 0.04] });
+      }
     }
     return out;
   }
@@ -412,8 +453,8 @@ export class Home {
     this.tweens = this.tweens.filter((t) => t.t < 1);
     if (this.platter && this.music.playing) this.platter.rotation.y -= dt * 3.5;
     if (this.tv) this.drawTv(dt);
-    this.updateSnow(dt);
-    if (this.water?.visible) this.water.scale.x = 1 + Math.sin(performance.now() * 0.03) * 0.08;
+    if (this.pc) this.drawComputer(dt);
+    for (const m of this.streams.values()) if (m.visible) m.scale.x = 1 + Math.sin(performance.now() * 0.03) * 0.08;
     if (this.heart && this.heart.position) this.heart.rotation.y += dt * 1.2;
   }
 }

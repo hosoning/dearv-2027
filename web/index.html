@@ -33,15 +33,43 @@
       <div class="places" id="places" hidden>
         <button data-go="living">客廳</button>
         <button data-go="window">落地窗</button>
+        <button data-go="dining">飯廳</button>
         <button data-go="kitchen">廚房</button>
-        <button data-go="bedroom">臥室</button>
+        <button data-go="gallery">相片走廊</button>
+        <button data-go="study">書房</button>
+        <button data-go="computer">電腦</button>
+        <button data-go="travel">旅行牆</button>
+        <button data-go="bedroom">主人房</button>
+        <button data-go="closet">衣帽間</button>
+        <button data-go="bath">浴室</button>
         <button data-go="vitrine">禮物櫃</button>
         <button data-go="letters">信件牆</button>
-        <button data-go="study">回憶書房</button>
       </div>
       <button class="stand" id="stand" hidden>起身</button>
-      <button class="stand story" id="story" hidden>翻閱故事</button>
       <div class="joy" id="joy" hidden><i></i></div>
+    </div>
+
+    <div class="inspect" id="inspect" hidden>
+      <div class="ins-card">
+        <div class="ins-title"></div>
+        <div class="ins-date"></div>
+        <div class="ins-story"></div>
+        <div class="ins-hint">拖動轉一轉 · 雙指或滾輪放大</div>
+      </div>
+      <button class="close ins-close" data-close aria-label="放回去">✕</button>
+    </div>
+
+    <div class="desktop" id="desktop" hidden>
+      <div class="dk-top"><span>Dear V</span><span class="dk-clock"></span><button data-power aria-label="關機">⏻</button></div>
+      <div class="dk-wall"><div class="dk-hello">Dear V</div></div>
+      <div class="dk-window" hidden></div>
+      <div class="dk-dock">
+        <button data-app="photos"><i style="background:#e8b26a"></i>相簿</button>
+        <button data-app="travel"><i style="background:#6aa9c9"></i>旅行</button>
+        <button data-app="letters"><i style="background:#d98c8c"></i>信件</button>
+        <button data-app="notes"><i style="background:#e9d98f"></i>便條</button>
+        <button data-app="music"><i style="background:#a98fd9"></i>音樂</button>
+      </div>
     </div>
 
     <div class="sheet" id="sheet" hidden>

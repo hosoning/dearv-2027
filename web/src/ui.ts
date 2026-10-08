@@ -3,13 +3,19 @@ import { store, fileToDataUrl, type Letter } from './store';
 export interface BookPage { image?: string | null; text?: string; heading?: string }
 export interface Book { title: string; subtitle?: string; pages: BookPage[] }
 export interface ContentLetter { title: string; from?: string; date?: string; image?: string; pages: string[] }
-export interface Keepsake { title: string; date?: string; pages: BookPage[] }
-export interface Content { keepsakes: Keepsake[]; letters: ContentLetter[] }
+export interface Keepsake { title: string; date?: string; story?: string; pages?: BookPage[] }
+export interface Trip {
+  title: string; dates?: string; places?: string[]; lat?: number; lon?: number; cover?: string; note?: string;
+  days?: { day: string; text: string }[];
+}
+export interface Content { keepsakes: Keepsake[]; letters: ContentLetter[]; trips?: Trip[] }
 
 let content: Content = { keepsakes: [], letters: [] };
 let assetBase = './';
 export function setContent(c: Content, base: string) { content = c; assetBase = base; }
 const img = (src?: string | null) => (!src ? '' : /^(data:|https?:|blob:)/.test(src) ? src : assetBase + src);
+export const assetUrl = (src: string) => img(src);
+export const getContent = () => content;
 
 /** Split long text into pages that fit a book page. */
 function paginate(text: string, per = 230): string[] {
@@ -30,9 +36,9 @@ export function letterBook(l: { title: string; from?: string; date?: string; ima
   pages.push({ text: `— ${l.from ?? '我'}${l.date ? ' · ' + l.date : ''}`, heading: 'sig' });
   return { title: l.title, subtitle: l.date, pages };
 }
-export const keepsakeBook = (i: number): Book | null => {
+export const keepsakeCaption = (i: number) => {
   const k = content.keepsakes[i];
-  return k ? { title: k.title, subtitle: k.date, pages: k.pages } : null;
+  return k ? { title: k.title, date: k.date, story: k.story ?? (k.pages ?? []).map((p) => p.text ?? '').join('\n\n') } : null;
 };
 export const pinnedLetterBook = (i: number): Book | null => {
   const l = content.letters[i];
@@ -116,7 +122,7 @@ window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && sheetOpen(
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 
-export function lettersSheet() {
+export function lettersSheet(startTab: 'list' | 'write' = 'list') {
   const render = (tab: 'list' | 'write') => {
     const mine = store.letters();
     const pinned = content.letters;
@@ -156,7 +162,14 @@ export function lettersSheet() {
       });
     });
   };
-  render('list');
+  render(startTab);
+}
+
+export function travelSheet(view: (el: HTMLElement) => void) {
+  openSheet('<h2>Travels</h2><div class="sub">我們的旅行</div><div id="travel-body"></div>', (root) => {
+    root.closest('.sheet-card')!.classList.add('wide');
+    view(root.querySelector('#travel-body') as HTMLElement);
+  });
 }
 
 export function photoSheet(index: number, current: string, onReplace: (dataUrl: string) => void) {

@@ -4,6 +4,7 @@ import { loadWorld, type V3 } from './world';
 import { Environment } from './environment';
 import { Player } from './controls';
 import { Home } from './interact';
+import { Inspector } from './inspect';
 import { lettersSheet, setContent, sheetOpen, type Content } from './ui';
 import { store } from './store';
 
@@ -24,13 +25,19 @@ const camera = new THREE.PerspectiveCamera(isTouch ? 72 : 62, window.innerWidth 
 const fromBlender = (v: V3) => new THREE.Vector3(v[0], v[2], -v[1]);
 
 const PLACES: Record<string, { pos: V3; look: V3 }> = {
-  living: { pos: [2.1, 0.9, 1.6], look: [6.5, 3.4, 1.2] },
-  window: { pos: [2.4, 4.25, 1.6], look: [1.0, 60, -6] },
-  kitchen: { pos: [1.7, -1.0, 1.6], look: [1.7, -4.8, 1.1] },
-  bedroom: { pos: [-2.6, 1.0, 1.6], look: [-8.5, 2.8, 0.9] },
-  vitrine: { pos: [-3.7, 2.4, 1.55], look: [-1.3, 2.4, 1.0] },
-  letters: { pos: [-3.35, 1.5, 1.6], look: [-3.35, -0.6, 1.45] },
-  study: { pos: [-2.6, -2.6, 1.6], look: [-9.0, -2.6, 1.4] },
+  living: { pos: [4.0, 3.2, 1.6], look: [10.9, 3.3, 1.3] },
+  window: { pos: [2.0, 6.3, 1.6], look: [2.0, 60, -6] },
+  kitchen: { pos: [-1.5, -4.9, 1.6], look: [-2.4, -10, 1.0] },
+  dining: { pos: [1.7, -0.6, 1.6], look: [-3.0, -1.5, 0.9] },
+  bedroom: { pos: [-8.3, -4.3, 1.6], look: [-14.5, -7.0, 1.0] },
+  closet: { pos: [-9.1, -1.3, 1.6], look: [-14.5, -1.0, 1.4] },
+  bath: { pos: [-7.1, 2.3, 1.6], look: [-11.0, 5.8, 0.6] },
+  vitrine: { pos: [-11.5, -8.0, 1.5], look: [-11.5, -10, 1.0] },
+  letters: { pos: [-12.4, -5.3, 1.6], look: [-12.4, -3.5, 1.45] },
+  study: { pos: [6.9, -3.0, 1.6], look: [9.5, -7.5, 1.0] },
+  computer: { pos: [7.75, -5.6, 1.35], look: [8.88, -5.6, 1.15] },
+  travel: { pos: [8.6, -7.9, 1.6], look: [8.6, -10, 1.6] },
+  gallery: { pos: [3.6, -6.0, 1.6], look: [6.2, -6.0, 1.5] },
 };
 
 async function boot() {
@@ -47,7 +54,9 @@ async function boot() {
 
   const env = new Environment(scene, world);
   const player = new Player(camera, canvas, world.manifest.colliders, $('joy'), (x, y) => tap(x, y));
-  const home = new Home(world, player, scene);
+  if (world.manifest.bounds) player.bounds = world.manifest.bounds;
+  const inspector = new Inspector(renderer, canvas);
+  const home = new Home(world, player, scene, inspector);
   // scene.json spawn is already in three.js coordinates
   player.spawn(new THREE.Vector3(...world.manifest.spawn.position), new THREE.Vector3(...world.manifest.spawn.lookAt));
 
@@ -213,6 +222,7 @@ async function boot() {
     if (envDirty > 0) { captureEnv(); envDirty = 0; }
 
     renderer.render(scene, camera);
+    inspector.render(dt);
     requestAnimationFrame(frame);
   };
 

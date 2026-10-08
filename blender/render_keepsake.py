@@ -14,6 +14,7 @@ import bpy  # noqa: E402
 from mathutils import Vector  # noqa: E402
 
 import apartment  # noqa: E402
+import home  # noqa: E402
 import lib  # noqa: E402
 from main import apply_uvs  # noqa: E402
 
@@ -32,7 +33,7 @@ def main():
     a = ap.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:])
     lib.TEX_DIR = os.path.abspath(a.tex)
     lib.reset_scene()
-    apartment.build()
+    home.build()
     apply_uvs()
     bpy.context.view_layer.update()
     sc = bpy.context.scene

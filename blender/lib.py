@@ -12,7 +12,7 @@ TEX_DIR = ""  # set by main.py
 
 # Bookkeeping consumed by bake/export -------------------------------------
 COLLIDERS: list[dict] = []          # axis-aligned XY boxes in Blender space
-LIGHTMAP_GROUPS: dict[str, list] = {"arch": [], "furn": []}
+LIGHTMAP_GROUPS: dict[str, list] = {"arch": [], "furn": [], "suite": [], "study": []}
 TILES: dict[str, tuple[float, float]] = {}  # material name -> UV tile size (m)
 NIGHT_EMITTERS: dict[str, float] = {}       # material name -> night emission strength
 _MATS: dict[str, bpy.types.Material] = {}
@@ -273,8 +273,11 @@ def empty(name, loc, parent=None, coll=None, **props):
     (coll or collection("Interior")).objects.link(e)
     e.location = loc
     e.empty_display_size = 0.2
-    if parent is not None:
+    if parent is not None:  # keep the given world position
+        bpy.context.view_layer.update()
+        mw = e.matrix_world.copy()
         e.parent = parent
+        e.matrix_world = mw
     for k, v in props.items():
         e[k] = v
     return e
@@ -347,3 +350,30 @@ def multi_box(name, boxes, mat, bevel=0.0, segs=1, parent=None, group="furn"):
         bm.from_mesh(me)
         bpy.data.meshes.remove(me)
     return _finish(name, bm, mat, (0, 0, 0), (0, 0, 0), parent, group)
+
+
+def placed(fn, *args, loc=(0.0, 0.0, 0.0), rot=0.0, name=None, **kw):
+    """Build a group with `fn` in its own coordinates, then rotate it about Z (degrees,
+    around the world origin) and move it by `loc`. Objects, bake lights and colliders follow."""
+    before = set(bpy.data.objects)
+    ncol = len(COLLIDERS)
+    out = fn(*args, **kw)
+    bpy.context.view_layer.update()
+    new = [o for o in bpy.data.objects if o not in before]
+    root = bpy.data.objects.new(name or f"placed_{fn.__name__}", None)
+    collection("Interior").objects.link(root)
+    for o in new:
+        if o.parent is None:
+            mw = o.matrix_world.copy()
+            o.parent = root
+            o.matrix_world = mw
+    root.rotation_euler.z = math.radians(rot)
+    root.location = (loc[0], loc[1], loc[2] if len(loc) > 2 else 0.0)
+    c, s = math.cos(math.radians(rot)), math.sin(math.radians(rot))
+    for col in COLLIDERS[ncol:]:
+        (x0, y0), (x1, y1) = col["min"], col["max"]
+        pts = [(x * c - y * s + loc[0], x * s + y * c + loc[1]) for x in (x0, x1) for y in (y0, y1)]
+        col["min"] = [min(p[0] for p in pts), min(p[1] for p in pts)]
+        col["max"] = [max(p[0] for p in pts), max(p[1] for p in pts)]
+    bpy.context.view_layer.update()
+    return out

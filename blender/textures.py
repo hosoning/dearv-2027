@@ -221,6 +221,9 @@ def generate_all(out: str):
     photos(out)
     pajamas(out)
     gifts_2025(out)
+    world_map(out)
+    couture(out)
+    plush(out)
 
 
 if __name__ == "__main__":
@@ -429,3 +432,111 @@ def _blur(a, sigma):
     for axis in (0, 1):
         a = sum(w * np.roll(a, i - r, axis=axis) for i, w in enumerate(k))
     return a
+
+
+# --------------------------------------------------------------------------
+# Big-flat additions: world map, couture wordmark boxes, suit wool, tweed, plush.
+def _topo_rings(path):
+    import json
+    t = json.load(open(path))
+    sc, tr = t["transform"]["scale"], t["transform"]["translate"]
+    arcs = []
+    for arc in t["arcs"]:
+        x = y = 0
+        pts = []
+        for dx, dy in arc:
+            x += dx
+            y += dy
+            pts.append((x * sc[0] + tr[0], y * sc[1] + tr[1]))
+        arcs.append(pts)
+    rings = []
+    for g in t["objects"]["land"]["geometries"]:
+        polys = g["arcs"] if g["type"] == "MultiPolygon" else [g["arcs"]]
+        for poly in polys:
+            for ring in poly:
+                pts = []
+                for a in ring:
+                    seg = arcs[a] if a >= 0 else arcs[~a][::-1]
+                    pts.extend(seg[1:] if pts else seg)
+                rings.append(pts)
+    return rings
+
+
+def world_map(out, W=2048, H=1024):
+    from PIL import Image as PImage, ImageDraw, ImageFilter
+    paper = colorize(fbm(2048, 6, 4, seed=800)[:H, :W], (0.86, 0.8, 0.68), (0.95, 0.91, 0.82))
+    img = PImage.fromarray((paper * 255).astype(np.uint8), "RGB")
+    d = ImageDraw.Draw(img)
+    for lon in range(-180, 181, 30):  # graticule
+        x = (lon + 180) / 360 * W
+        d.line([(x, 0), (x, H)], fill=(196, 182, 156), width=1)
+    for lat in range(-60, 91, 30):
+        y = (90 - lat) / 180 * H
+        d.line([(0, y), (W, y)], fill=(196, 182, 156), width=1)
+    land = PImage.new("L", (W, H), 0)
+    ld = ImageDraw.Draw(land)
+    for ring in _topo_rings(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "land-110m.json")):
+        # unwrap longitudes across the antimeridian, then draw shifted copies so nothing streaks
+        un, off = [], 0.0
+        for k, (lon, lat) in enumerate(ring):
+            if k and lon + off - un[-1][0] > 180:
+                off -= 360
+            elif k and lon + off - un[-1][0] < -180:
+                off += 360
+            un.append((lon + off, lat))
+        if len(un) < 3:
+            continue
+        if abs(un[-1][0] - un[0][0]) > 180:   # ring wraps the globe (Antarctica): close along the pole
+            un += [(un[-1][0], -90), (un[0][0], -90)]
+        for shift in (-360, 0, 360):
+            ld.polygon([((lon + shift + 180) / 360 * W, (90 - lat) / 180 * H) for lon, lat in un], fill=255)
+    edge = land.filter(ImageFilter.FIND_EDGES)
+    img.paste((120, 140, 118), (0, 0), land)
+    img.paste((70, 82, 70), (0, 0), edge)
+    f = _font("cormorant-garamond-latin-500-italic.woff", 64)
+    d.text((W * 0.14, H * 0.58), "Our Travels", font=f, fill=(90, 70, 50), anchor="mm")
+    img.save(f"{out}/world_map_albedo.png")
+
+
+def couture(out):
+    """Wordmark boxes and garment bags for the walk-in closet (text only, no logos)."""
+    from PIL import Image as PImage, ImageDraw
+    serif = "cormorant-garamond-latin-500-italic.woff"
+    brands = {
+        "hermes": ((232, 118, 38), (92, 52, 22), "HERMÈS", "PARIS", "cinzel-latin-500-normal.woff"),
+        "chanel": ((16, 16, 16), (236, 236, 232), "CHANEL", "", "montserrat-latin-600-normal.woff"),
+        "dior": ((206, 202, 196), (40, 40, 40), "DIOR", "", "cinzel-latin-500-normal.woff"),
+        "loropiana": ((214, 200, 178), (90, 70, 50), "LORO PIANA", "", "cinzel-latin-500-normal.woff"),
+        "tomford": ((20, 20, 22), (214, 196, 160), "TOM FORD", "", "montserrat-latin-600-normal.woff"),
+        "cartier": ((150, 20, 32), (224, 186, 110), "Cartier", "", serif),
+    }
+    for key, (bg, ink, word, sub, face) in brands.items():
+        img = PImage.new("RGB", (512, 512), bg)
+        d = ImageDraw.Draw(img)
+        d.rectangle([14, 14, 498, 498], outline=ink, width=3)
+        d.text((256, 240), word, font=_font(face, 62 if len(word) < 8 else 44), fill=ink, anchor="mm")
+        if sub:
+            d.text((256, 300), sub, font=_font(serif, 30), fill=ink, anchor="mm")
+        img.save(f"{out}/brand_{key}_albedo.png")
+    # suit wool (fine twill) and Chanel-style tweed
+    S = 512
+    tw = fbm(S, 120, 2, aspect=(1, 0.3), seed=820)
+    diag = 0.5 + 0.5 * np.sin((np.mgrid[0:S, 0:S][0] + np.mgrid[0:S, 0:S][1]) * 2 * np.pi / 6)
+    save(f"{out}/wool_albedo.png", np.dstack([0.75 + 0.15 * tw + 0.1 * diag] * 3))
+    save(f"{out}/wool_normal.png", normal_from_height(diag * 0.5 + tw * 0.5, 0.8))
+    rng = np.random.default_rng(830)
+    tweed = colorize(fbm(S, 60, 3, seed=831), (0.85, 0.82, 0.78), (0.97, 0.95, 0.92))
+    for _ in range(9000):
+        x, y = rng.integers(0, S, 2)
+        c = rng.choice([(0.2, 0.2, 0.22), (0.86, 0.72, 0.62), (0.95, 0.95, 0.95)])
+        tweed[y:y + 2, x:x + rng.integers(2, 7)] = c
+    save(f"{out}/tweed_albedo.png", tweed)
+
+
+def plush(out, size=512):
+    """Short-pile plush upholstery for the living-room sofa."""
+    pile = fbm(size, 160, 2, seed=840)
+    cloud = fbm(size, 6, 3, seed=841)
+    t = 0.86 + 0.08 * pile + 0.06 * cloud
+    save(f"{out}/plush_albedo.png", np.dstack([t] * 3))
+    save(f"{out}/plush_normal.png", normal_from_height(pile, 1.6))

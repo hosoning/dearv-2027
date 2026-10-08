@@ -492,7 +492,8 @@ def build_kitchen(M):
     cylinder("k_faucet_base", 0.025, 0.05, (1.0, -4.9, 0.965), M["brass"], segs=16, parent=f)
     tube("k_faucet_neck", [(1.0, -4.9, 0.95), (1.0, -4.9, 1.3), (1.0, -4.84, 1.37), (1.0, -4.72, 1.34),
                            (1.0, -4.68, 1.24)], 0.013, M["brass"], parent=f)
-    interact(bpy.data.objects["k_faucet_neck"], "faucet", "水龍頭", spout=[1.0, -4.68, 1.22])
+    empty("k_faucet_spout", (1.0, -4.68, 1.22), parent=f)
+    interact(bpy.data.objects["k_faucet_neck"], "faucet", "水龍頭", spout="k_faucet_spout")
     # cooktop + hood
     box("k_cooktop", (0.78, 0.5, 0.006), (2.5, -4.66, 0.943), M["tvscreen"])
     for i, (dx, dy, r) in enumerate(((-0.2, -0.1, 0.1), (0.2, -0.1, 0.08), (-0.2, 0.12, 0.07), (0.2, 0.12, 0.1))):
@@ -522,7 +523,7 @@ def build_kitchen(M):
                1.02 + 0.02 * (i % 2)), material(f"fruit_{i % 2}", color=((0.85, 0.5, 0.1), (0.75, 0.1, 0.08))[i % 2],
                                                 rough=0.4), segs=12)
     box("island_board", (0.45, 0.3, 0.025), (2.3, -2.7, 0.943), M["oakfurn"], bevel=0.008, rot=(0, 0, R(8)))
-    for i, x in enumerate((0.9, 1.7, 2.5)):
+    for i, x in enumerate((0.6, 1.3, 2.1, 2.8)):
         stool(f"stool_{i}", (x, -1.95), M)
     for i, x in enumerate((1.05, 1.7, 2.35)):
         pendant_globe(f"island_pendant_{i}", (x, -2.75, 1.9), M)

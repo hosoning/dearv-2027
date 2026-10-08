@@ -20,6 +20,7 @@ export class Player {
   onArrive: (() => void) | null = null;
   seated: { pos: THREE.Vector3; look: THREE.Vector3 } | null = null;
   dynamicColliders: () => Box2[] = () => [];
+  bounds: Box2 = { min: [-100, -100], max: [100, 100] };
   private joy = { id: -1, ox: 0, oy: 0, x: 0, y: 0 };
   private look = { id: -1, x: 0, y: 0, moved: 0 };
   private bob = 0;
@@ -159,7 +160,8 @@ export class Player {
         }
       }
     }
-    return [THREE.MathUtils.clamp(x, -8.8, 6.8), THREE.MathUtils.clamp(z, -4.75, 4.85)];
+    const b = this.bounds;
+    return [THREE.MathUtils.clamp(x, b.min[0] + 0.2, b.max[0] - 0.2), THREE.MathUtils.clamp(z, b.min[1] + 0.2, b.max[1] - 0.2)];
   }
 
   update(dt: number) {
