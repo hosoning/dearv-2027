@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+    <meta name="theme-color" content="#0e0d0c" />
+    <title>Dear V · 海港的家</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+TC:wght@300;400;500&display=swap" />
+    <script type="module" crossorigin src="./assets/index-CGojIpCK.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BVxLsWtp.css">
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div id="loader">
+      <div class="mark">V</div>
+      <div class="loader-title">Dear V</div>
+      <div class="loader-sub">正在打開我們的家</div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="lock" id="lock" hidden>
+        <div class="lock-screen"><span class="lock-dots" id="lock-dots"></span><span class="lock-msg" id="lock-msg">輸入門鎖密碼</span></div>
+        <div class="lock-pad">
+          <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+          <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+          <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+          <button data-k="*" class="dim">✱</button><button data-k="0">0</button><button data-k="#" class="dim">#</button>
+        </div>
+      </div>
+      <button id="enter" hidden></button>
+    </div>
+
+    <div id="hud" hidden>
+      <div class="brand"><span class="mark sm">V</span><span>海港的家</span></div>
+      <div class="hint" id="hint">拖動看四周 · WASD / 點地板走動 · 走近東西按 E 或點按鈕互動</div>
+      <div class="prompts" id="prompts"></div>
+      <div class="toast" id="toast" hidden></div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="dock">
+        <button data-act="time" id="btn-time" title="時間">☀︎<span>白天</span></button>
+        <button data-act="lights" id="btn-lights" title="燈光">◐<span>燈光</span></button>
+        <button data-act="curtains" title="窗簾">≋<span>窗簾</span></button>
+        <button data-act="letters" title="信件">✉︎<span>信件</span></button>
+        <button data-act="views" id="btn-views" title="地點">⌖<span>走到</span></button>
+      </div>
+      <div class="places" id="places" hidden>
+        <button data-go="living">客廳</button>
+        <button data-go="window">落地窗</button>
+        <button data-go="kitchen">廚房</button>
+        <button data-go="dining">餐桌</button>
+        <button data-go="gallery">相片走廊</button>
+        <button data-go="study">書房</button>
+        <button data-go="computer">電腦</button>
+        <button data-go="travel">旅行牆</button>
+        <button data-go="reading">閱讀角</button>
+        <button data-go="bedroom">主人房</button>
+        <button data-go="closet">衣帽間</button>
+        <button data-go="bath">浴室</button>
+        <button data-go="vitrine">禮物櫃</button>
+        <button data-go="letters">信件牆</button>
+      </div>
+      <button class="stand" id="stand" hidden>起身</button>
+      <div class="joy" id="joy" hidden><i></i></div>
+    </div>
+
+    <div class="fade" id="fade"></div>
+
+    <div class="inspect" id="inspect" hidden>
+      <div class="ins-card">
+        <div class="ins-title"></div>
+        <div class="ins-date"></div>
+        <div class="ins-story"></div>
+        <div class="ins-hint">拖動轉一轉 · 雙指或滾輪放大</div>
+      </div>
+      <button class="close ins-close" data-close aria-label="放回去">✕</button>
+    </div>
+
+    <div class="desktop" id="desktop" hidden>
+      <div class="dk-top"><span>Dear V</span><span class="dk-clock"></span><button data-power aria-label="關機">⏻</button></div>
+      <div class="dk-wall"><div class="dk-hello">Dear V</div></div>
+      <div class="dk-window" hidden></div>
+      <div class="dk-dock">
+        <button data-app="photos"><i style="background:#e8b26a"></i>相簿</button>
+        <button data-app="travel"><i style="background:#6aa9c9"></i>旅行</button>
+        <button data-app="letters"><i style="background:#d98c8c"></i>信件</button>
+        <button data-app="notes"><i style="background:#e9d98f"></i>便條</button>
+        <button data-app="music"><i style="background:#a98fd9"></i>音樂</button>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-card">
+        <button class="close" data-close>✕</button>
+        <div id="sheet-body"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
