@@ -3,45 +3,55 @@
   "arch": {
    "day": {
     "file": "lightmaps/arch_day.webp",
-    "scale": 2.4990138888359072
+    "scale": 2.4982413411140443
    },
    "night": {
     "file": "lightmaps/arch_night.webp",
-    "scale": 1.79386745095253
+    "scale": 2.4397342443466186
    }
   },
   "furn": {
    "day": {
     "file": "lightmaps/furn_day.webp",
-    "scale": 2.5022923350334167
+    "scale": 2.5032992005348205
    },
    "night": {
     "file": "lightmaps/furn_night.webp",
-    "scale": 4.114774417877197
+    "scale": 1.6203528821468354
    }
   },
   "suite": {
    "day": {
     "file": "lightmaps/suite_day.webp",
-    "scale": 2.036392736434937
+    "scale": 1.9180990576744081
    },
    "night": {
     "file": "lightmaps/suite_night.webp",
-    "scale": 10.082014131546021
+    "scale": 9.008545303344727
    }
   },
   "study": {
    "day": {
     "file": "lightmaps/study_day.webp",
-    "scale": 1.233925062417984
+    "scale": 1.593823277950287
    },
    "night": {
     "file": "lightmaps/study_night.webp",
-    "scale": 0.8331957846879959
+    "scale": 0.854892897605896
+   }
+  },
+  "kitch": {
+   "day": {
+    "file": "lightmaps/kitch_day.webp",
+    "scale": 0.5034089997410774
+   },
+   "night": {
+    "file": "lightmaps/kitch_night.webp",
+    "scale": 3.5722932100296023
    }
   }
  },
- "version": 1791452072,
+ "version": 1791535189,
  "colliders": [
   {
    "min": [
@@ -49,13 +59,23 @@
     10.0
    ],
    "max": [
-    3.2,
+    -14.6,
     10.25
    ]
   },
   {
    "min": [
-    4.4,
+    -10.4,
+    10.0
+   ],
+   "max": [
+    1.9,
+    10.25
+   ]
+  },
+  {
+   "min": [
+    3.1,
     10.0
    ],
    "max": [
@@ -66,21 +86,11 @@
   {
    "min": [
     -15.25,
-    9.7
+    -2.6
    ],
    "max": [
     -15.0,
     10.25
-   ]
-  },
-  {
-   "min": [
-    -15.25,
-    -1.2
-   ],
-   "max": [
-    -15.0,
-    3.8
    ]
   },
   {
@@ -110,97 +120,87 @@
    ],
    "max": [
     11.25,
-    1.0
+    -6.8
    ]
   },
   {
    "min": [
-    -6.27,
-    1.5
+    -6.07,
+    -0.9
    ],
    "max": [
-    -6.13,
+    -5.93,
     10.0
    ]
   },
   {
    "min": [
-    -6.27,
-    -3.0
+    -6.07,
+    -2.9
    ],
    "max": [
-    -6.13,
-    0.4
+    -5.93,
+    -1.9
    ]
   },
   {
    "min": [
-    -6.27,
+    -6.07,
     -6.88
    ],
    "max": [
-    -6.13,
-    -3.9
+    -5.93,
+    -3.8
    ]
   },
   {
    "min": [
     -15.0,
-    -0.97
+    -2.37
    ],
    "max": [
-    -8.4,
-    -0.83
+    -7.7,
+    -2.23
    ]
   },
   {
    "min": [
-    -7.4,
-    -0.97
+    -6.8,
+    -2.37
    ],
    "max": [
-    -6.27,
-    -0.83
+    -6.07,
+    -2.23
    ]
   },
   {
    "min": [
-    -15.0,
-    3.43
+    4.03,
+    8.5
    ],
    "max": [
-    -9.6,
-    3.57
-   ]
-  },
-  {
-   "min": [
-    6.13,
-    4.4
-   ],
-   "max": [
-    6.27,
+    4.17,
     10.0
    ]
   },
   {
    "min": [
-    6.13,
-    0.5
+    4.03,
+    -6.88
    ],
    "max": [
-    6.27,
-    2.8
+    4.17,
+    7.1
    ]
   },
   {
    "min": [
-    6.27,
-    0.43
+    -15.0,
+    2.75
    ],
    "max": [
-    11.0,
-    0.57
+    -8.2,
+    2.89
    ]
   },
   {
@@ -215,12 +215,12 @@
   },
   {
    "min": [
-    -15.2,
-    3.8
+    -14.6,
+    9.8
    ],
    "max": [
-    -14.8,
-    9.7
+    -10.4,
+    10.2
    ]
   },
   {
@@ -230,13 +230,13 @@
    ],
    "max": [
     -14.8,
-    -1.2
+    -2.6
    ]
   },
   {
    "min": [
     10.8,
-    1.0
+    -6.8
    ],
    "max": [
     11.2,
@@ -245,292 +245,322 @@
   },
   {
    "min": [
-    3.2,
+    1.9,
     10.0
    ],
    "max": [
-    4.4,
+    3.1,
     10.4
    ]
   },
   {
    "min": [
-    1.2,
-    7.6
+    3.58,
+    8.65
+   ],
+   "max": [
+    4.03,
+    9.95
+   ]
+  },
+  {
+   "min": [
+    0.12,
+    9.58
    ],
    "max": [
     1.68,
-    9.9
-   ]
-  },
-  {
-   "min": [
-    5.73,
-    8.05
-   ],
-   "max": [
-    6.13,
-    9.75
-   ]
-  },
-  {
-   "min": [
-    -6.1,
-    9.3
-   ],
-   "max": [
-    -4.85,
     10.0
    ]
   },
   {
    "min": [
-    -4.85,
-    9.32
+    -4.2,
+    9.48
    ],
    "max": [
-    -0.45,
+    -2.4,
     10.0
    ]
   },
   {
    "min": [
-    -4.67,
-    7.2
+    -5.85,
+    9.25
    ],
    "max": [
-    -1.73,
-    8.3
+    -5.25,
+    9.85
    ]
   },
   {
    "min": [
-    -4.52,
-    6.73
+    -5.93,
+    7.38
    ],
    "max": [
-    -4.08,
-    7.17
+    0.82,
+    8.19
    ]
   },
   {
    "min": [
-    -3.82,
-    6.73
+    -5.93,
+    3.46
    ],
    "max": [
-    -3.38,
-    7.17
+    -5.31,
+    7.38
    ]
   },
   {
    "min": [
-    -3.02,
-    6.73
-   ],
-   "max": [
-    -2.58,
-    7.17
-   ]
-  },
-  {
-   "min": [
-    -2.32,
-    6.73
-   ],
-   "max": [
-    -1.88,
-    7.17
-   ]
-  },
-  {
-   "min": [
-    -3.5,
-    0.85
+    -4.14,
+    3.6
    ],
    "max": [
     -1.3,
-    1.95
+    4.6
    ]
   },
   {
    "min": [
-    5.15,
-    -5.77
+    -3.92,
+    2.93
    ],
    "max": [
-    6.23,
-    -0.58
+    -3.48,
+    3.37
    ]
   },
   {
    "min": [
-    6.23,
-    -5.77
+    -3.07,
+    2.93
    ],
    "max": [
-    8.13,
-    -4.52
+    -2.63,
+    3.37
    ]
   },
   {
    "min": [
-    7.65,
+    -2.22,
+    2.93
+   ],
+   "max": [
+    -1.78,
+    3.37
+   ]
+  },
+  {
+   "min": [
+    -1.3,
+    3.65
+   ],
+   "max": [
+    0.9,
+    4.55
+   ]
+  },
+  {
+   "min": [
+    -1.09,
+    4.69
+   ],
+   "max": [
+    -0.61,
+    5.17
+   ]
+  },
+  {
+   "min": [
+    -1.09,
+    3.03
+   ],
+   "max": [
+    -0.61,
+    3.51
+   ]
+  },
+  {
+   "min": [
+    -0.29,
+    4.69
+   ],
+   "max": [
+    0.19,
+    5.17
+   ]
+  },
+  {
+   "min": [
+    -0.29,
+    3.03
+   ],
+   "max": [
+    0.19,
+    3.51
+   ]
+  },
+  {
+   "min": [
+    0.41,
+    4.69
+   ],
+   "max": [
+    0.89,
+    5.17
+   ]
+  },
+  {
+   "min": [
+    0.41,
+    3.03
+   ],
+   "max": [
+    0.89,
+    3.51
+   ]
+  },
+  {
+   "min": [
+    3.48,
+    3.4
+   ],
+   "max": [
+    4.03,
+    5.6
+   ]
+  },
+  {
+   "min": [
+    3.2,
+    2.1
+   ],
+   "max": [
+    3.8,
+    2.7
+   ]
+  },
+  {
+   "min": [
+    -4.0,
+    -1.63
+   ],
+   "max": [
+    1.82,
+    -0.55
+   ]
+  },
+  {
+   "min": [
+    -4.0,
+    -5.63
+   ],
+   "max": [
+    -2.92,
+    -1.63
+   ]
+  },
+  {
+   "min": [
+    -1.76,
+    -3.75
+   ],
+   "max": [
+    0.95,
+    -2.54
+   ]
+  },
+  {
+   "min": [
+    3.51,
     -4.75
    ],
    "max": [
-    8.8,
-    -2.05
+    4.1,
+    -1.25
    ]
   },
   {
    "min": [
-    10.43,
-    -5.2
+    1.9,
+    -0.5
    ],
    "max": [
-    11.0,
-    -1.6
+    2.4,
+    -0.0
    ]
   },
   {
    "min": [
-    9.12,
-    -6.58
+    2.42,
+    -6.48
    ],
    "max": [
-    10.08,
-    -5.62
-   ]
-  },
-  {
-   "min": [
-    9.22,
-    -0.98
-   ],
-   "max": [
-    10.18,
-    -0.02
-   ]
-  },
-  {
-   "min": [
-    10.2,
-    -6.75
-   ],
-   "max": [
-    10.8,
-    -6.15
+    3.38,
+    -5.52
    ]
   },
   {
    "min": [
     3.3,
-    -6.7
+    -6.8
    ],
    "max": [
     3.9,
-    -6.1
+    -6.2
    ]
   },
   {
    "min": [
-    -6.13,
-    -3.0
+    -5.8,
+    -6.85
    ],
    "max": [
-    -5.63,
-    -0.5
+    -5.2,
+    -6.25
    ]
   },
   {
    "min": [
-    -4.78,
-    -1.08
+    -5.93,
+    -6.05
    ],
    "max": [
-    -3.82,
-    -0.12
+    -5.43,
+    -3.95
    ]
   },
   {
    "min": [
-    -4.78,
-    -3.38
+    7.44,
+    3.18
    ],
    "max": [
-    -3.82,
-    -2.42
+    8.56,
+    6.02
    ]
   },
   {
    "min": [
-    -4.9,
-    -2.05
+    6.83,
+    4.28
    ],
    "max": [
-    -4.3,
-    -1.45
+    7.47,
+    4.92
    ]
   },
   {
    "min": [
-    -2.8,
-    -6.58
+    4.17,
+    0.3
    ],
    "max": [
-    -0.8,
-    -5.72
-   ]
-  },
-  {
-   "min": [
-    -5.9,
-    -6.7
-   ],
-   "max": [
-    -5.3,
-    -6.1
-   ]
-  },
-  {
-   "min": [
-    8.04,
-    4.18
-   ],
-   "max": [
-    9.16,
-    7.02
-   ]
-  },
-  {
-   "min": [
-    7.43,
-    5.28
-   ],
-   "max": [
-    8.07,
-    5.92
-   ]
-  },
-  {
-   "min": [
-    6.37,
-    0.57
-   ],
-   "max": [
-    10.82,
-    0.95
-   ]
-  },
-  {
-   "min": [
-    6.27,
-    4.5
-   ],
-   "max": [
-    6.65,
-    9.6
+    4.55,
+    6.9
    ]
   },
   {
@@ -545,272 +575,312 @@
   },
   {
    "min": [
-    7.18,
+    5.98,
     9.43
    ],
    "max": [
-    10.02,
+    8.82,
     9.93
    ]
   },
   {
    "min": [
-    9.62,
-    1.02
+    5.92,
+    -5.08
    ],
    "max": [
-    10.58,
-    1.98
+    6.88,
+    -4.12
    ]
   },
   {
    "min": [
-    6.45,
-    0.9
+    8.32,
+    -5.08
    ],
    "max": [
-    7.05,
-    1.5
+    9.28,
+    -4.12
    ]
   },
   {
    "min": [
-    -15.0,
-    -0.65
+    7.3,
+    -5.2
    ],
    "max": [
-    -14.33,
-    3.3
+    7.9,
+    -4.6
    ]
   },
   {
    "min": [
-    -14.35,
-    2.76
+    7.6,
+    -6.68
    ],
    "max": [
-    -9.95,
-    3.43
+    9.6,
+    -5.82
    ]
   },
   {
    "min": [
-    -14.35,
-    -0.83
+    10.2,
+    -6.7
    ],
    "max": [
-    -9.95,
-    -0.41
+    10.8,
+    -6.1
    ]
   },
   {
    "min": [
-    -13.32,
-    0.8
-   ],
-   "max": [
-    -11.28,
-    1.8
-   ]
-  },
-  {
-   "min": [
-    -10.35,
-    2.1
-   ],
-   "max": [
-    -9.65,
-    3.1
-   ]
-  },
-  {
-   "min": [
-    -11.35,
-    -0.35
-   ],
-   "max": [
-    -10.65,
-    0.35
-   ]
-  },
-  {
-   "min": [
-    -8.49,
-    5.7
-   ],
-   "max": [
-    -6.27,
-    7.8
-   ]
-  },
-  {
-   "min": [
-    -9.16,
-    5.93
-   ],
-   "max": [
-    -8.68,
-    7.57
-   ]
-  },
-  {
-   "min": [
-    -6.83,
-    5.05
-   ],
-   "max": [
-    -6.27,
-    5.61
-   ]
-  },
-  {
-   "min": [
-    -6.83,
-    7.89
-   ],
-   "max": [
-    -6.27,
-    8.45
-   ]
-  },
-  {
-   "min": [
-    -12.8,
-    9.47
-   ],
-   "max": [
-    -10.2,
-    9.93
-   ]
-  },
-  {
-   "min": [
-    -13.32,
-    3.57
-   ],
-   "max": [
-    -11.48,
-    4.07
-   ]
-  },
-  {
-   "min": [
-    -14.38,
-    8.12
-   ],
-   "max": [
-    -13.42,
-    9.08
-   ]
-  },
-  {
-   "min": [
-    -14.38,
-    4.52
-   ],
-   "max": [
-    -13.42,
-    5.48
-   ]
-  },
-  {
-   "min": [
-    -14.4,
-    6.5
-   ],
-   "max": [
-    -13.8,
-    7.1
-   ]
-  },
-  {
-   "min": [
-    -9.9,
+    4.35,
     9.2
    ],
    "max": [
-    -9.3,
+    4.95,
     9.8
    ]
   },
   {
    "min": [
-    -6.72,
-    1.85
+    -14.98,
+    2.08
    ],
    "max": [
-    -6.27,
-    3.35
+    -8.2,
+    2.75
    ]
   },
   {
    "min": [
-    -11.55,
-    -6.08
+    -14.98,
+    -2.23
    ],
    "max": [
-    -9.65,
-    -5.12
+    -8.2,
+    -1.56
    ]
   },
   {
    "min": [
-    -14.6,
-    -1.57
+    -15.0,
+    -1.59
    ],
    "max": [
-    -11.2,
-    -0.97
+    -14.56,
+    2.11
    ]
   },
   {
    "min": [
-    -12.93,
-    -6.4
+    -12.72,
+    -0.215
    ],
    "max": [
-    -12.87,
-    -3.4
+    -10.08,
+    0.735
    ]
   },
   {
    "min": [
-    -8.13,
+    -9.55,
+    -0.09
+   ],
+   "max": [
+    -8.85,
+    0.61
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    5.25
+   ],
+   "max": [
+    -12.78,
+    7.35
+   ]
+  },
+  {
+   "min": [
+    -12.59,
+    5.48
+   ],
+   "max": [
+    -12.11,
+    7.12
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    7.44
+   ],
+   "max": [
+    -14.44,
+    8.0
+   ]
+  },
+  {
+   "min": [
+    -15.0,
+    4.6
+   ],
+   "max": [
+    -14.44,
+    5.16
+   ]
+  },
+  {
+   "min": [
+    -9.9,
+    9.47
+   ],
+   "max": [
+    -7.3,
+    9.93
+   ]
+  },
+  {
+   "min": [
+    -12.32,
+    2.9
+   ],
+   "max": [
+    -10.48,
+    3.4
+   ]
+  },
+  {
+   "min": [
+    -13.88,
+    8.62
+   ],
+   "max": [
+    -12.92,
+    9.58
+   ]
+  },
+  {
+   "min": [
+    -12.08,
+    8.62
+   ],
+   "max": [
+    -11.12,
+    9.58
+   ]
+  },
+  {
+   "min": [
+    -12.75,
+    9.0
+   ],
+   "max": [
+    -12.25,
+    9.5
+   ]
+  },
+  {
+   "min": [
+    -6.85,
+    9.15
+   ],
+   "max": [
+    -6.25,
+    9.75
+   ]
+  },
+  {
+   "min": [
+    -6.57,
+    4.94
+   ],
+   "max": [
+    -6.07,
+    6.26
+   ]
+  },
+  {
+   "min": [
+    -7.09,
+    5.38
+   ],
+   "max": [
+    -6.65,
+    5.82
+   ]
+  },
+  {
+   "min": [
+    -11.25,
+    -6.33
+   ],
+   "max": [
+    -9.35,
+    -5.37
+   ]
+  },
+  {
+   "min": [
+    -12.0,
+    -2.97
+   ],
+   "max": [
+    -8.5,
+    -2.37
+   ]
+  },
+  {
+   "min": [
+    -13.03,
+    -7.0
+   ],
+   "max": [
+    -12.97,
+    -3.6
+   ]
+  },
+  {
+   "min": [
+    -7.63,
     -6.8
    ],
    "max": [
-    -8.07,
-    -4.9
+    -7.57,
+    -5.2
    ]
   },
   {
    "min": [
-    -8.1,
-    -4.93
+    -7.6,
+    -5.23
    ],
    "max": [
-    -7.0,
-    -4.87
+    -6.9,
+    -5.17
    ]
   },
   {
    "min": [
-    -7.0,
-    -6.3
+    -6.82,
+    -6.4
    ],
    "max": [
-    -6.2,
-    -5.7
+    -6.07,
+    -5.8
    ]
   },
   {
    "min": [
-    -12.7,
-    -1.9
+    -12.65,
+    -6.85
    ],
    "max": [
-    -12.1,
-    -1.3
+    -12.05,
+    -6.25
    ]
   }
  ],
@@ -843,37 +913,54 @@
    "name": "bedroom_door",
    "kind": "door",
    "label": "主人房門",
-   "angle": -95
+   "angle": 95,
+   "auto": 1
   },
   {
    "name": "bath_door_living",
    "kind": "door",
    "label": "浴室門",
-   "angle": -95
+   "angle": -95,
+   "auto": 1
   },
   {
    "name": "bath_door_suite",
    "kind": "door",
    "label": "浴室門",
-   "angle": 95
+   "angle": -95,
+   "auto": 1
   },
   {
    "name": "study_door_s",
    "kind": "door",
    "label": "書房門",
-   "angle": -100
+   "angle": 100,
+   "auto": 1
   },
   {
    "name": "study_door_n",
    "kind": "door",
    "label": "書房門",
-   "angle": 100
+   "angle": -100,
+   "auto": 1
   },
   {
    "name": "front_door_hinge",
    "kind": "door",
    "label": "大門",
    "angle": -80
+  },
+  {
+   "name": "shoe_cab_door_0",
+   "kind": "door",
+   "label": "鞋櫃",
+   "angle": 105
+  },
+  {
+   "name": "shoe_cab_door_1",
+   "kind": "door",
+   "label": "鞋櫃",
+   "angle": -105
   },
   {
    "name": "frame_0_photo",
@@ -918,16 +1005,331 @@
    "index": 6
   },
   {
-   "name": "fridge_hinge",
+   "name": "gallery_bench_pad",
+   "kind": "sit",
+   "label": "坐下看看相片",
+   "seat": "gallery_bench_pad_seatpt",
+   "look": "gallery_bench_pad_lookpt"
+  },
+  {
+   "name": "k_drawer_0_0",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_0_1",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_0_2",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_sink_door_1_a",
    "kind": "door",
-   "label": "冰箱",
-   "angle": 100
+   "label": "水槽櫃",
+   "angle": 105
+  },
+  {
+   "name": "k_sink_door_1_b",
+   "kind": "door",
+   "label": "水槽櫃",
+   "angle": -105
   },
   {
    "name": "k_faucet_neck",
    "kind": "faucet",
-   "label": "水龍頭",
+   "label": "廚房水龍頭",
    "spout": "k_faucet_spout"
+  },
+  {
+   "name": "k_dishwasher",
+   "kind": "door",
+   "label": "洗碗機",
+   "angle": -85,
+   "axis": "x"
+  },
+  {
+   "name": "k_drawer_3_0",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_3_1",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_4_0",
+   "kind": "drawer",
+   "label": "鍋具抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_4_1",
+   "kind": "drawer",
+   "label": "鍋具抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_hob",
+   "kind": "hob",
+   "label": "爐頭",
+   "pan": "k_pan"
+  },
+  {
+   "name": "k_drawer_5_0",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_5_1",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_drawer_5_2",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.0,
+    0.4602000000000003,
+    0.0
+   ]
+  },
+  {
+   "name": "k_base_door_6_a",
+   "kind": "door",
+   "label": "櫥櫃",
+   "angle": 105
+  },
+  {
+   "name": "k_base_door_6_b",
+   "kind": "door",
+   "label": "櫥櫃",
+   "angle": -105
+  },
+  {
+   "name": "fridge_crisper",
+   "kind": "drawer",
+   "label": "冰箱 · 蔬果抽屜",
+   "slide": [
+    0.3354,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "fridge_door",
+   "kind": "door",
+   "label": "冰箱",
+   "angle": -110
+  },
+  {
+   "name": "freezer_door",
+   "kind": "door",
+   "label": "冷凍庫",
+   "angle": 110
+  },
+  {
+   "name": "k_tall_drawer",
+   "kind": "drawer",
+   "label": "抽屜",
+   "slide": [
+    0.4368000000000001,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "k_warming_drawer",
+   "kind": "drawer",
+   "label": "暖碗抽屜",
+   "slide": [
+    0.4056,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "k_oven_door",
+   "kind": "door",
+   "label": "焗爐",
+   "angle": 88,
+   "axis": "y"
+  },
+  {
+   "name": "k_steam_oven_door",
+   "kind": "door",
+   "label": "蒸焗爐",
+   "angle": 88,
+   "axis": "y"
+  },
+  {
+   "name": "k_tall_top_door",
+   "kind": "door",
+   "label": "上櫃",
+   "angle": -105
+  },
+  {
+   "name": "k_coffee_machine",
+   "kind": "coffee",
+   "label": "咖啡機 · 沖一杯"
+  },
+  {
+   "name": "k_niche_low_a",
+   "kind": "door",
+   "label": "櫥櫃",
+   "angle": -105
+  },
+  {
+   "name": "k_niche_low_b",
+   "kind": "door",
+   "label": "櫥櫃",
+   "angle": 105
+  },
+  {
+   "name": "k_niche_top_a",
+   "kind": "door",
+   "label": "上櫃",
+   "angle": -105
+  },
+  {
+   "name": "k_niche_top_b",
+   "kind": "door",
+   "label": "上櫃",
+   "angle": 105
+  },
+  {
+   "name": "pantry_door_a",
+   "kind": "door",
+   "label": "食物櫃",
+   "angle": -105
+  },
+  {
+   "name": "pantry_door_b",
+   "kind": "door",
+   "label": "食物櫃",
+   "angle": 105
+  },
+  {
+   "name": "island_drawer_0_0",
+   "kind": "drawer",
+   "label": "中島抽屜",
+   "slide": [
+    0.0,
+    -0.46799999999999997,
+    0.0
+   ]
+  },
+  {
+   "name": "island_drawer_0_1",
+   "kind": "drawer",
+   "label": "中島抽屜",
+   "slide": [
+    0.0,
+    -0.46799999999999997,
+    0.0
+   ]
+  },
+  {
+   "name": "island_drawer_1_0",
+   "kind": "drawer",
+   "label": "中島抽屜",
+   "slide": [
+    0.0,
+    -0.46799999999999997,
+    0.0
+   ]
+  },
+  {
+   "name": "island_drawer_1_1",
+   "kind": "drawer",
+   "label": "中島抽屜",
+   "slide": [
+    0.0,
+    -0.46799999999999997,
+    0.0
+   ]
+  },
+  {
+   "name": "island_drawer_2_0",
+   "kind": "drawer",
+   "label": "中島抽屜",
+   "slide": [
+    0.0,
+    -0.46799999999999997,
+    0.0
+   ]
+  },
+  {
+   "name": "island_drawer_2_1",
+   "kind": "drawer",
+   "label": "中島抽屜",
+   "slide": [
+    0.0,
+    -0.46799999999999997,
+    0.0
+   ]
+  },
+  {
+   "name": "stool_1_seat",
+   "kind": "sit",
+   "label": "坐在中島",
+   "seat": "stool_1_seat_seatpt",
+   "look": "stool_1_seat_lookpt"
+  },
+  {
+   "name": "dining_chair_n1_seat",
+   "kind": "sit",
+   "label": "坐下吃飯",
+   "seat": "dining_chair_n1_seat_seatpt",
+   "look": "dining_chair_n1_seat_lookpt"
   },
   {
    "name": "island_pendant_1_glass",
@@ -936,22 +1338,54 @@
    "light": "island_pendants"
   },
   {
-   "name": "dining_pendant_body",
-   "kind": "lamp",
-   "label": "餐桌吊燈",
-   "light": "dining_pendant"
+   "name": "wine_cab_door_a",
+   "kind": "door",
+   "label": "酒櫃",
+   "angle": 105
+  },
+  {
+   "name": "wine_cab_door_b",
+   "kind": "door",
+   "label": "酒櫃",
+   "angle": -105
   },
   {
    "name": "sofa_seat_2",
    "kind": "sit",
-   "label": "坐下休息",
-   "seat": "sofa_seat_point",
-   "look": "sofa_look"
+   "label": "坐在沙發上看海",
+   "seat": "sofa_seat_2_seatpt",
+   "look": "sofa_seat_2_lookpt"
+  },
+  {
+   "name": "sofa_arm_seat_1",
+   "kind": "sit",
+   "label": "坐下看電視",
+   "seat": "sofa_arm_seat_1_seatpt",
+   "look": "sofa_arm_seat_1_lookpt"
+  },
+  {
+   "name": "sofa_arm_seat_2",
+   "kind": "lie",
+   "label": "躺在沙發上",
+   "seat": "sofa_arm_seat_2_seatpt",
+   "look": "sofa_arm_seat_2_lookpt"
   },
   {
    "name": "tv_screen",
    "kind": "tv",
    "label": "電視 · 回憶投影"
+  },
+  {
+   "name": "tv_console_door_0",
+   "kind": "door",
+   "label": "電視櫃",
+   "angle": 95
+  },
+  {
+   "name": "tv_console_door_1",
+   "kind": "door",
+   "label": "電視櫃",
+   "angle": -95
   },
   {
    "name": "arc_lamp_shade",
@@ -966,9 +1400,94 @@
    "light": "side_lamp"
   },
   {
+   "name": "lounge_chair_n_seat",
+   "kind": "sit",
+   "label": "坐在窗邊",
+   "seat": "lounge_chair_n_seat_seatpt",
+   "look": "lounge_chair_n_seat_lookpt"
+  },
+  {
+   "name": "sideboard_door_0",
+   "kind": "door",
+   "label": "唱片櫃",
+   "angle": -95
+  },
+  {
+   "name": "sideboard_door_1",
+   "kind": "door",
+   "label": "唱片櫃",
+   "angle": 95
+  },
+  {
    "name": "turntable_platter",
    "kind": "music",
    "label": "黑膠唱機 · 播放音樂"
+  },
+  {
+   "name": "sideboard_lamp_shade",
+   "kind": "lamp",
+   "label": "檯燈",
+   "light": "sideboard_lamp"
+  },
+  {
+   "name": "desk_drawer_-1_0",
+   "kind": "drawer",
+   "label": "書桌抽屜",
+   "slide": [
+    -0.46799999999999997,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "desk_drawer_-1_1",
+   "kind": "drawer",
+   "label": "書桌抽屜",
+   "slide": [
+    -0.46799999999999997,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "desk_drawer_-1_2",
+   "kind": "drawer",
+   "label": "書桌抽屜",
+   "slide": [
+    -0.46799999999999997,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "desk_drawer_1_0",
+   "kind": "drawer",
+   "label": "書桌抽屜",
+   "slide": [
+    -0.46799999999999997,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "desk_drawer_1_1",
+   "kind": "drawer",
+   "label": "書桌抽屜",
+   "slide": [
+    -0.46799999999999997,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "desk_drawer_1_2",
+   "kind": "drawer",
+   "label": "書桌抽屜",
+   "slide": [
+    -0.46799999999999997,
+    0.0,
+    0.0
+   ]
   },
   {
    "name": "computer",
@@ -982,14 +1501,65 @@
    "light": "desk_lamp"
   },
   {
+   "name": "desk_chair_seat",
+   "kind": "sit",
+   "label": "坐在書桌前",
+   "seat": "desk_chair_seat_seatpt",
+   "look": "desk_chair_seat_lookpt"
+  },
+  {
    "name": "travel_map",
    "kind": "travel",
    "label": "旅行地圖 · 我們的行程"
   },
   {
+   "name": "travel_drawer_0",
+   "kind": "drawer",
+   "label": "旅行抽屜",
+   "slide": [
+    0.0,
+    0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "travel_drawer_1",
+   "kind": "drawer",
+   "label": "旅行抽屜",
+   "slide": [
+    0.0,
+    0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "travel_drawer_2",
+   "kind": "drawer",
+   "label": "旅行抽屜",
+   "slide": [
+    0.0,
+    0.3276,
+    0.0
+   ]
+  },
+  {
    "name": "travel_journals",
    "kind": "travel",
    "label": "旅行日記"
+  },
+  {
+   "name": "study_reading_chair_seat",
+   "kind": "sit",
+   "label": "坐下看書",
+   "seat": "study_reading_chair_seat_seatpt",
+   "look": "study_reading_chair_seat_lookpt"
+  },
+  {
+   "name": "study_reading_chair_b_seat",
+   "kind": "sit",
+   "label": "坐下看書",
+   "seat": "study_reading_chair_b_seat_seatpt",
+   "look": "study_reading_chair_b_seat_lookpt"
   },
   {
    "name": "study_lamp_shade",
@@ -998,46 +1568,86 @@
    "light": "study_lamp"
   },
   {
-   "name": "his_wardrobe_door_0",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": 95
+   "name": "study_daybed_pad",
+   "kind": "lie",
+   "label": "躺在窗邊",
+   "seat": "study_daybed_pad_seatpt",
+   "look": "study_daybed_pad_lookpt"
   },
   {
-   "name": "his_wardrobe_door_1",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": -95
+   "name": "her_wardrobe_g0",
+   "kind": "garment",
+   "label": "她的長裙"
   },
   {
-   "name": "his_wardrobe_door_2",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": 95
+   "name": "her_wardrobe_g1",
+   "kind": "garment",
+   "label": "她的長裙"
   },
   {
-   "name": "his_wardrobe_door_3",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": -95
+   "name": "her_wardrobe_g2",
+   "kind": "garment",
+   "label": "她的小禮服"
   },
   {
-   "name": "his_wardrobe_door_4",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": 95
+   "name": "her_wardrobe_g3",
+   "kind": "garment",
+   "label": "她的長裙"
   },
   {
-   "name": "his_wardrobe_door_5",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": -95
+   "name": "her_wardrobe_g4",
+   "kind": "garment",
+   "label": "她的小禮服"
   },
   {
-   "name": "his_wardrobe_door_6",
-   "kind": "door",
-   "label": "衣櫃 · 他的",
-   "angle": 95
+   "name": "her_wardrobe_g5",
+   "kind": "garment",
+   "label": "她的西裝外套"
+  },
+  {
+   "name": "her_wardrobe_g6",
+   "kind": "garment",
+   "label": "她的西裝外套"
+  },
+  {
+   "name": "her_wardrobe_g7",
+   "kind": "garment",
+   "label": "她的大衣"
+  },
+  {
+   "name": "her_wardrobe_g8",
+   "kind": "garment",
+   "label": "她的襯衫"
+  },
+  {
+   "name": "her_wardrobe_g9",
+   "kind": "garment",
+   "label": "她的小禮服"
+  },
+  {
+   "name": "her_wardrobe_g10",
+   "kind": "garment",
+   "label": "她的長裙"
+  },
+  {
+   "name": "her_wardrobe_g11",
+   "kind": "garment",
+   "label": "她的針織衫"
+  },
+  {
+   "name": "her_wardrobe_g12",
+   "kind": "garment",
+   "label": "她的大衣"
+  },
+  {
+   "name": "her_wardrobe_g13",
+   "kind": "garment",
+   "label": "她的襯衫"
+  },
+  {
+   "name": "her_wardrobe_g14",
+   "kind": "garment",
+   "label": "她的針織衫"
   },
   {
    "name": "her_wardrobe_door_0",
@@ -1088,16 +1698,335 @@
    "angle": 95
   },
   {
+   "name": "her_wardrobe_door_8",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": -95
+  },
+  {
+   "name": "her_wardrobe_door_9",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": 95
+  },
+  {
+   "name": "her_wardrobe_door_10",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": -95
+  },
+  {
+   "name": "her_wardrobe_door_11",
+   "kind": "door",
+   "label": "衣櫃 · 她的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_g0",
+   "kind": "garment",
+   "label": "他的西裝外套"
+  },
+  {
+   "name": "his_wardrobe_g1",
+   "kind": "garment",
+   "label": "他的西裝外套"
+  },
+  {
+   "name": "his_wardrobe_g2",
+   "kind": "garment",
+   "label": "他的西裝外套"
+  },
+  {
+   "name": "his_wardrobe_g3",
+   "kind": "garment",
+   "label": "他的襯衫"
+  },
+  {
+   "name": "his_wardrobe_g4",
+   "kind": "garment",
+   "label": "他的襯衫"
+  },
+  {
+   "name": "his_wardrobe_g5",
+   "kind": "garment",
+   "label": "他的襯衫"
+  },
+  {
+   "name": "his_wardrobe_g6",
+   "kind": "garment",
+   "label": "他的襯衫"
+  },
+  {
+   "name": "his_wardrobe_g7",
+   "kind": "garment",
+   "label": "他的大衣"
+  },
+  {
+   "name": "his_wardrobe_g8",
+   "kind": "garment",
+   "label": "他的大衣"
+  },
+  {
+   "name": "his_wardrobe_g9",
+   "kind": "garment",
+   "label": "他的西褲"
+  },
+  {
+   "name": "his_wardrobe_g10",
+   "kind": "garment",
+   "label": "他的西褲"
+  },
+  {
+   "name": "his_wardrobe_g11",
+   "kind": "garment",
+   "label": "他的西裝外套"
+  },
+  {
+   "name": "his_wardrobe_g12",
+   "kind": "garment",
+   "label": "他的針織衫"
+  },
+  {
+   "name": "his_wardrobe_g13",
+   "kind": "garment",
+   "label": "他的針織衫"
+  },
+  {
+   "name": "his_wardrobe_g14",
+   "kind": "garment",
+   "label": "他的西褲"
+  },
+  {
+   "name": "his_wardrobe_door_0",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_1",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_2",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_3",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_4",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_5",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_6",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_7",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_8",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_9",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "his_wardrobe_door_10",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": 95
+  },
+  {
+   "name": "his_wardrobe_door_11",
+   "kind": "door",
+   "label": "衣櫃 · 他的",
+   "angle": -95
+  },
+  {
+   "name": "bag_0",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_1",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_2",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_3",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_4",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_5",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_6",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "bag_7",
+   "kind": "garment",
+   "label": "手袋"
+  },
+  {
+   "name": "closet_drawer_-1_0",
+   "kind": "drawer",
+   "label": "衣帽間抽屜",
+   "slide": [
+    0.0,
+    -0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "closet_drawer_-1_1",
+   "kind": "drawer",
+   "label": "衣帽間抽屜",
+   "slide": [
+    0.0,
+    -0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "closet_drawer_-1_2",
+   "kind": "drawer",
+   "label": "衣帽間抽屜",
+   "slide": [
+    0.0,
+    -0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "closet_drawer_1_0",
+   "kind": "drawer",
+   "label": "衣帽間抽屜",
+   "slide": [
+    0.0,
+    0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "closet_drawer_1_1",
+   "kind": "drawer",
+   "label": "衣帽間抽屜",
+   "slide": [
+    0.0,
+    0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "closet_drawer_1_2",
+   "kind": "drawer",
+   "label": "衣帽間抽屜",
+   "slide": [
+    0.0,
+    0.3276,
+    0.0
+   ]
+  },
+  {
+   "name": "closet_ottoman",
+   "kind": "sit",
+   "label": "坐下",
+   "seat": "closet_ottoman_seatpt",
+   "look": "closet_ottoman_lookpt"
+  },
+  {
+   "name": "bed_duvet",
+   "kind": "lie",
+   "label": "躺在床上",
+   "seat": "bed_duvet_seatpt",
+   "look": "bed_duvet_lookpt"
+  },
+  {
+   "name": "bed_pillow_1",
+   "kind": "sleep",
+   "label": "睡覺",
+   "seat": "bed_pillow_1_seatpt",
+   "look": "bed_pillow_1_lookpt"
+  },
+  {
+   "name": "bed_bench_pad",
+   "kind": "sit",
+   "label": "坐在床尾",
+   "seat": "bed_bench_pad_seatpt",
+   "look": "bed_bench_pad_lookpt"
+  },
+  {
    "name": "gift_lid",
    "kind": "gift",
    "label": "禮物盒",
    "angle": 110
   },
   {
+   "name": "nightstand_0_drawer",
+   "kind": "drawer",
+   "label": "床頭櫃抽屜",
+   "slide": [
+    0.3588,
+    0.0,
+    0.0
+   ]
+  },
+  {
    "name": "bed_lamp_0_shade",
    "kind": "lamp",
    "label": "床頭燈",
    "light": "bed_lamp_0"
+  },
+  {
+   "name": "nightstand_1_drawer",
+   "kind": "drawer",
+   "label": "床頭櫃抽屜",
+   "slide": [
+    0.3588,
+    0.0,
+    0.0
+   ]
   },
   {
    "name": "bed_lamp_1_shade",
@@ -1195,9 +2124,67 @@
    "index": 5
   },
   {
+   "name": "bed_lounge_a_seat",
+   "kind": "sit",
+   "label": "坐在窗邊",
+   "seat": "bed_lounge_a_seat_seatpt",
+   "look": "bed_lounge_a_seat_lookpt"
+  },
+  {
+   "name": "bed_lounge_b_seat",
+   "kind": "sit",
+   "label": "坐在窗邊",
+   "seat": "bed_lounge_b_seat_seatpt",
+   "look": "bed_lounge_b_seat_lookpt"
+  },
+  {
+   "name": "dressing_drawer",
+   "kind": "drawer",
+   "label": "梳妝台抽屜",
+   "slide": [
+    -0.3432,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "name": "dressing_stool",
+   "kind": "sit",
+   "label": "坐在梳妝台前",
+   "seat": "dressing_stool_seatpt",
+   "look": "dressing_stool_lookpt"
+  },
+  {
    "name": "bathtub",
    "kind": "bath",
    "label": "浴缸 · 放水"
+  },
+  {
+   "name": "tub_tray",
+   "kind": "lie",
+   "label": "泡澡",
+   "seat": "tub_tray_seatpt",
+   "look": "tub_tray_lookpt"
+  },
+  {
+   "name": "vanity_drawer_0",
+   "kind": "drawer",
+   "label": "浴室抽屜",
+   "slide": [
+    0.0,
+    0.3744,
+    0.0
+   ]
+  },
+  {
+   "name": "vanity_drawer_1",
+   "kind": "drawer",
+   "label": "浴室抽屜",
+   "slide": [
+    0.0,
+    0.3744,
+    0.0
+   ]
   },
   {
    "name": "vanity_spout_0",
@@ -1210,6 +2197,12 @@
    "kind": "faucet",
    "label": "水龍頭",
    "spout": "vanity_spout_tip_1"
+  },
+  {
+   "name": "shower_mixer",
+   "kind": "shower",
+   "label": "花灑 · 淋浴",
+   "spout": "shower_spout"
   }
  ],
  "emitters": {
@@ -1324,16 +2317,24 @@
     1
    ],
    "strength": 1.0
+  },
+  "street_lamp": {
+   "color": [
+    1.0,
+    0.78,
+    0.45
+   ],
+   "strength": 4.0
   }
  },
  "spawn": {
   "position": [
-   3.8,
+   2.5,
    1.62,
-   9.2
+   9.1
   ],
   "lookAt": [
-   3.6,
+   2.5,
    1.4,
    -4.0
   ]

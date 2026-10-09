@@ -7,8 +7,8 @@
     <title>Dear V · 海港的家</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Noto+Sans+TC:wght@300;400;500&display=swap" />
-    <script type="module" crossorigin src="./assets/index-OIxTV3NE.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-C4SEE8RP.css">
+    <script type="module" crossorigin src="./assets/index-CGojIpCK.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BVxLsWtp.css">
   </head>
   <body>
     <canvas id="scene"></canvas>
@@ -32,7 +32,9 @@
 
     <div id="hud" hidden>
       <div class="brand"><span class="mark sm">V</span><span>海港的家</span></div>
-      <div class="hint" id="hint">拖動看四周 · WASD / 點地板走動 · 點擊物件互動</div>
+      <div class="hint" id="hint">拖動看四周 · WASD / 點地板走動 · 走近東西按 E 或點按鈕互動</div>
+      <div class="prompts" id="prompts"></div>
+      <div class="toast" id="toast" hidden></div>
       <div class="tip" id="tip" hidden></div>
       <div class="dock">
         <button data-act="time" id="btn-time" title="時間">☀︎<span>白天</span></button>
@@ -44,12 +46,13 @@
       <div class="places" id="places" hidden>
         <button data-go="living">客廳</button>
         <button data-go="window">落地窗</button>
-        <button data-go="dining">飯廳</button>
         <button data-go="kitchen">廚房</button>
+        <button data-go="dining">餐桌</button>
         <button data-go="gallery">相片走廊</button>
         <button data-go="study">書房</button>
         <button data-go="computer">電腦</button>
         <button data-go="travel">旅行牆</button>
+        <button data-go="reading">閱讀角</button>
         <button data-go="bedroom">主人房</button>
         <button data-go="closet">衣帽間</button>
         <button data-go="bath">浴室</button>
@@ -59,6 +62,8 @@
       <button class="stand" id="stand" hidden>起身</button>
       <div class="joy" id="joy" hidden><i></i></div>
     </div>
+
+    <div class="fade" id="fade"></div>
 
     <div class="inspect" id="inspect" hidden>
       <div class="ins-card">
