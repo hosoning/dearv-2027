@@ -12,7 +12,7 @@ TEX_DIR = ""  # set by main.py
 
 # Bookkeeping consumed by bake/export -------------------------------------
 COLLIDERS: list[dict] = []          # axis-aligned XY boxes in Blender space
-LIGHTMAP_GROUPS: dict[str, list] = {"arch": [], "furn": [], "suite": [], "study": []}
+LIGHTMAP_GROUPS: dict[str, list] = {"arch": [], "furn": [], "suite": [], "study": [], "kitch": []}
 TILES: dict[str, tuple[float, float]] = {}  # material name -> UV tile size (m)
 NIGHT_EMITTERS: dict[str, float] = {}       # material name -> night emission strength
 _MATS: dict[str, bpy.types.Material] = {}

@@ -68,11 +68,11 @@ def split_furniture_groups():
     keep = []
     for ob in lib.LIGHTMAP_GROUPS["furn"]:
         c = sum((ob.matrix_world @ Vector(b) for b in ob.bound_box), Vector()) / 8
-        g = "suite" if c.x < home.SUITE_X else "study" if (c.x > home.STUDY_X and c.y < home.STUDY_Y) else "furn"
+        g = "suite" if c.x < home.SUITE_X else "study" if c.x > home.STUDY_X else "kitch" if c.y < -1.7 else "furn"
         ob["lm"] = g
         (keep if g == "furn" else lib.LIGHTMAP_GROUPS[g]).append(ob)
     lib.LIGHTMAP_GROUPS["furn"] = keep
-    for g in ("suite", "study"):
+    for g in ("suite", "study", "kitch"):
         for ob in lib.LIGHTMAP_GROUPS[g]:
             ob["lm"] = g
     print("[dearv] lightmap groups:", {k: len(v) for k, v in lib.LIGHTMAP_GROUPS.items()})
@@ -203,7 +203,7 @@ def main():
         "colliders": cols,
         "interactables": apartment.INTERACT,
         "emitters": emitters,
-        "spawn": {"position": to_three((3.8, -9.2, 1.62)), "lookAt": to_three((3.6, 4.0, 1.4))},
+        "spawn": {"position": to_three(home.SPAWN[0]), "lookAt": to_three(home.SPAWN[1])},
         "bounds": {"min": to_three((home.XW, home.YN, 0))[::2], "max": to_three((home.XE, home.YS, 0))[::2]},
         "waterY": exterior.WATER_Z,
         "sunDirection": to_three((-0.28, 0.77, 0.57)),

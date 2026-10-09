@@ -25,19 +25,20 @@ const camera = new THREE.PerspectiveCamera(isTouch ? 72 : 62, window.innerWidth 
 const fromBlender = (v: V3) => new THREE.Vector3(v[0], v[2], -v[1]);
 
 const PLACES: Record<string, { pos: V3; look: V3 }> = {
-  living: { pos: [4.3, 0.2, 1.6], look: [10.5, 4.6, 1.0] },
-  window: { pos: [2.0, 6.3, 1.6], look: [2.0, 60, -6] },
-  kitchen: { pos: [-1.5, -4.9, 1.6], look: [-2.4, -10, 1.0] },
-  dining: { pos: [1.7, -0.6, 1.6], look: [-3.0, -1.5, 0.9] },
-  bedroom: { pos: [-12.2, -4.6, 1.6], look: [-6.3, -7.4, 0.7] },
-  closet: { pos: [-9.1, -1.3, 1.6], look: [-14.5, -1.0, 1.4] },
-  bath: { pos: [-7.3, 2.0, 1.6], look: [-12.5, 4.6, 0.8] },
-  vitrine: { pos: [-11.5, -8.0, 1.5], look: [-11.5, -10, 1.0] },
-  letters: { pos: [-12.4, -5.3, 1.6], look: [-12.4, -3.5, 1.45] },
-  study: { pos: [6.9, -3.0, 1.6], look: [9.5, -7.5, 1.0] },
-  computer: { pos: [7.75, -5.6, 1.35], look: [8.88, -5.6, 1.15] },
-  travel: { pos: [8.6, -7.9, 1.6], look: [8.6, -10, 1.6] },
-  gallery: { pos: [3.6, -6.0, 1.6], look: [6.2, -6.0, 1.5] },
+  living: { pos: [2.6, -0.9, 1.6], look: [-2.0, 6.5, 1.0] },
+  window: { pos: [0.0, 6.2, 1.6], look: [0.0, 60, -6] },
+  kitchen: { pos: [-0.8, -2.6, 1.6], look: [-4.5, -7.5, 1.0] },
+  dining: { pos: [2.5, -3.0, 1.6], look: [-3.0, -4.6, 0.9] },
+  gallery: { pos: [-3.3, -8.7, 1.6], look: [-3.3, -10, 1.5] },
+  bedroom: { pos: [-8.0, -3.6, 1.6], look: [-14.0, -7.5, 0.7] },
+  closet: { pos: [-8.7, -0.26, 1.6], look: [-14.5, -0.26, 1.4] },
+  bath: { pos: [-7.0, 3.3, 1.6], look: [-12.0, 5.6, 0.8] },
+  vitrine: { pos: [-8.6, -8.4, 1.5], look: [-8.6, -10, 1.0] },
+  letters: { pos: [-11.4, -5.0, 1.6], look: [-11.4, -2.9, 1.45] },
+  study: { pos: [5.0, -7.8, 1.6], look: [9.5, -3.0, 1.0] },
+  computer: { pos: [7.15, -4.6, 1.35], look: [8.28, -4.6, 1.15] },
+  travel: { pos: [7.4, -8.1, 1.6], look: [7.4, -10, 1.6] },
+  reading: { pos: [7.6, 2.4, 1.6], look: [7.6, 7.0, 1.0] },
 };
 
 async function boot() {
@@ -179,20 +180,81 @@ async function boot() {
         player.faceTowards(c);
         home.activate(root);
       });
-      if (root.userData.interact !== 'sit') $('stand').hidden = !player.isSeated;
+      if (!['sit', 'lie', 'sleep'].includes(root.userData.interact)) $('stand').hidden = !player.isSeated;
       fadeHint();
     } else if (r.floor) {
       player.walkTo(r.hit.point);
       fadeHint();
     }
   }
+  // Proximity buttons: whatever is within reach gets a big button (E = the first one) ---------
+  const prompts = $('prompts');
+  let promptRoots: THREE.Object3D[] = [];
+  let promptKey = '';
+  let promptT = 0;
+  const refreshPrompts = () => {
+    if (sheetOpen() || inspector.active || !$('desktop').hidden) { if (promptKey) { prompts.innerHTML = ''; promptKey = ''; } return; }
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    dir.y = 0;
+    dir.normalize();
+    promptRoots = player.isSeated ? [] : home.nearby(player.pos, dir, solid, isTouch ? 3 : 4);
+    // the thing in the middle of the screen (within reach) goes first
+    const c = !player.isSeated && pick(window.innerWidth / 2, window.innerHeight / 2);
+    if (c && c.root && c.hit.distance < 2.6) promptRoots = [c.root, ...promptRoots.filter((r) => r !== c.root)].slice(0, isTouch ? 3 : 4);
+    const labels = promptRoots.map((r) => home.label(r));
+    const key = labels.join('|');
+    if (key === promptKey) return;
+    promptKey = key;
+    $('hint').style.visibility = labels.length ? 'hidden' : '';
+    prompts.innerHTML = labels.map((l, i) => `<button data-i="${i}">${i === 0 && !isTouch ? '<kbd>E</kbd>' : ''}${l}</button>`).join('');
+  };
+  prompts.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    const r = b && promptRoots[Number(b.dataset.i)];
+    if (!r) return;
+    home.activate(r);
+    if (r.userData.interact !== 'sit' && r.userData.interact !== 'lie' && r.userData.interact !== 'sleep') $('stand').hidden = !player.isSeated;
+    promptKey = '';
+    fadeHint();
+  });
+  window.addEventListener('keydown', (e) => {
+    if ((e.target as HTMLElement).closest?.('input,textarea') || sheetOpen()) return;
+    if (e.code === 'KeyE' && promptRoots[0]) { home.activate(promptRoots[0]); promptKey = ''; }
+    if ((e.code === 'KeyQ' || e.code === 'Space') && player.isSeated) { player.stand(); $('stand').hidden = true; }
+  });
+
+  // Sleep: fade out, the night passes (or a nap through the day), wake up ----------------------
+  const fade = $('fade');
+  home.onSleep = () => {
+    fade.textContent = goal.t > 0.4 ? '晚安' : '睡個午覺';
+    fade.classList.add('on');
+    setTimeout(() => {
+      const morning = goal.t > 0.4;
+      goal.t = time.t = morning ? 0 : 1;
+      home.setLightsMaster(!morning);
+      refreshDock();
+      persist();
+      fade.textContent = morning ? '早安' : '晚上了';
+    }, 2600);
+    setTimeout(() => fade.classList.remove('on'), 4600);
+  };
+  const toast = $('toast');
+  let toastTimer = 0;
+  home.onToast = (msg) => {
+    toast.textContent = msg;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => { toast.hidden = true; }, 2600);
+  };
+
   let hintFaded = false;
   const fadeHint = () => {
     if (hintFaded) return;
     hintFaded = true;
     setTimeout(() => $('hint').classList.add('fade'), 2500);
   };
-  if (isTouch) $('hint').textContent = '左邊拖動走路 · 右邊拖動看四周 · 點擊物件互動';
+  if (isTouch) $('hint').textContent = '左邊拖動走路 · 右邊拖動看四周 · 走近東西會出現按鈕';
 
   // Loop --------------------------------------------------------------------------------
   let last = performance.now();
@@ -218,6 +280,8 @@ async function boot() {
     player.update(dt);
     if (!player.isSeated) $('stand').hidden = true;
     home.update(dt);
+    promptT -= dt;
+    if (promptT <= 0) { promptT = 0.2; refreshPrompts(); }
     env.update(dt, elapsed);
     env.sky.position.copy(camera.position);
 
@@ -259,6 +323,16 @@ async function boot() {
       look: (pos: V3, look: V3) => player.spawn(fromBlender(pos), fromBlender(look)),
       setTime: (t: number, lights: number) => { goal.t = time.t = t; goal.lights = time.lights = lights; home.setLightsMaster(lights > 0.5); },
       info: () => renderer.info.render,
+      player,
+      home,
+      prompts: () => [...prompts.querySelectorAll('button')].map((b) => b.textContent),
+      walk: (x: number, y: number) => {
+        // simulate the walk in fixed steps (independent of the frame rate)
+        let done = false;
+        player.walkTo(fromBlender([x, y, 0]), () => { done = true; });
+        for (let i = 0; i < 1200 && !done; i++) { player.update(0.05); home.update(0.05); }
+        return [player.pos.x, -player.pos.z];
+      },
       world,
       scene,
       camera,

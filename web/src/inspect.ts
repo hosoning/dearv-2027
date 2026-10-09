@@ -58,7 +58,7 @@ export class Inspector {
     window.addEventListener('keydown', (e) => { if (this.active && e.key === 'Escape') this.close(); });
   }
 
-  open(root: THREE.Object3D, caption: Caption, opts: { onClose?: () => void } = {}) {
+  open(root: THREE.Object3D, caption: Caption, opts: { onClose?: () => void; face?: THREE.Vector3 } = {}) {
     this.close(true);
     root.updateWorldMatrix(true, true);
     const box = new THREE.Box3().setFromObject(root);
@@ -94,7 +94,13 @@ export class Inspector {
     this.setupSnow(clone);
     // start with the side that faced the visitor turned towards the camera
     const d = new THREE.Vector3().subVectors(this.viewer.position, center);
-    this.yaw = Math.atan2(-d.x, d.z) + 0.35;
+    if (opts.face) {
+      // a flat piece (a garment): show its broad side
+      const f = opts.face.clone();
+      if (f.dot(d) < 0) f.negate();
+      d.copy(f);
+    }
+    this.yaw = Math.atan2(-d.x, d.z) + (opts.face ? 0.15 : 0.35);
     this.pitch = 0.3;
     this.dist = this.targetDist = 2.3;
     this.appear = 0;

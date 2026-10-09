@@ -28,6 +28,15 @@ export class Home {
   private curtainsClosed = new Map<string, boolean>();
   lightsMaster = 1;
   onLightsChanged: () => void = () => {};
+  onSleep: () => void = () => {};
+  onToast: (msg: string) => void = () => {};
+  private autoOpened = new Set<THREE.Object3D>();
+  private autoDoors: { root: THREE.Object3D; center: THREE.Vector3 }[] = [];
+  private spots: { root: THREE.Object3D; box: THREE.Box3; center: THREE.Vector3 }[] = [];
+  private burners: THREE.Mesh[] = [];
+  private burnerOn = false;
+  private shower: THREE.Group | null = null;
+  private steam: { mesh: THREE.Mesh; t: number; origin: THREE.Vector3 }[] = [];
 
   constructor(private world: World, private player: Player, private scene: THREE.Scene, private inspector: Inspector) {
     this.platter = world.byName.get('turntable_platter') ?? null;
@@ -43,6 +52,66 @@ export class Home {
       music: { playing: () => this.music.playing, toggle: () => (this.music.playing ? this.music.stop() : this.music.start()) },
     });
     player.dynamicColliders = () => this.doorColliders();
+    this.setupSpots();
+    this.setupBurners();
+  }
+
+  /** Every interactable with its (closed-state) bounds, for the proximity buttons and auto doors. */
+  private setupSpots() {
+    const seen = new Set<THREE.Object3D>();
+    for (const it of this.world.manifest.interactables) {
+      const o = this.world.byName.get(it.name);
+      if (!o || seen.has(o)) continue;
+      seen.add(o);
+      o.updateWorldMatrix(true, true);
+      const box = new THREE.Box3().setFromObject(o);
+      if (box.isEmpty()) {
+        // a bare hinge / root: use its children or its own position
+        const p = o.getWorldPosition(new THREE.Vector3());
+        box.setFromCenterAndSize(p, new THREE.Vector3(0.3, 0.3, 0.3));
+      }
+      const center = box.getCenter(new THREE.Vector3());
+      this.spots.push({ root: o, box, center });
+      if (o.userData.interact === 'door' && o.userData.auto) this.autoDoors.push({ root: o, center });
+    }
+  }
+
+  /** Interactables near the player, nearest first (for the on-screen buttons). */
+  nearby(pos: THREE.Vector3, dir: THREE.Vector3, solid: THREE.Object3D[], max = 4): THREE.Object3D[] {
+    const out: { root: THREE.Object3D; d: number }[] = [];
+    const ray = new THREE.Raycaster();
+    const eye = new THREE.Vector3(pos.x, 1.5, pos.z);
+    for (const s of this.spots) {
+      const k = s.root.userData.interact as string;
+      if (k === 'photo' && out.length > 6) continue;
+      // horizontal distance to the bounds
+      const cx = THREE.MathUtils.clamp(pos.x, s.box.min.x, s.box.max.x);
+      const cz = THREE.MathUtils.clamp(pos.z, s.box.min.z, s.box.max.z);
+      const d = Math.hypot(pos.x - cx, pos.z - cz);
+      if (d > 1.35) continue;
+      const to = new THREE.Vector3(s.center.x - pos.x, 0, s.center.z - pos.z);
+      const len = to.length();
+      const facing = len > 1e-3 ? to.normalize().dot(dir) : 1;
+      if (len > 0.5 && facing < 0.3 && d > 0.35) continue;
+      // something solid in between (a wall)? aim at the closest point, slightly above the floor
+      const target = new THREE.Vector3(cx, THREE.MathUtils.clamp(1.0, s.box.min.y, s.box.max.y), cz);
+      const v = target.clone().sub(eye);
+      const dist = v.length();
+      if (dist > 0.3) {
+        ray.set(eye, v.normalize());
+        ray.far = dist - 0.05;
+        const hit = ray.intersectObjects(solid, false)[0];
+        if (hit && this.rootOf(hit.object) !== s.root) {
+          // allow hits on the object's own parts and on things the object sits inside of
+          const hb = new THREE.Box3().setFromObject(hit.object);
+          if (!hb.containsPoint(target)) continue;
+        }
+      }
+      // what you are facing comes first, then what is closest
+      out.push({ root: s.root, d: d + 1.2 * (1 - facing) - (k === 'door' && s.root.userData.auto ? 0.4 : 0) });
+    }
+    out.sort((a, b) => a.d - b.d);
+    return out.slice(0, max).map((o) => o.root);
   }
 
   /** Root object carrying the interact metadata for a hit mesh. */
@@ -59,7 +128,9 @@ export class Home {
     const kind = root.userData.interact as string;
     const base = root.userData.label as string;
     const verb: Record<string, string> = {
-      door: this.open.get(root) ? '關上' : '打開', lamp: this.lampOn.get(root.userData.light) ? '關燈' : '開燈',
+      door: this.open.get(root) ? '關上' : '打開', drawer: this.open.get(root) ? '推回' : '拉開', lie: '', sleep: '',
+      hob: this.burnerOn ? '關火' : '開火', coffee: '', shower: this.shower?.visible ? '關掉' : '打開', garment: '拿起來看',
+      lamp: this.lampOn.get(root.userData.light) ? '關燈' : '開燈',
       curtains: this.curtainsClosed.get(root.userData.target) ? '拉開' : '拉上', tv: this.tv?.on ? '關掉' : '打開',
       music: this.music.playing ? '停止' : '播放', faucet: this.streams.get(root.userData.spout)?.visible ? '關水' : '開水',
       sit: '', letters: '翻閱', photo: '看看', gift: this.open.get(root) ? '再看一次' : '拆開', keepsake: '拿起來看',
@@ -71,10 +142,33 @@ export class Home {
   activate(root: THREE.Object3D) {
     const d = root.userData;
     switch (d.interact as string) {
-      case 'door': {
+      case 'door': this.autoOpened.delete(root); this.setDoor(root, !this.open.get(root)); break;
+      case 'drawer': {
         const isOpen = !this.open.get(root);
         this.open.set(root, isOpen);
-        this.tween(root.rotation as unknown as Record<string, number>, 'y', isOpen ? THREE.MathUtils.degToRad(d.angle) : 0, 0.9);
+        const p0 = (d._p0 ??= root.position.toArray()) as number[];
+        const sl = d.slide as number[];
+        const k = isOpen ? 1 : 0;
+        const pos = root.position as unknown as Record<string, number>;
+        this.tween(pos, 'x', p0[0] + sl[0] * k, 0.5);
+        this.tween(pos, 'y', p0[1] + sl[2] * k, 0.5);
+        this.tween(pos, 'z', p0[2] - sl[1] * k, 0.5);
+        break;
+      }
+      case 'hob': this.toggleBurners(); break;
+      case 'coffee': {
+        const c = new THREE.Box3().setFromObject(root).getCenter(new THREE.Vector3());
+        this.puff(new THREE.Vector3(c.x, c.y - 0.12, c.z), 6);
+        this.onToast('咖啡沖好了 ☕');
+        break;
+      }
+      case 'shower': this.toggleShower(d.spout as string); break;
+      case 'garment': {
+        // the broad side of a hanging garment is across its thinner horizontal extent
+        const body = root.children.find((c) => c.name.endsWith('_body')) ?? root;
+        const sz = new THREE.Box3().setFromObject(body).getSize(new THREE.Vector3());
+        const face = sz.x < sz.z ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+        this.inspector.open(root, { title: d.label as string, story: '拖動轉一轉，看看布料和摺痕' }, { face });
         break;
       }
       case 'gift': {
@@ -118,6 +212,8 @@ export class Home {
         photoSheet(i, this.photoImgs[i]?.src ?? '', (url) => this.applyPhoto(i, url));
         break;
       }
+      case 'lie':
+      case 'sleep':
       case 'sit': {
         const seat = this.world.byName.get(d.seat as string);
         if (seat) {
@@ -128,6 +224,7 @@ export class Home {
           if (t) t.getWorldPosition(look); else look.copy(p).add(new THREE.Vector3(1, 0, 0));
           this.player.sit(p, look);
           document.getElementById('stand')!.hidden = false;
+          if (d.interact === 'sleep') setTimeout(() => this.onSleep(), 1500);
         }
         break;
       }
@@ -424,17 +521,120 @@ export class Home {
     }
   }
 
-  // Doors as dynamic colliders -------------------------------------------------------
+  // Doors ---------------------------------------------------------------------------
+  /** Hinged leaves rotate about their Blender axis (z = vertical hinge, x / y = drop-down). */
+  setDoor(root: THREE.Object3D, isOpen: boolean) {
+    const d = root.userData;
+    this.open.set(root, isOpen);
+    const r0 = (d._r0 ??= [root.rotation.x, root.rotation.y, root.rotation.z]) as number[];
+    const a = isOpen ? THREE.MathUtils.degToRad(d.angle) : 0;
+    const rot = root.rotation as unknown as Record<string, number>;
+    const dur = d.auto ? 0.8 : 0.7;
+    if (d.axis === 'x') this.tween(rot, 'x', r0[0] + a, dur);
+    else if (d.axis === 'y') this.tween(rot, 'z', r0[2] - a, dur);
+    else this.tween(rot, 'y', r0[1] + a, dur);
+  }
+
+  /** Room doors open as you walk up to them and close again behind you. */
+  private autoDoorsUpdate() {
+    const p = this.player.pos;
+    for (const { root, center } of this.autoDoors) {
+      const dist = Math.hypot(p.x - center.x, p.z - center.z);
+      const isOpen = !!this.open.get(root);
+      if (!isOpen && dist < 1.5) { this.setDoor(root, true); this.autoOpened.add(root); }
+      else if (isOpen && this.autoOpened.has(root) && dist > 3.2) { this.setDoor(root, false); this.autoOpened.delete(root); }
+    }
+  }
+
   private doorColliders(): Box2[] {
     const out: Box2[] = [];
-    for (const name of ['bedroom_door', 'bath_door_living', 'bath_door_suite', 'study_door_s', 'study_door_n']) {
-      const door = this.world.byName.get(name);
-      if (door && !this.open.get(door)) {
+    for (const { root: door } of this.autoDoors) {
+      if (!this.open.get(door)) {
         const b = new THREE.Box3().setFromObject(door);
         out.push({ min: [b.min.x - 0.04, b.min.z - 0.04], max: [b.max.x + 0.04, b.max.z + 0.04] });
       }
     }
     return out;
+  }
+
+  // Kitchen hob, shower, steam ------------------------------------------------------------
+  private setupBurners() {
+    const hob = this.world.byName.get('k_hob');
+    hob?.traverse((o) => {
+      if (o.userData.burner) {
+        const m = o as THREE.Mesh;
+        const mat = (m.material as THREE.MeshStandardMaterial).clone();
+        mat.emissive = new THREE.Color(1.0, 0.25, 0.05);
+        mat.emissiveIntensity = 0;
+        m.material = mat;
+        this.burners.push(m);
+      }
+    });
+  }
+
+  private toggleBurners() {
+    this.burnerOn = !this.burnerOn;
+    for (const b of this.burners) {
+      this.tween(b.material as unknown as Record<string, number>, 'emissiveIntensity', this.burnerOn ? 2.2 : 0, 1.2);
+    }
+    if (this.burnerOn) {
+      const pot = this.world.byName.get('k_pot');
+      if (pot) this.puff(pot.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.1, 0)), 10);
+    }
+  }
+
+  private toggleShower(spout: string) {
+    if (!this.shower) {
+      const o = this.world.byName.get(spout);
+      if (!o) return;
+      const p = o.getWorldPosition(new THREE.Vector3());
+      const g = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({ color: 0xd8ecff, roughness: 0.05, transparent: true, opacity: 0.35,
+        emissive: 0x335566, emissiveIntensity: 0.3, depthWrite: false });
+      const geo = new THREE.CylinderGeometry(0.003, 0.004, p.y, 5, 1, true);
+      for (let i = 0; i < 46; i++) {
+        const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()) * 0.16;
+        const m = new THREE.Mesh(geo, mat);
+        m.position.set(p.x + Math.cos(a) * r, p.y / 2, p.z + Math.sin(a) * r);
+        m.rotation.z = (Math.random() - 0.5) * 0.06;
+        g.add(m);
+      }
+      g.visible = false;
+      this.scene.add(g);
+      this.shower = g;
+    }
+    this.shower.visible = !this.shower.visible;
+  }
+
+  /** A few soft rising puffs (coffee, cooking). */
+  private puff(origin: THREE.Vector3, n: number) {
+    for (let i = 0; i < n; i++) {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }));
+      m.position.copy(origin);
+      this.scene.add(m);
+      this.steam.push({ mesh: m, t: -i * 0.35, origin: origin.clone() });
+    }
+  }
+
+  private updateSteam(dt: number) {
+    for (const s of this.steam) {
+      s.t += dt;
+      const k = Math.max(0, s.t) / 3;
+      const m = s.mesh.material as THREE.MeshBasicMaterial;
+      m.opacity = s.t < 0 ? 0 : 0.22 * Math.sin(Math.min(1, k) * Math.PI);
+      s.mesh.position.set(s.origin.x + Math.sin(s.t * 2 + s.origin.x) * 0.03, s.origin.y + k * 0.45, s.origin.z);
+      s.mesh.scale.setScalar(1 + k * 2.5);
+    }
+    for (const s of this.steam.filter((x) => x.t > 3)) {
+      this.scene.remove(s.mesh);
+      s.mesh.geometry.dispose();
+    }
+    this.steam = this.steam.filter((x) => x.t <= 3);
+    if (this.burnerOn && Math.random() < dt * 0.8) {
+      const pot = this.world.byName.get('k_pot');
+      if (pot) this.puff(pot.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.12, 0)), 1);
+    }
   }
 
   // Tweens ----------------------------------------------------------------------------
@@ -456,5 +656,8 @@ export class Home {
     if (this.pc) this.drawComputer(dt);
     for (const m of this.streams.values()) if (m.visible) m.scale.x = 1 + Math.sin(performance.now() * 0.03) * 0.08;
     if (this.heart && this.heart.position) this.heart.rotation.y += dt * 1.2;
+    if (this.shower?.visible) this.shower.children.forEach((c, i) => { c.scale.x = 1 + Math.sin(performance.now() * 0.05 + i) * 0.3; });
+    this.updateSteam(dt);
+    this.autoDoorsUpdate();
   }
 }
