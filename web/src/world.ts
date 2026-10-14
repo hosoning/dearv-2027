@@ -269,7 +269,8 @@ export async function loadWorld(base: string, onProgress: (f: number) => void): 
   const buckets = new Map<THREE.Material, THREE.Mesh[]>();
   for (const mesh of meshes) {
     if (ancestorWith(mesh, 'interact') || mesh.userData.curtain || mesh.userData.glass || mesh.userData.lamp_group ||
-        mesh.userData.spin || mesh.userData.gift_heart || floors.includes(mesh)) continue;
+        mesh.userData.spin || mesh.userData.gift_heart || floors.includes(mesh) ||
+        /^(fr_|k_pan|dining_plate|toothbrush)/.test(mesh.name)) continue;   // things daily life moves or hides
     const arr = buckets.get(mesh.material as THREE.Material) ?? [];
     arr.push(mesh);
     buckets.set(mesh.material as THREE.Material, arr);

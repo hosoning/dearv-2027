@@ -83,8 +83,11 @@ export class Player {
     };
   }
 
+  onStand: () => void = () => {};
+
   stand() {
     if (!this.seated) return;
+    this.onStand();
     const s = this.seated;
     this.seated = null;
     // back to where we stood before sitting down
@@ -244,7 +247,7 @@ export class Player {
  * Grid A* over the floor plan (10 cm cells, colliders inflated by the walking radius) so
  * click-to-walk and the "walk to" menu go around furniture and through doorways.
  */
-class Nav {
+export class Nav {
   private res = 0.1;
   private w: number;
   private h: number;

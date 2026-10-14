@@ -7,6 +7,9 @@ import { Home } from './interact';
 import { Inspector } from './inspect';
 import { lettersSheet, setContent, sheetOpen, type Content } from './ui';
 import { store } from './store';
+import { LiZeyan } from './lizeyan';
+import { Pudding } from './pudding';
+import { KitchenLife } from './life';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const canvas = $('scene') as HTMLCanvasElement;
@@ -24,21 +27,22 @@ const camera = new THREE.PerspectiveCamera(isTouch ? 72 : 62, window.innerWidth 
 
 const fromBlender = (v: V3) => new THREE.Vector3(v[0], v[2], -v[1]);
 
+// Blender coordinates of the finished (mirrored) flat
 const PLACES: Record<string, { pos: V3; look: V3 }> = {
-  living: { pos: [2.6, -0.9, 1.6], look: [-2.0, 6.5, 1.0] },
-  window: { pos: [0.0, 6.2, 1.6], look: [0.0, 60, -6] },
-  kitchen: { pos: [-0.8, -2.6, 1.6], look: [-4.5, -7.5, 1.0] },
-  dining: { pos: [2.5, -3.0, 1.6], look: [-3.0, -4.6, 0.9] },
-  gallery: { pos: [-3.3, -8.7, 1.6], look: [-3.3, -10, 1.5] },
-  bedroom: { pos: [-8.0, -3.6, 1.6], look: [-14.0, -7.5, 0.7] },
-  closet: { pos: [-8.7, -0.26, 1.6], look: [-14.5, -0.26, 1.4] },
-  bath: { pos: [-7.0, 3.3, 1.6], look: [-12.0, 5.6, 0.8] },
-  vitrine: { pos: [-8.6, -8.4, 1.5], look: [-8.6, -10, 1.0] },
-  letters: { pos: [-11.4, -5.0, 1.6], look: [-11.4, -2.9, 1.45] },
-  study: { pos: [5.0, -7.8, 1.6], look: [9.5, -3.0, 1.0] },
-  computer: { pos: [7.15, -4.6, 1.35], look: [8.28, -4.6, 1.15] },
-  travel: { pos: [7.4, -8.1, 1.6], look: [7.4, -10, 1.6] },
-  reading: { pos: [7.6, 2.4, 1.6], look: [7.6, 7.0, 1.0] },
+  living: { pos: [-6.6, -0.9, 1.6], look: [-2.0, 6.5, 1.0] },
+  window: { pos: [-4.0, 6.2, 1.6], look: [-4.0, 60.0, -6.0] },
+  kitchen: { pos: [-3.2, -2.6, 1.6], look: [0.5, -7.5, 1.0] },
+  dining: { pos: [-6.5, -3.0, 1.6], look: [-1.0, -4.6, 0.9] },
+  gallery: { pos: [-0.7, -8.7, 1.6], look: [-0.7, -10.0, 1.5] },
+  bedroom: { pos: [4.0, -3.6, 1.6], look: [10.0, -7.5, 0.7] },
+  closet: { pos: [4.7, -0.26, 1.6], look: [10.5, -0.26, 1.4] },
+  bath: { pos: [3.0, 3.3, 1.6], look: [8.0, 5.6, 0.8] },
+  vitrine: { pos: [4.6, -8.4, 1.5], look: [4.6, -10.0, 1.0] },
+  letters: { pos: [7.4, -5.0, 1.6], look: [7.4, -2.9, 1.45] },
+  study: { pos: [-9.0, -7.8, 1.6], look: [-13.5, -3.0, 1.0] },
+  computer: { pos: [-11.15, -4.6, 1.35], look: [-12.28, -4.6, 1.15] },
+  travel: { pos: [-11.4, -8.1, 1.6], look: [-11.4, -10.0, 1.6] },
+  reading: { pos: [-11.6, 2.4, 1.6], look: [-11.6, 7.0, 1.0] },
 };
 
 async function boot() {
@@ -58,6 +62,38 @@ async function boot() {
   if (world.manifest.bounds) player.bounds = world.manifest.bounds;
   const inspector = new Inspector(renderer, canvas, camera);
   const home = new Home(world, player, scene, inspector);
+  // 李澤言 (optional: the home still works if he fails to load)
+  let lz: LiZeyan | null = null;
+  try {
+    lz = await LiZeyan.load(`${base}lizeyan.glb?v=${world.manifest.version}`, scene, world.manifest.colliders,
+      world.manifest.bounds ?? { min: [-100, -100], max: [100, 100] });
+  } catch (e) { console.warn('lizeyan', e); }
+  let cat: Pudding | null = null;
+  try {
+    cat = await Pudding.load(`${base}pudding.glb?v=${world.manifest.version}`, scene, world.manifest.colliders,
+      world.manifest.bounds ?? { min: [-100, -100], max: [100, 100] });
+  } catch (e) { console.warn('pudding', e); }
+  const life = new KitchenLife(world, home, scene);
+  let took = false;
+  if (lz) {
+    lz.onSpot = (spot, phase, secs) => {
+      const now = lz!.now();
+      if (spot === 'fridge') {
+        if (phase === 'arrive') { life.atFridge(now, 'arrive'); took = false; }
+        if (phase === 'stay' && secs > 2.5 && !took) { life.atFridge(now, 'take'); took = true; }
+        if (phase === 'leave') life.atFridge(now, 'leave');
+      }
+      if (spot === 'cook') life.atHob(phase !== 'leave');
+      if (spot === 'dine' && phase === 'leave') life.ate();
+    };
+  }
+  let lifeT = 0;
+  const lzStatus = $('lz-status');
+  if (lz) {
+    lz.onStatus = (s) => { if (lzStatus.textContent !== s) lzStatus.textContent = s ? `他 · ${s}` : ''; };
+    home.onSit = (kind, seat, look) => lz!.joinHer(kind, seat, look);
+    player.onStand = () => lz!.herStood();
+  }
   // scene.json spawn is already in three.js coordinates
   player.spawn(new THREE.Vector3(...world.manifest.spawn.position), new THREE.Vector3(...world.manifest.spawn.lookAt));
 
@@ -83,9 +119,11 @@ async function boot() {
   const captureEnv = () => {
     scene.environment = null;
     env.water.visible = false;
+    lz?.setVisibleForCapture(false);
     env.sky.position.set(2.5, 1.5, -1.5);
     const rt = pmrem.fromScene(scene, 0.02, 0.1, 12000, { size: 128, position: new THREE.Vector3(2.5, 1.5, -1.5) });
     env.water.visible = true;
+    lz?.setVisibleForCapture(true);
     scene.environment = rt.texture;
     // three only honours envMapIntensity when the material has its own envMap: assign the
     // probe explicitly so the city ignores it and the window glass only catches a hint of it
@@ -190,6 +228,7 @@ async function boot() {
   // Proximity buttons: whatever is within reach gets a big button (E = the first one) ---------
   const prompts = $('prompts');
   let promptRoots: THREE.Object3D[] = [];
+  let promptItems: { label: string; run: () => void }[] = [];
   let promptKey = '';
   let promptT = 0;
   const refreshPrompts = () => {
@@ -202,7 +241,16 @@ async function boot() {
     // the thing in the middle of the screen (within reach) goes first
     const c = !player.isSeated && pick(window.innerWidth / 2, window.innerHeight / 2);
     if (c && c.root && c.hit.distance < 2.6) promptRoots = [c.root, ...promptRoots.filter((r) => r !== c.root)].slice(0, isTouch ? 3 : 4);
-    const labels = promptRoots.map((r) => home.label(r));
+    const max = isTouch ? 3 : 4;
+    promptItems = [
+      ...(lz?.actions(camera.position, player.isSeated) ?? []),
+      ...(cat?.actions(camera.position) ?? []),
+      ...promptRoots.map((r) => ({ label: home.label(r), run: () => {
+        home.activate(r);
+        if (!['sit', 'lie', 'sleep'].includes(r.userData.interact)) $('stand').hidden = !player.isSeated;
+      } })),
+    ].slice(0, max + (lz && lz.actions(camera.position, player.isSeated).length ? 2 : 0));
+    const labels = promptItems.map((p) => p.label);
     const key = labels.join('|');
     if (key === promptKey) return;
     promptKey = key;
@@ -211,16 +259,15 @@ async function boot() {
   };
   prompts.addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest('button');
-    const r = b && promptRoots[Number(b.dataset.i)];
-    if (!r) return;
-    home.activate(r);
-    if (r.userData.interact !== 'sit' && r.userData.interact !== 'lie' && r.userData.interact !== 'sleep') $('stand').hidden = !player.isSeated;
+    const it = b && promptItems[Number(b.dataset.i)];
+    if (!it) return;
+    it.run();
     promptKey = '';
     fadeHint();
   });
   window.addEventListener('keydown', (e) => {
     if ((e.target as HTMLElement).closest?.('input,textarea') || sheetOpen()) return;
-    if (e.code === 'KeyE' && promptRoots[0]) { home.activate(promptRoots[0]); promptKey = ''; }
+    if (e.code === 'KeyE' && promptItems[0]) { promptItems[0].run(); promptKey = ''; }
     if ((e.code === 'KeyQ' || e.code === 'Space') && player.isSeated) { player.stand(); $('stand').hidden = true; }
   });
 
@@ -280,6 +327,10 @@ async function boot() {
     player.update(dt);
     if (!player.isSeated) $('stand').hidden = true;
     home.update(dt);
+    lz?.update(dt, camera, camera.position, night);
+    cat?.update(dt, camera.position, lz ? lz.root.position : null, !!lz?.isSleeping);
+    lifeT -= dt;
+    if (lifeT <= 0) { lifeT = 3; life.sync(lz ? lz.now() : new Date()); }
     promptT -= dt;
     if (promptT <= 0) { promptT = 0.2; refreshPrompts(); }
     env.update(dt, elapsed);
@@ -325,6 +376,8 @@ async function boot() {
       info: () => renderer.info.render,
       player,
       home,
+      lz,
+      cat,
       prompts: () => [...prompts.querySelectorAll('button')].map((b) => b.textContent),
       walk: (x: number, y: number) => {
         // simulate the walk in fixed steps (independent of the frame rate)

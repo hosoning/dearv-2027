@@ -1792,6 +1792,81 @@ def build_ceiling_lights(M):
     A.area_light("slot_study", (7.6, -2.5, H - 0.03), (0.05, 14.4), 160, (1.0, 0.84, 0.66))
 
 
+# ---------------------------------------------------------------------------
+# The rooms above were laid out with the drawing's left on the west; standing at the
+# entrance facing the harbour the drawing is the other way round, so the finished
+# interior is mirrored across the flat's centre line (x -> XW + XE - x).
+MIRROR_C = XW + XE
+RIGID_GROUPS = ("vitrine_group", "letter_group")   # carry text: moved, never mirrored
+
+
+def mx(x):
+    """Final (mirrored) x of a layout x."""
+    return MIRROR_C - x
+
+
+def spawn():
+    (x, y, z), (lx, ly, lz) = SPAWN
+    return (mx(x), y, z), (mx(lx), ly, lz)
+
+
+def mirror_interior():
+    bpy.context.view_layer.update()
+    D = Matrix.Scale(-1, 4, (1, 0, 0))
+    Rw = Matrix.Translation((MIRROR_C, 0, 0)) @ D
+    objs = set(lib.collection("Interior").all_objects) | set(lib.collection("BakeLights").all_objects)
+    rigid = set()
+    for name in RIGID_GROUPS:
+        root = bpy.data.objects[name]
+        rigid |= {root, *root.children_recursive}
+    new_world = {}
+    for ob in objs:
+        if ob not in rigid:
+            new_world[ob] = Rw @ ob.matrix_world @ D
+    for name in RIGID_GROUPS:
+        root = bpy.data.objects[name]
+        xs = [(o.matrix_world @ Vector(c)).x for o in root.children_recursive if o.type == "MESH" for c in o.bound_box]
+        cx = (min(xs) + max(xs)) / 2
+        new_world[root] = Matrix.Translation((MIRROR_C - 2 * cx, 0, 0)) @ root.matrix_world
+    for ob in new_world:
+        if ob.type == "MESH" and ob not in rigid:
+            ob.data.transform(D)
+            ob.data.flip_normals()
+            fit = ob.get("uvfit")
+            if isinstance(fit, str) and fit.lstrip("-").startswith("y"):
+                # u along y on a wall that now faces the other way: keep pictures reading forwards
+                ob["uvfit"] = fit[1:] if fit.startswith("-") else "-" + fit
+    def depth(o):
+        d = 0
+        while o.parent is not None:
+            o, d = o.parent, d + 1
+        return d
+    for level in sorted({depth(o) for o in new_world}):
+        for ob in new_world:
+            if depth(ob) == level:
+                ob.matrix_world = new_world[ob]
+        bpy.context.view_layer.update()
+    for c in lib.COLLIDERS:
+        (x0, y0), (x1, y1) = c["min"], c["max"]
+        c["min"], c["max"] = [MIRROR_C - x1, y0], [MIRROR_C - x0, y1]
+    # hinges swing and drawers slide the mirrored way
+    rigid_names = {o.name for o in rigid}
+    for it in A.INTERACT:
+        if it["name"] in rigid_names:
+            continue
+        ob = bpy.data.objects.get(it["name"])
+        if it["kind"] in ("door", "gift") and it.get("axis", "z") in ("z", "y") and it["kind"] == "door":
+            it["angle"] = -it["angle"]
+            if ob is not None:
+                ob["angle"] = it["angle"]
+        if it["kind"] == "drawer":
+            sl = list(it["slide"])
+            sl[0] = -sl[0]
+            it["slide"] = sl
+            if ob is not None:
+                ob["slide"] = sl
+
+
 def build(M=None):
     A.H = H
     A.XW = XW
@@ -1811,4 +1886,5 @@ def build(M=None):
     build_bedroom(M)
     build_bathroom(M)
     build_ceiling_lights(M)
+    mirror_interior()
     return M

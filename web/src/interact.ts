@@ -29,6 +29,7 @@ export class Home {
   lightsMaster = 1;
   onLightsChanged: () => void = () => {};
   onSleep: () => void = () => {};
+  onSit: (kind: 'sit' | 'lie' | 'sleep', seat: THREE.Vector3, look: THREE.Vector3) => void = () => {};
   onToast: (msg: string) => void = () => {};
   private autoOpened = new Set<THREE.Object3D>();
   private autoDoors: { root: THREE.Object3D; center: THREE.Vector3 }[] = [];
@@ -223,6 +224,7 @@ export class Home {
           const t = this.world.byName.get(d.look as string);
           if (t) t.getWorldPosition(look); else look.copy(p).add(new THREE.Vector3(1, 0, 0));
           this.player.sit(p, look);
+          this.onSit(d.interact as 'sit' | 'lie' | 'sleep', p, look);
           document.getElementById('stand')!.hidden = false;
           if (d.interact === 'sleep') setTimeout(() => this.onSleep(), 1500);
         }
@@ -571,6 +573,8 @@ export class Home {
       }
     });
   }
+
+  setBurners(on: boolean) { if (on !== this.burnerOn) this.toggleBurners(); }
 
   private toggleBurners() {
     this.burnerOn = !this.burnerOn;
