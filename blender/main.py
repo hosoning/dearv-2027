@@ -118,6 +118,8 @@ def main():
     ap.add_argument("--quick", action="store_true", help="low samples / resolution preview bake")
     ap.add_argument("--no-bake", action="store_true")
     ap.add_argument("--blend", default="", help="optionally save the .blend here")
+    ap.add_argument("--resume", action="store_true",
+                    help="keep lightmaps already baked into --out (listed in lightmaps.json) and bake only the rest")
     args = ap.parse_args(argv)
     out = os.path.abspath(args.out)
     os.makedirs(os.path.join(out, "lightmaps"), exist_ok=True)
@@ -152,16 +154,30 @@ def main():
             t = time.time()
             bake.lightmap_uvs(objs, res=res[group], margin_px=4)
             print(f"[dearv] lightmap UVs {group}: {time.time() - t:.1f}s")
+        # long bakes can be resumed: every finished map is recorded as it lands
+        done_path = os.path.join(out, "lightmaps", "lightmaps.json")
+        done = json.load(open(done_path)) if args.resume and os.path.exists(done_path) else {}
         for mode in ("day", "night"):
+            todo = [g for g in lib.LIGHTMAP_GROUPS if mode not in done.get(g, {})]
+            for g in lib.LIGHTMAP_GROUPS:
+                if g not in todo:
+                    manifest["lightmaps"].setdefault(g, {})[mode] = done[g][mode]
+            if not todo:
+                continue
             bake.configure_cycles(samples[mode])
             bake.set_mode(mode, apartment.LIGHTS_NIGHT, hide_always)
             for group, objs in lib.LIGHTMAP_GROUPS.items():
+                if group not in todo:
+                    continue
                 t = time.time()
                 px = bake.bake_group(objs, f"lm_{group}", res[group])
                 px = bake.denoise(px)
                 fn = f"{group}_{mode}.webp"
                 scale = bake.encode(px, os.path.join(out, "lightmaps", fn))
                 manifest["lightmaps"].setdefault(group, {})[mode] = {"file": f"lightmaps/{fn}", "scale": scale}
+                done.setdefault(group, {})[mode] = manifest["lightmaps"][group][mode]
+                with open(done_path, "w") as f:
+                    json.dump(done, f, indent=1)
                 print(f"[dearv] baked {group}/{mode} {res[group]}px in {time.time() - t:.1f}s (scale {scale:.3f})")
         bake.remove_bake_nodes()
         # restore day state for export (emission factors off; three drives them)
