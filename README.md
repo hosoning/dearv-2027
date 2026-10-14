@@ -39,9 +39,12 @@ web/                Vite + TypeScript + three.js（r185）
 ```bash
 python3 -m venv .venv && .venv/bin/pip install bpy==5.2.2 pillow
 # 需要 libEGL（OIDN 降噪用的 compositor）：sudo apt-get install libegl1
-.venv/bin/python blender/main.py --out web/public/assets            # 完整品質（4 核 CPU 約 40 分鐘）
+.venv/bin/python blender/main.py --out web/public/assets            # 完整品質（4 核 CPU 約 2 小時，可用 --resume 分段）
 .venv/bin/python blender/main.py --out web/public/assets --quick    # 預覽品質（約 3 分鐘）
 .venv/bin/python blender/main.py --out /tmp/x --no-bake             # 只匯出幾何（測試用）
+.venv/bin/python blender/main.py --out web/public/assets --resume   # 接著上次中斷的烘焙繼續
+.venv/bin/python blender/character.py --out web/public/assets       # 李澤言（MakeHuman CC0 身體 + 衣服層）
+.venv/bin/python blender/cat.py --out web/public/assets             # 布丁（重點色布偶貓）
 ```
 
 也可以在一般 Blender 裡跑：`blender -b -P blender/main.py -- --out web/public/assets`。

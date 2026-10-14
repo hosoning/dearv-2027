@@ -22,15 +22,15 @@ const SPOTS: CatSpot[] = [
   cs('sofa_arm', [-3.5, 4.8], 0.43, 'loaf', 100, '窩在沙發角落'),
   cs('window', [1.2, 6.35], 0, 'sit', 180, '坐在落地窗前看海'),
   cs('rug', [-1.6, 4.4], 0.016, 'curl', -40, '在地毯上打盹'),
-  cs('bed', [-12.55, -6.3], 0.62, 'curl', 70, '在床尾睡覺'),
+  cs('bed', [-13.25, -6.75], 0.8, 'curl', 70, '在床尾睡覺'),
   cs('study_rug', [7.0, 3.2], 0.014, 'loaf', 200, '在書房地毯上'),
   cs('kitchen', [-2.2, -5.4], 0, 'sit', 10, '在廚房等吃的'),
   cs('closet', [-11.5, 0.9], 0, 'groom', 120, '在衣帽間舔毛'),
   cs('daybed', [8.9, 6.25], 0.44, 'curl', 160, '在窗邊躺椅上曬太陽'),
 ];
 
-const FUR_LAYERS = 10;
-const FUR_LEN = 0.032;
+const FUR_LAYERS = 12;
+const FUR_LEN = 0.042;
 
 export class Pudding {
   root = new THREE.Group();
@@ -65,17 +65,25 @@ export class Pudding {
     this.model.add(src);
     this.root.add(this.model);
     scene.add(this.root);
-    let skinned: THREE.SkinnedMesh | null = null;
+    const skinned: THREE.SkinnedMesh[] = [];
     src.traverse((o) => {
       if ((o as THREE.Bone).isBone) this.bones.set(o.name, o as THREE.Bone);
-      if ((o as THREE.SkinnedMesh).isSkinnedMesh) skinned = o as THREE.SkinnedMesh;
+      if ((o as THREE.SkinnedMesh).isSkinnedMesh) skinned.push(o as THREE.SkinnedMesh);
     });
     src.updateMatrixWorld(true);
     for (const b of this.bones.values()) {
       this.restLocal.set(b, b.quaternion.clone());
       this.restRoot.set(b, b.getWorldQuaternion(new THREE.Quaternion()));
     }
-    if (skinned) this.makeFur(skinned);
+    // glTF splits the body into one mesh per material: fur body and eyes
+    for (const m of skinned) {
+      const mat = m.material as THREE.MeshStandardMaterial;
+      if (/eye/.test(mat.name)) {
+        m.material = new THREE.MeshStandardMaterial({ color: 0x5aa0ff, emissive: 0x2a5cb8, emissiveIntensity: 0.6,
+          roughness: 0.1, transparent: true, opacity: 0.85 });
+        m.renderOrder = 2;
+      } else this.makeFur(m);
+    }
     const day = Math.floor(Date.now() / 86400000);
     this.placeAt(SPOTS[day % SPOTS.length]);
     this.nextMove = 40 + (day % 7) * 10;
@@ -87,8 +95,8 @@ export class Pudding {
     const src = mesh.material as THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[];
     const mats = Array.isArray(src) ? src : [src];
     const eye = mats.findIndex((m) => /eye/.test(m.name));
-    const furBase = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, transparent: true, opacity: 0.55,
-      depthWrite: false });
+    const furBase = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, transparent: true, opacity: 0.22,
+      depthWrite: false, color: 0xe6d6c0 });
     const eyeMat = new THREE.MeshStandardMaterial({ color: 0x5aa0ff, emissive: 0x2a5cb8, emissiveIntensity: 0.6,
       roughness: 0.1, transparent: true, opacity: 0.85 });
     mesh.material = Array.isArray(src) ? mats.map((_, i) => (i === eye ? eyeMat : furBase)) : furBase;
@@ -121,16 +129,16 @@ export class Pudding {
       sh.fragmentShader = sh.fragmentShader
         .replace('#include <common>', '#include <common>\nuniform float uK;\nvarying vec3 vFurPos;\nfloat furHash(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }')
         .replace('#include <dithering_fragment>', `#include <dithering_fragment>
-          float strand = furHash(floor(vFurPos * 700.0));
-          if (strand < uK * 0.92) discard;
-          gl_FragColor.a *= (1.0 - uK) * 0.5;
-          gl_FragColor.rgb *= 0.85 + 0.25 * uK;`);
+          float strand = furHash(floor(vFurPos * 320.0));
+          if (strand < 0.25 + uK * 0.7) discard;
+          gl_FragColor.a *= (1.0 - uK) * 0.2;
+          gl_FragColor.rgb *= vec3(0.9, 0.84, 0.76) * (0.8 + 0.3 * uK);`);
     };
     m.customProgramCacheKey = () => `fur${k.toFixed(2)}`;
     return m;
   }
 
-  private placeAt(s: CatSpot) {
+  placeAt(s: CatSpot) {
     this.spot = s;
     this.target = s;
     this.root.position.set(s.pos.x, s.y, s.pos.z);

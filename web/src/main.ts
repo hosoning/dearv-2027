@@ -250,6 +250,9 @@ async function boot() {
         if (!['sit', 'lie', 'sleep'].includes(r.userData.interact)) $('stand').hidden = !player.isSeated;
       } })),
     ].slice(0, max + (lz && lz.actions(camera.position, player.isSeated).length ? 2 : 0));
+    // one button per distinct action (four identical drawers read as noise)
+    const seenLabels = new Set<string>();
+    promptItems = promptItems.filter((p) => !seenLabels.has(p.label) && !!seenLabels.add(p.label));
     const labels = promptItems.map((p) => p.label);
     const key = labels.join('|');
     if (key === promptKey) return;

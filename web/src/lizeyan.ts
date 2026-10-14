@@ -207,10 +207,11 @@ export class LiZeyan {
     const tint = new THREE.Color(src.color ?? 0xffffff);
     const m = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(1, 1, 1).lerp(tint, skin ? 0.04 : 0.1),
-      metalness: 0, roughness: skin ? 0.18 : 0.32, transmission: 1, thickness: skin ? 0.25 : 0.4,
-      ior: skin ? 1.06 : 1.14, specularIntensity: 0.06, envMapIntensity: 0.0, transparent: false,
+      // thin: the room behind shows almost straight through, only the edges bend a little
+      metalness: 0, roughness: skin ? 0.06 : 0.12, transmission: 1, thickness: skin ? 0.018 : 0.03,
+      ior: skin ? 1.2 : 1.3, specularIntensity: 0.0, envMapIntensity: 0.0, transparent: false,
     });
-    const uniforms = { uRim: { value: skin ? 0.16 : 0.22 }, uRimColor: { value: new THREE.Color(1.0, 0.93, 0.82) }, uTime: { value: 0 } };
+    const uniforms = { uRim: { value: skin ? 0.3 : 0.38 }, uRimColor: { value: new THREE.Color(1.0, 0.93, 0.82) }, uTime: { value: 0 } };
     m.userData.uniforms = uniforms;
     m.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, uniforms);
