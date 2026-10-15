@@ -227,5 +227,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .fade.on { opacity: 1; pointer-events: auto; }
 @media (max-width: 600px) { .prompts button { padding: 13px 22px; font-size: 15px; } }
 
-.lz-status { position: absolute; left: 18px; top: calc(52px + env(safe-area-inset-top)); font-size: 12px; letter-spacing: .08em;
+.lz-status { white-space: pre-line; line-height: 1.7; position: absolute; left: 18px; top: calc(52px + env(safe-area-inset-top)); font-size: 12px; letter-spacing: .08em;
   color: var(--ink-dim); text-shadow: 0 1px 6px rgba(0,0,0,.5); }

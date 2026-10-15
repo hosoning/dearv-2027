@@ -90,7 +90,10 @@ async function boot() {
   let lifeT = 0;
   const lzStatus = $('lz-status');
   if (lz) {
-    lz.onStatus = (s) => { if (lzStatus.textContent !== s) lzStatus.textContent = s ? `他 · ${s}` : ''; };
+    lz.onStatus = (s) => {
+      const line = (s ? `他 · ${s}` : '') + (cat ? `\n布丁 · ${cat.status}` : '');
+      if (lzStatus.textContent !== line) lzStatus.textContent = line;
+    };
     home.onSit = (kind, seat, look) => lz!.joinHer(kind, seat, look);
     player.onStand = () => lz!.herStood();
   }
@@ -164,6 +167,16 @@ async function boot() {
   });
   $('places').addEventListener('click', (e) => {
     const b = (e.target as HTMLElement).closest('button');
+    const who = b?.dataset.go === 'find-lz' ? lz?.root : b?.dataset.go === 'find-cat' ? cat?.root : null;
+    if (who) {
+      $('places').hidden = true;
+      if (who === lz?.root && lz.away) { home.onToast(lz.away); return; }
+      const at = who.position.clone().setY(0);
+      const from = new THREE.Vector3(player.pos.x, 0, player.pos.z);
+      const stand = at.clone().add(from.sub(at).setY(0).normalize().multiplyScalar(1.1));
+      player.walkTo(stand, () => player.faceTowards(at.clone().setY(who === cat?.root ? 0.3 : 1.3)));
+      return;
+    }
     const p = b && PLACES[b.dataset.go!];
     if (!p) return;
     $('places').hidden = true;
@@ -356,6 +369,7 @@ async function boot() {
   requestAnimationFrame(frame);
   enter.addEventListener('click', () => {
     $('loader').classList.add('gone');
+    cat?.greet(new THREE.Vector3(player.pos.x, 0, player.pos.z));
     $('hud').hidden = false;
     setTimeout(() => $('loader').remove(), 1000);
   });

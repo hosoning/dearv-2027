@@ -95,7 +95,7 @@ export class Pudding {
     const src = mesh.material as THREE.MeshStandardMaterial | THREE.MeshStandardMaterial[];
     const mats = Array.isArray(src) ? src : [src];
     const eye = mats.findIndex((m) => /eye/.test(m.name));
-    const furBase = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, transparent: true, opacity: 0.22,
+    const furBase = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, transparent: true, opacity: 0.32,
       depthWrite: false, color: 0xe6d6c0 });
     const eyeMat = new THREE.MeshStandardMaterial({ color: 0x5aa0ff, emissive: 0x2a5cb8, emissiveIntensity: 0.6,
       roughness: 0.1, transparent: true, opacity: 0.85 });
@@ -131,7 +131,7 @@ export class Pudding {
         .replace('#include <dithering_fragment>', `#include <dithering_fragment>
           float strand = furHash(floor(vFurPos * 320.0));
           if (strand < 0.25 + uK * 0.7) discard;
-          gl_FragColor.a *= (1.0 - uK) * 0.2;
+          gl_FragColor.a *= (1.0 - uK) * 0.28;
           gl_FragColor.rgb *= vec3(0.9, 0.84, 0.76) * (0.8 + 0.3 * uK);`);
     };
     m.customProgramCacheKey = () => `fur${k.toFixed(2)}`;
@@ -168,6 +168,14 @@ export class Pudding {
         if (this.followUntil) this.meow();
       } },
     ];
+  }
+
+  /** She just came in: he trots to the door to greet her and keeps her company for a while. */
+  greet(her: THREE.Vector3) {
+    this.followUntil = this.t + 75;
+    const fwd = new THREE.Vector3(0, 0, -1);
+    this.goTo({ name: 'her', pos: her.clone().setY(0).addScaledVector(fwd, -0.9), y: 0, pose: 'sit', yaw: 0, label: '跑來門口接你' });
+    setTimeout(() => this.meow(), 1500);
   }
 
   pet() {
